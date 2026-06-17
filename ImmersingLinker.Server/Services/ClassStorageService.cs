@@ -5,9 +5,9 @@ namespace ImmersingLinker.Server.Services;
 
 public class ClassStorageService
 {
-    private readonly JsonSerializerOptions _options = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
     
-    public async Task<List<ClassInfo>?> GetClassInfos()
+    public async Task<List<ClassInfo>> GetClassInfos()
     {
         List<ClassInfo> infos = [];
         foreach (var guid in Directory.GetFiles("./Data/Classes", "*.json").Select(p => Path.GetFileNameWithoutExtension(p)))
