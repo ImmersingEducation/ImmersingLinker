@@ -24,11 +24,19 @@ public class ClassStorageService
 
     public async Task<Class?> GetClass(Guid guid)
     {
-        return JsonSerializer.Deserialize<Class>(await File.ReadAllTextAsync($"./Data/Classes/{guid}.json"), _options);
+        var path = $"./Data/Classes/{guid}.json";
+        if (!File.Exists(path)) return null;
+        return JsonSerializer.Deserialize<Class>(await File.ReadAllTextAsync(path), _options);
     }
 
     public async Task SaveClass(Class @class)
     {
         await File.WriteAllTextAsync($"./Data/Classes/{@class.Guid}.json", JsonSerializer.Serialize(@class, _options));
+    }
+
+    public void DeleteClass(Guid guid)
+    {
+        var path = $"./Data/Classes/{guid}.json";
+        if (File.Exists(path)) File.Delete(path);
     }
 }
