@@ -16,5 +16,10 @@
             <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="FluentAvaloniaUI" Version="3.0.0-preview4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AvaloniaResource Include="Assets\LaunchWindowBackground.png" />
     </ItemGroup>
 </Project>
