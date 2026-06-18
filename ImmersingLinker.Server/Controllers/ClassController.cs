@@ -17,10 +17,23 @@ public class ClassController : ControllerBase
     
     #region Logic
 
+    public Guid? ParseGuidFromString(string guidString)
+    {
+        try
+        {
+            return Guid.Parse(guidString);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
+    
     public Class? GetClassByGuidLogic(string guidString)
     {
-        Guid guid = Guid.Parse(guidString);
-        return _classStorageService.GetClass(guid).Result;
+        var guid = ParseGuidFromString(guidString);
+        if (guid is null) return null;
+        return _classStorageService.GetClass(guid.Value).Result;
     }
     
     #endregion
@@ -337,8 +350,9 @@ public class ClassController : ControllerBase
     [HttpDelete("{classGuid}")]
     public IActionResult DeleteClass(string classGuid)
     {
-        var guid = Guid.Parse(classGuid);
-        _classStorageService.DeleteClass(guid);
+        var guid = ParseGuidFromString(classGuid);
+        if (guid is null) return BadRequest("Invalid GUID format");
+        _classStorageService.DeleteClass(guid.Value);
         return NoContent();
     }
 

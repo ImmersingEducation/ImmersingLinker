@@ -6,11 +6,20 @@ namespace ImmersingLinker.Server.Services;
 public class ClassStorageService
 {
     private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
-    
+    private static readonly string _dataDirectory = Path.Combine(AppContext.BaseDirectory, "Data", "Classes");
+
+    public ClassStorageService()
+    {
+        Directory.CreateDirectory(_dataDirectory);
+    }
+
     public virtual async Task<List<ClassInfo>> GetClassInfos()
     {
         List<ClassInfo> infos = [];
-        foreach (var guid in Directory.GetFiles("./Data/Classes", "*.json").Select(p => Path.GetFileNameWithoutExtension(p)))
+        var dataDir = new DirectoryInfo(_dataDirectory);
+        if (!dataDir.Exists) return infos;
+
+        foreach (var guid in dataDir.GetFiles("*.json").Select(p => Path.GetFileNameWithoutExtension(p.Name)))
         {
             infos.Add(new ClassInfo
             {
@@ -24,19 +33,20 @@ public class ClassStorageService
 
     public virtual async Task<Class?> GetClass(Guid guid)
     {
-        var path = $"./Data/Classes/{guid}.json";
+        var path = Path.Combine(_dataDirectory, $"{guid}.json");
         if (!File.Exists(path)) return null;
         return JsonSerializer.Deserialize<Class>(await File.ReadAllTextAsync(path), _options);
     }
 
     public virtual async Task SaveClass(Class @class)
     {
-        await File.WriteAllTextAsync($"./Data/Classes/{@class.Guid}.json", JsonSerializer.Serialize(@class, _options));
+        var path = Path.Combine(_dataDirectory, $"{@class.Guid}.json");
+        await File.WriteAllTextAsync(path, JsonSerializer.Serialize(@class, _options));
     }
 
     public virtual void DeleteClass(Guid guid)
     {
-        var path = $"./Data/Classes/{guid}.json";
+        var path = Path.Combine(_dataDirectory, $"{guid}.json");
         if (File.Exists(path)) File.Delete(path);
     }
 }
