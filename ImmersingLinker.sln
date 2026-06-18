@@ -4,11 +4,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.Core", "Imm
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.SDK", "ImmersingLinker.SDK\ImmersingLinker.SDK.csproj", "{25EA10BF-5991-4C81-AD26-8372645CB822}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.UI", "ImmersingLinker.UI\ImmersingLinker.UI.csproj", "{3C54DE98-0F55-4645-9CCC-D83F5F99E48D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.Server", "ImmersingLinker.Server\ImmersingLinker.Server.csproj", "{05B56D3D-7839-456F-A272-43DFFD1E3B5F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.Test", "ImmersingLinker.Test\ImmersingLinker.Test.csproj", "{EAA2C08E-027A-4999-AF67-540B4892B9F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.UI", "ImmersingLinker.UI\ImmersingLinker.UI.csproj", "{7270737D-313A-4495-A237-DB9AEE121B9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,10 +24,6 @@ Global
 		{25EA10BF-5991-4C81-AD26-8372645CB822}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25EA10BF-5991-4C81-AD26-8372645CB822}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25EA10BF-5991-4C81-AD26-8372645CB822}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C54DE98-0F55-4645-9CCC-D83F5F99E48D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C54DE98-0F55-4645-9CCC-D83F5F99E48D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C54DE98-0F55-4645-9CCC-D83F5F99E48D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C54DE98-0F55-4645-9CCC-D83F5F99E48D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{05B56D3D-7839-456F-A272-43DFFD1E3B5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{05B56D3D-7839-456F-A272-43DFFD1E3B5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05B56D3D-7839-456F-A272-43DFFD1E3B5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -36,5 +32,9 @@ Global
 		{EAA2C08E-027A-4999-AF67-540B4892B9F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAA2C08E-027A-4999-AF67-540B4892B9F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAA2C08E-027A-4999-AF67-540B4892B9F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7270737D-313A-4495-A237-DB9AEE121B9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7270737D-313A-4495-A237-DB9AEE121B9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7270737D-313A-4495-A237-DB9AEE121B9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7270737D-313A-4495-A237-DB9AEE121B9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
