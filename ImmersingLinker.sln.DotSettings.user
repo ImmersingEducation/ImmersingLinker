@@ -1,0 +1,4 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=94632175_002D93d0_002D43a1_002D9ede_002D38f7510e93a8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="&amp;lt;ImmersingLinker.Test&amp;gt; 中的所有测试" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Project Location="/home/cc/RiderProjects/ImmersingLinker/ImmersingLinker.Test" Presentation="&amp;lt;ImmersingLinker.Test&amp;gt;" /&gt;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

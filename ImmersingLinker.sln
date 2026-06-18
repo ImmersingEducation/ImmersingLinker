@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.UI", "Immer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.Server", "ImmersingLinker.Server\ImmersingLinker.Server.csproj", "{05B56D3D-7839-456F-A272-43DFFD1E3B5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.Test", "ImmersingLinker.Test\ImmersingLinker.Test.csproj", "{EAA2C08E-027A-4999-AF67-540B4892B9F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{05B56D3D-7839-456F-A272-43DFFD1E3B5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05B56D3D-7839-456F-A272-43DFFD1E3B5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05B56D3D-7839-456F-A272-43DFFD1E3B5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAA2C08E-027A-4999-AF67-540B4892B9F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAA2C08E-027A-4999-AF67-540B4892B9F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAA2C08E-027A-4999-AF67-540B4892B9F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAA2C08E-027A-4999-AF67-540B4892B9F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
