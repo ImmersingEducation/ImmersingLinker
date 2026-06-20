@@ -36,6 +36,22 @@ public class ClassController : ControllerBase
         return _classStorageService.GetClass(guid.Value).Result;
     }
     
+    public GroupingRuleResponse BuildGroupingRuleResponse(Class @class, GroupingRule rule)
+    {
+        var assignedStudentGuids = rule.Groups.SelectMany(g => g.Contains).ToHashSet();
+        var unassigned = @class.Students
+            .Where(s => !assignedStudentGuids.Contains(s.Guid))
+            .Select(s => s.Guid)
+            .ToList();
+        return new GroupingRuleResponse
+        {
+            Guid = rule.Guid,
+            Name = rule.Name,
+            Groups = rule.Groups,
+            UnassignedStudentGuids = unassigned
+        };
+    }
+
     #endregion
     
     #region GET
@@ -186,6 +202,38 @@ public class ClassController : ControllerBase
         return NotFound();
     }
     
+    /// <summary>
+    /// 获取指定班级内所有分组规则
+    /// </summary>
+    /// <param name="classGuid">班级 GUID</param>
+    [HttpGet("{classGuid}/groupingRule")]
+    public async Task<IActionResult> GetGroupingRules(string classGuid)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        var rules = (@class.GroupingRules ?? [])
+            .Select(r => BuildGroupingRuleResponse(@class, r))
+            .ToList();
+        return Ok(rules);
+    }
+
+    /// <summary>
+    /// 获取指定班级内指定分组规则
+    /// </summary>
+    /// <param name="classGuid">班级 GUID</param>
+    /// <param name="ruleGuid">分组规则 GUID</param>
+    [HttpGet("{classGuid}/groupingRule/{ruleGuid}")]
+    public async Task<IActionResult> GetGroupingRule(string classGuid, string ruleGuid)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        var parsed = ParseGuidFromString(ruleGuid);
+        if (parsed is null) return BadRequest("Invalid GUID format");
+        var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == parsed.Value);
+        if (rule is null) return NotFound();
+        return Ok(BuildGroupingRuleResponse(@class, rule));
+    }
+
     #endregion
     
     #region POST
@@ -201,7 +249,8 @@ public class ClassController : ControllerBase
             Guid = Guid.NewGuid(),
             Name = request.Name,
             Students = [],
-            ExtraProperties = []
+            ExtraProperties = [],
+            GroupingRules = []
         };
         await _classStorageService.SaveClass(@class);
         return CreatedAtAction(nameof(GetClassByGuid), new { classGuid = @class.Guid }, @class);
@@ -225,7 +274,6 @@ public class ClassController : ControllerBase
             Name = request.Name,
             StudentIdInClass = request.StudentIdInClass,
             Gender = request.Gender,
-            GroupInClass = request.GroupInClass,
             ExtraProperties = []
         };
         @class.Students.Add(student);
@@ -278,6 +326,47 @@ public class ClassController : ControllerBase
         return CreatedAtAction(nameof(GetExtraPropertyByNameAndStudentIdInClass), new { classGuid, studentId, appId = request.AppId, propName = request.Name }, prop);
     }
 
+    /// <summary>
+    /// 添加分组规则
+    /// </summary>
+    [HttpPost("{classGuid}/groupingRules")]
+    public async Task<IActionResult> AddGroupingRule(string classGuid, [FromBody] CreateGroupingRuleRequest request)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        @class.GroupingRules ??= [];
+        var rule = new GroupingRule
+        {
+            Guid = Guid.NewGuid(),
+            Name = request.Name,
+        };
+        @class.GroupingRules.Add(rule);
+        await _classStorageService.SaveClass(@class);
+        return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() }, BuildGroupingRuleResponse(@class, rule));
+    }
+
+    /// <summary>
+    /// 在指定分组规则中添加小组
+    /// </summary>
+    [HttpPost("{classGuid}/groupingRules/{ruleGuid}")]
+    public async Task<IActionResult> AddGroup(string classGuid, string ruleGuid, [FromBody] CreateGroupRequest request)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        var parsed = ParseGuidFromString(ruleGuid);
+        if (parsed is null) return BadRequest("Invalid GUID format");
+        var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == parsed.Value);
+        if (rule is null) return NotFound();
+        var group = new Group
+        {
+            Guid = Guid.NewGuid(),
+            Name = request.Name,
+        };
+        rule.Groups.Add(group);
+        await _classStorageService.SaveClass(@class);
+        return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() }, BuildGroupingRuleResponse(@class, rule));
+    }
+
     #endregion
     
     #region PUT
@@ -306,7 +395,6 @@ public class ClassController : ControllerBase
         if (student is null) return NotFound();
         student.Name = request.Name;
         student.Gender = request.Gender;
-        student.GroupInClass = request.GroupInClass;
         await _classStorageService.SaveClass(@class);
         return Ok(student);
     }
@@ -338,6 +426,44 @@ public class ClassController : ControllerBase
         prop.Value = request.Value;
         await _classStorageService.SaveClass(@class);
         return Ok(prop);
+    }
+
+    /// <summary>
+    /// 修改分组规则名称
+    /// </summary>
+    [HttpPut("{classGuid}/groupingRules/{ruleGuid}")]
+    public async Task<IActionResult> UpdateGroupingRule(string classGuid, string ruleGuid, [FromBody] UpdateGroupingRuleRequest request)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        var parsed = ParseGuidFromString(ruleGuid);
+        if (parsed is null) return BadRequest("Invalid GUID format");
+        var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == parsed.Value);
+        if (rule is null) return NotFound();
+        rule.Name = request.Name;
+        await _classStorageService.SaveClass(@class);
+        return Ok(BuildGroupingRuleResponse(@class, rule));
+    }
+
+    /// <summary>
+    /// 修改指定小组的名称
+    /// </summary>
+    [HttpPut("{classGuid}/groupingRules/{ruleGuid}/{groupGuid}")]
+    public async Task<IActionResult> UpdateGroup(string classGuid, string ruleGuid, string groupGuid, [FromBody] UpdateGroupRequest request)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        var ruleParsed = ParseGuidFromString(ruleGuid);
+        if (ruleParsed is null) return BadRequest("Invalid GUID format");
+        var groupParsed = ParseGuidFromString(groupGuid);
+        if (groupParsed is null) return BadRequest("Invalid GUID format");
+        var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == ruleParsed.Value);
+        if (rule is null) return NotFound();
+        var group = rule.Groups.FirstOrDefault(g => g.Guid == groupParsed.Value);
+        if (group is null) return NotFound();
+        group.Name = request.Name;
+        await _classStorageService.SaveClass(@class);
+        return Ok(BuildGroupingRuleResponse(@class, rule));
     }
 
     #endregion
@@ -395,6 +521,44 @@ public class ClassController : ControllerBase
         var prop = student?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
         student.ExtraProperties.Remove(prop);
+        await _classStorageService.SaveClass(@class);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 删除分组规则
+    /// </summary>
+    [HttpDelete("{classGuid}/groupingRules/{ruleGuid}")]
+    public async Task<IActionResult> DeleteGroupingRule(string classGuid, string ruleGuid)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        var parsed = ParseGuidFromString(ruleGuid);
+        if (parsed is null) return BadRequest("Invalid GUID format");
+        var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == parsed.Value);
+        if (rule is null) return NotFound();
+        @class.GroupingRules.Remove(rule);
+        await _classStorageService.SaveClass(@class);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 删除指定分组规则中的小组
+    /// </summary>
+    [HttpDelete("{classGuid}/groupingRules/{ruleGuid}/{groupGuid}")]
+    public async Task<IActionResult> DeleteGroup(string classGuid, string ruleGuid, string groupGuid)
+    {
+        var @class = GetClassByGuidLogic(classGuid);
+        if (@class is null) return NotFound();
+        var ruleParsed = ParseGuidFromString(ruleGuid);
+        if (ruleParsed is null) return BadRequest("Invalid GUID format");
+        var groupParsed = ParseGuidFromString(groupGuid);
+        if (groupParsed is null) return BadRequest("Invalid GUID format");
+        var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == ruleParsed.Value);
+        if (rule is null) return NotFound();
+        var group = rule.Groups.FirstOrDefault(g => g.Guid == groupParsed.Value);
+        if (group is null) return NotFound();
+        rule.Groups.Remove(group);
         await _classStorageService.SaveClass(@class);
         return NoContent();
     }

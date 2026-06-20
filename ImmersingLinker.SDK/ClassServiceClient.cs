@@ -259,7 +259,7 @@ public class ClassServiceClient
         };
     }
 
-    public static Student CreateStudentOffline(string name, int studentIdInClass, Gender gender, string groupInClass)
+    public static Student CreateStudentOffline(string name, int studentIdInClass, Gender gender)
     {
         return new Student
         {
@@ -267,7 +267,6 @@ public class ClassServiceClient
             Name = name,
             StudentIdInClass = studentIdInClass,
             Gender = gender,
-            GroupInClass = groupInClass,
             ExtraProperties = []
         };
     }

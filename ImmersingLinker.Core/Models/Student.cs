@@ -6,7 +6,6 @@ public class Student
     public string Name { get; set; }
     public int StudentIdInClass { get; set; }
     public Gender Gender { get; set; }
-    public string GroupInClass { get; set; }
     public List<StudentExtraProperty> ExtraProperties { get; set; }
 }
 
