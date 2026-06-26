@@ -36,7 +36,7 @@ public class ClassController : ControllerBase
         return _classStorageService.GetClass(guid.Value).Result;
     }
     
-    public GroupingRuleResponse BuildGroupingRuleResponse(Class @class, GroupingRule rule)
+    private GroupingRuleResponse BuildGroupingRuleResponse(Class @class, GroupingRule rule)
     {
         var assignedStudentGuids = rule.Groups.SelectMany(g => g.Contains).ToHashSet();
         var unassigned = @class.Students
