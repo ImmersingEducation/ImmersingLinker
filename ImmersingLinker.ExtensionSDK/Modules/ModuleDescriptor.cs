@@ -2,14 +2,14 @@ namespace ImmersingLinker.ExtensionSDK.Modules;
 
 public class ModuleDescriptor
 {
-    public Type Type { get; }
-    public IAppModule Instance { get; }
+    public Guid Guid { get; }
     public string Name { get; }
+    public ModuleType ModuleType { get; }
 
-    public ModuleDescriptor(Type type, IAppModule instance)
+    public ModuleDescriptor(Guid guid, string name, ModuleType moduleType)
     {
-        Type = type;
-        Instance = instance;
-        Name = type.Name;
+        Guid = guid;
+        Name = name;
+        ModuleType = moduleType;
     }
 }

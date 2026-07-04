@@ -1,3 +1,4 @@
+using ImmersingLinker.Server;
 using ImmersingLinker.Server.Services;
 using Scalar.AspNetCore;
 
@@ -11,7 +12,17 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSingleton<ClassStorageService>();
 
+var moduleManager = new ApiModuleManager();
+moduleManager.Initialize();
+moduleManager.PreConfigureServices(new(builder.Services));
+moduleManager.ConfigureServices(new(builder.Services));
+builder.Services.AddSingleton(moduleManager);
+
 var app = builder.Build();
+
+moduleManager.OnApplicationInitialization(new(app.Services));
+app.Lifetime.ApplicationStopping.Register(() => 
+    moduleManager.OnApplicationShutdown(new(app.Services)));
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
