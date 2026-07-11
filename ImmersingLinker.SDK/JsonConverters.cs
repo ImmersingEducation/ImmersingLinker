@@ -6,7 +6,8 @@ namespace ImmersingLinker.SDK;
 
 public class ClassExtraPropertyConverter : JsonConverter<ClassExtraProperty>
 {
-    public override ClassExtraProperty? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override ClassExtraProperty? Read(ref Utf8JsonReader reader, Type typeToConvert,
+        JsonSerializerOptions options)
     {
         return JsonSerializer.Deserialize<ClassExtraProperty<object>>(ref reader, options);
     }
@@ -19,7 +20,8 @@ public class ClassExtraPropertyConverter : JsonConverter<ClassExtraProperty>
 
 public class StudentExtraPropertyConverter : JsonConverter<StudentExtraProperty>
 {
-    public override StudentExtraProperty? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override StudentExtraProperty? Read(ref Utf8JsonReader reader, Type typeToConvert,
+        JsonSerializerOptions options)
     {
         return JsonSerializer.Deserialize<StudentExtraProperty<object>>(ref reader, options);
     }

@@ -14,7 +14,7 @@ public class ClassController : ControllerBase
     {
         _classStorageService = classStorageService;
     }
-    
+
     #region Logic
 
     public Guid? ParseGuidFromString(string guidString)
@@ -28,14 +28,14 @@ public class ClassController : ControllerBase
             return null;
         }
     }
-    
+
     public Class? GetClassByGuidLogic(string guidString)
     {
         var guid = ParseGuidFromString(guidString);
         if (guid is null) return null;
         return _classStorageService.GetClass(guid.Value).Result;
     }
-    
+
     private GroupingRuleResponse BuildGroupingRuleResponse(Class @class, GroupingRule rule)
     {
         var assignedStudentGuids = rule.Groups.SelectMany(g => g.Contains).ToHashSet();
@@ -53,11 +53,11 @@ public class ClassController : ControllerBase
     }
 
     #endregion
-    
+
     #region GET
-    
+
     /// <summary>
-    /// 获取所有班级
+    ///     获取所有班级
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAllClasses()
@@ -71,9 +71,9 @@ public class ClassController : ControllerBase
 
         return Ok(classes);
     }
-    
+
     /// <summary>
-    /// 获取所有班级信息
+    ///     获取所有班级信息
     /// </summary>
     [HttpGet("infos")]
     public async Task<IActionResult> GetAllClassInfos()
@@ -82,7 +82,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定班级
+    ///     获取指定班级
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     [HttpGet("{classGuid}")]
@@ -94,7 +94,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定班级内所有学生
+    ///     获取指定班级内所有学生
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     [HttpGet("{classGuid}/student")]
@@ -106,7 +106,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定班级内指定学生
+    ///     获取指定班级内指定学生
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     /// <param name="studentId">学生学号</param>
@@ -119,11 +119,12 @@ public class ClassController : ControllerBase
             var student = @class.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
             if (student is not null) return Ok(student);
         }
+
         return NotFound();
     }
 
     /// <summary>
-    /// 获取指定班级内指定学生的所有扩展属性
+    ///     获取指定班级内指定学生的所有扩展属性
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     /// <param name="studentId">学生学号</param>
@@ -137,13 +138,14 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定班级内指定学生的指定 App 的所有扩展属性
+    ///     获取指定班级内指定学生的指定 App 的所有扩展属性
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     /// <param name="studentId">学生学号</param>
     /// <param name="appId">App ID</param>
     [HttpGet("{classGuid}/student/{studentId}/extraProps/{appId}")]
-    public async Task<IActionResult> GetExtraPropertiesByStudentIdAndAppIdInClass(string classGuid, int studentId, string appId)
+    public async Task<IActionResult> GetExtraPropertiesByStudentIdAndAppIdInClass(string classGuid, int studentId,
+        string appId)
     {
         var @class = GetClassByGuidLogic(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
@@ -163,7 +165,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定班级内所有扩展属性
+    ///     获取指定班级内所有扩展属性
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     [HttpGet("{classGuid}/extraProps")]
@@ -175,7 +177,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定班级内指定 App 的所有扩展属性
+    ///     获取指定班级内指定 App 的所有扩展属性
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     /// <param name="appId">App ID</param>
@@ -186,24 +188,25 @@ public class ClassController : ControllerBase
         if (@class is not null) return Ok(@class.ExtraProperties.Where(p => p.Application.UniqueId == appId).ToList());
         return NotFound();
     }
-    
+
     /// <summary>
-    /// 获取指定班级内指定扩展属性
+    ///     获取指定班级内指定扩展属性
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     /// <param name="appId">App ID</param>
     /// <param name="propName">属性名称</param>
     [HttpGet("{classGuid}/extraProps/{appId}/{propName}")]
-    public async Task<IActionResult> GetExtraPropertyByAppIdAndNameInClass(string classGuid, string appId, string propName)
+    public async Task<IActionResult> GetExtraPropertyByAppIdAndNameInClass(string classGuid, string appId,
+        string propName)
     {
         var @class = GetClassByGuidLogic(classGuid);
         var prop = @class?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop != null) return Ok(prop);
         return NotFound();
     }
-    
+
     /// <summary>
-    /// 获取指定班级内所有分组规则
+    ///     获取指定班级内所有分组规则
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     [HttpGet("{classGuid}/groupingRule")]
@@ -218,7 +221,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 获取指定班级内指定分组规则
+    ///     获取指定班级内指定分组规则
     /// </summary>
     /// <param name="classGuid">班级 GUID</param>
     /// <param name="ruleGuid">分组规则 GUID</param>
@@ -235,11 +238,11 @@ public class ClassController : ControllerBase
     }
 
     #endregion
-    
+
     #region POST
 
     /// <summary>
-    /// 创建班级
+    ///     创建班级
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateClass([FromBody] CreateClassRequest request)
@@ -257,7 +260,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 添加学生
+    ///     添加学生
     /// </summary>
     [HttpPost("{classGuid}/student")]
     public async Task<IActionResult> AddStudent(string classGuid, [FromBody] CreateStudentRequest request)
@@ -278,14 +281,16 @@ public class ClassController : ControllerBase
         };
         @class.Students.Add(student);
         await _classStorageService.SaveClass(@class);
-        return CreatedAtAction(nameof(GetStudentByStudentIdInClass), new { classGuid, studentId = student.StudentIdInClass }, student);
+        return CreatedAtAction(nameof(GetStudentByStudentIdInClass),
+            new { classGuid, studentId = student.StudentIdInClass }, student);
     }
 
     /// <summary>
-    /// 添加班级扩展属性
+    ///     添加班级扩展属性
     /// </summary>
     [HttpPost("{classGuid}/extraProps")]
-    public async Task<IActionResult> AddClassExtraProperty(string classGuid, [FromBody] CreateExtraPropertyRequest request)
+    public async Task<IActionResult> AddClassExtraProperty(string classGuid,
+        [FromBody] CreateExtraPropertyRequest request)
     {
         var @class = GetClassByGuidLogic(classGuid);
         if (@class is null) return NotFound();
@@ -296,18 +301,20 @@ public class ClassController : ControllerBase
         var prop = new ClassExtraProperty<object>
         {
             Application = new Application { UniqueId = request.AppId },
-            Name = request.Name,
+            Name = request.Name
         };
         @class.ExtraProperties.Add(prop);
         await _classStorageService.SaveClass(@class);
-        return CreatedAtAction(nameof(GetExtraPropertyByAppIdAndNameInClass), new { classGuid, appId = request.AppId, propName = request.Name }, prop);
+        return CreatedAtAction(nameof(GetExtraPropertyByAppIdAndNameInClass),
+            new { classGuid, appId = request.AppId, propName = request.Name }, prop);
     }
 
     /// <summary>
-    /// 添加学生扩展属性
+    ///     添加学生扩展属性
     /// </summary>
     [HttpPost("{classGuid}/student/{studentId}/extraProps")]
-    public async Task<IActionResult> AddStudentExtraProperty(string classGuid, int studentId, [FromBody] CreateExtraPropertyRequest request)
+    public async Task<IActionResult> AddStudentExtraProperty(string classGuid, int studentId,
+        [FromBody] CreateExtraPropertyRequest request)
     {
         var @class = GetClassByGuidLogic(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
@@ -319,15 +326,16 @@ public class ClassController : ControllerBase
         var prop = new StudentExtraProperty<object>
         {
             Application = new Application { UniqueId = request.AppId },
-            Name = request.Name,
+            Name = request.Name
         };
         student.ExtraProperties.Add(prop);
         await _classStorageService.SaveClass(@class);
-        return CreatedAtAction(nameof(GetExtraPropertyByNameAndStudentIdInClass), new { classGuid, studentId, appId = request.AppId, propName = request.Name }, prop);
+        return CreatedAtAction(nameof(GetExtraPropertyByNameAndStudentIdInClass),
+            new { classGuid, studentId, appId = request.AppId, propName = request.Name }, prop);
     }
 
     /// <summary>
-    /// 添加分组规则
+    ///     添加分组规则
     /// </summary>
     [HttpPost("{classGuid}/groupingRules")]
     public async Task<IActionResult> AddGroupingRule(string classGuid, [FromBody] CreateGroupingRuleRequest request)
@@ -338,15 +346,16 @@ public class ClassController : ControllerBase
         var rule = new GroupingRule
         {
             Guid = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name
         };
         @class.GroupingRules.Add(rule);
         await _classStorageService.SaveClass(@class);
-        return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() }, BuildGroupingRuleResponse(@class, rule));
+        return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() },
+            BuildGroupingRuleResponse(@class, rule));
     }
 
     /// <summary>
-    /// 在指定分组规则中添加小组
+    ///     在指定分组规则中添加小组
     /// </summary>
     [HttpPost("{classGuid}/groupingRules/{ruleGuid}")]
     public async Task<IActionResult> AddGroup(string classGuid, string ruleGuid, [FromBody] CreateGroupRequest request)
@@ -360,19 +369,20 @@ public class ClassController : ControllerBase
         var group = new Group
         {
             Guid = Guid.NewGuid(),
-            Name = request.Name,
+            Name = request.Name
         };
         rule.Groups.Add(group);
         await _classStorageService.SaveClass(@class);
-        return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() }, BuildGroupingRuleResponse(@class, rule));
+        return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() },
+            BuildGroupingRuleResponse(@class, rule));
     }
 
     #endregion
-    
+
     #region PUT
 
     /// <summary>
-    /// 更新班级名称
+    ///     更新班级名称
     /// </summary>
     [HttpPut("{classGuid}")]
     public async Task<IActionResult> UpdateClass(string classGuid, [FromBody] UpdateClassRequest request)
@@ -385,10 +395,11 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 更新学生信息
+    ///     更新学生信息
     /// </summary>
     [HttpPut("{classGuid}/student/{studentId}")]
-    public async Task<IActionResult> UpdateStudent(string classGuid, int studentId, [FromBody] UpdateStudentRequest request)
+    public async Task<IActionResult> UpdateStudent(string classGuid, int studentId,
+        [FromBody] UpdateStudentRequest request)
     {
         var @class = GetClassByGuidLogic(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
@@ -400,10 +411,11 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 更新班级扩展属性值
+    ///     更新班级扩展属性值
     /// </summary>
     [HttpPut("{classGuid}/extraProps/{appId}/{propName}")]
-    public async Task<IActionResult> UpdateClassExtraProperty(string classGuid, string appId, string propName, [FromBody] UpdateExtraPropertyRequest request)
+    public async Task<IActionResult> UpdateClassExtraProperty(string classGuid, string appId, string propName,
+        [FromBody] UpdateExtraPropertyRequest request)
     {
         var @class = GetClassByGuidLogic(classGuid);
         var prop = @class?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
@@ -414,10 +426,11 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 更新学生扩展属性值
+    ///     更新学生扩展属性值
     /// </summary>
     [HttpPut("{classGuid}/student/{studentId}/extraProps/{appId}/{propName}")]
-    public async Task<IActionResult> UpdateStudentExtraProperty(string classGuid, int studentId, string appId, string propName, [FromBody] UpdateExtraPropertyRequest request)
+    public async Task<IActionResult> UpdateStudentExtraProperty(string classGuid, int studentId, string appId,
+        string propName, [FromBody] UpdateExtraPropertyRequest request)
     {
         var @class = GetClassByGuidLogic(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
@@ -429,10 +442,11 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 修改分组规则名称
+    ///     修改分组规则名称
     /// </summary>
     [HttpPut("{classGuid}/groupingRules/{ruleGuid}")]
-    public async Task<IActionResult> UpdateGroupingRule(string classGuid, string ruleGuid, [FromBody] UpdateGroupingRuleRequest request)
+    public async Task<IActionResult> UpdateGroupingRule(string classGuid, string ruleGuid,
+        [FromBody] UpdateGroupingRuleRequest request)
     {
         var @class = GetClassByGuidLogic(classGuid);
         if (@class is null) return NotFound();
@@ -446,10 +460,11 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 修改指定小组的名称
+    ///     修改指定小组的名称
     /// </summary>
     [HttpPut("{classGuid}/groupingRules/{ruleGuid}/{groupGuid}")]
-    public async Task<IActionResult> UpdateGroup(string classGuid, string ruleGuid, string groupGuid, [FromBody] UpdateGroupRequest request)
+    public async Task<IActionResult> UpdateGroup(string classGuid, string ruleGuid, string groupGuid,
+        [FromBody] UpdateGroupRequest request)
     {
         var @class = GetClassByGuidLogic(classGuid);
         if (@class is null) return NotFound();
@@ -471,7 +486,7 @@ public class ClassController : ControllerBase
     #region DELETE
 
     /// <summary>
-    /// 删除班级
+    ///     删除班级
     /// </summary>
     [HttpDelete("{classGuid}")]
     public IActionResult DeleteClass(string classGuid)
@@ -483,7 +498,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 删除学生
+    ///     删除学生
     /// </summary>
     [HttpDelete("{classGuid}/student/{studentId}")]
     public async Task<IActionResult> DeleteStudent(string classGuid, int studentId)
@@ -497,7 +512,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 删除班级扩展属性
+    ///     删除班级扩展属性
     /// </summary>
     [HttpDelete("{classGuid}/extraProps/{appId}/{propName}")]
     public async Task<IActionResult> DeleteClassExtraProperty(string classGuid, string appId, string propName)
@@ -511,10 +526,11 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 删除学生扩展属性
+    ///     删除学生扩展属性
     /// </summary>
     [HttpDelete("{classGuid}/student/{studentId}/extraProps/{appId}/{propName}")]
-    public async Task<IActionResult> DeleteStudentExtraProperty(string classGuid, int studentId, string appId, string propName)
+    public async Task<IActionResult> DeleteStudentExtraProperty(string classGuid, int studentId, string appId,
+        string propName)
     {
         var @class = GetClassByGuidLogic(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
@@ -526,7 +542,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 删除分组规则
+    ///     删除分组规则
     /// </summary>
     [HttpDelete("{classGuid}/groupingRules/{ruleGuid}")]
     public async Task<IActionResult> DeleteGroupingRule(string classGuid, string ruleGuid)
@@ -543,7 +559,7 @@ public class ClassController : ControllerBase
     }
 
     /// <summary>
-    /// 删除指定分组规则中的小组
+    ///     删除指定分组规则中的小组
     /// </summary>
     [HttpDelete("{classGuid}/groupingRules/{ruleGuid}/{groupGuid}")]
     public async Task<IActionResult> DeleteGroup(string classGuid, string ruleGuid, string groupGuid)

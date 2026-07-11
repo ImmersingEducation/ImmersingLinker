@@ -8,9 +8,9 @@ namespace ImmersingLinker.Test.Controllers;
 
 public class ClassControllerTest
 {
-    private static readonly Guid TestGuid = Guid.NewGuid();
     private const string TestGuidString = "test-guid";
     private const string TestClassName = "TestClass";
+    private static readonly Guid TestGuid = Guid.NewGuid();
     private static readonly Guid TestRuleGuid = Guid.NewGuid();
     private static readonly Guid TestGroupGuid = Guid.NewGuid();
 
@@ -33,7 +33,7 @@ public class ClassControllerTest
                         new StudentExtraProperty<object>
                         {
                             Application = new Application { UniqueId = "app1" },
-                            Name = "nickname",
+                            Name = "nickname"
                         }
                     ]
                 }
@@ -43,7 +43,7 @@ public class ClassControllerTest
                 new ClassExtraProperty<object>
                 {
                     Application = new Application { UniqueId = "app1" },
-                    Name = "room",
+                    Name = "room"
                 }
             ],
             GroupingRules =
@@ -57,7 +57,7 @@ public class ClassControllerTest
                         new Group
                         {
                             Guid = TestGroupGuid,
-                            Name = "TestGroup",
+                            Name = "TestGroup"
                         }
                     ]
                 }
@@ -217,7 +217,8 @@ public class ClassControllerTest
     public async Task GetExtraPropertyByNameAndStudentIdInClass_Existing_ReturnsProperty()
     {
         var controller = CreateController();
-        var result = await controller.GetExtraPropertyByNameAndStudentIdInClass(TestGuid.ToString(), 1, "app1", "nickname");
+        var result =
+            await controller.GetExtraPropertyByNameAndStudentIdInClass(TestGuid.ToString(), 1, "app1", "nickname");
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var prop = Assert.IsType<StudentExtraProperty<object>>(okResult.Value);
@@ -228,7 +229,8 @@ public class ClassControllerTest
     public async Task GetExtraPropertyByNameAndStudentIdInClass_NotFound_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.GetExtraPropertyByNameAndStudentIdInClass(TestGuid.ToString(), 1, "app1", "nonexistent");
+        var result =
+            await controller.GetExtraPropertyByNameAndStudentIdInClass(TestGuid.ToString(), 1, "app1", "nonexistent");
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -707,7 +709,8 @@ public class ClassControllerTest
         var mock = CreateMockService(@class);
         var controller = CreateController(mock);
 
-        var result = await controller.AddGroup(TestGuid.ToString(), TestRuleGuid.ToString(), new CreateGroupRequest("NewGroup"));
+        var result = await controller.AddGroup(TestGuid.ToString(), TestRuleGuid.ToString(),
+            new CreateGroupRequest("NewGroup"));
 
         var createdResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal(nameof(ClassController.GetGroupingRule), createdResult.ActionName);
@@ -719,7 +722,8 @@ public class ClassControllerTest
     public async Task AddGroup_NotFoundClass_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.AddGroup(Guid.NewGuid().ToString(), TestRuleGuid.ToString(), new CreateGroupRequest("G"));
+        var result = await controller.AddGroup(Guid.NewGuid().ToString(), TestRuleGuid.ToString(),
+            new CreateGroupRequest("G"));
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -728,7 +732,8 @@ public class ClassControllerTest
     public async Task AddGroup_NotFoundRule_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.AddGroup(TestGuid.ToString(), Guid.NewGuid().ToString(), new CreateGroupRequest("G"));
+        var result =
+            await controller.AddGroup(TestGuid.ToString(), Guid.NewGuid().ToString(), new CreateGroupRequest("G"));
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -751,7 +756,8 @@ public class ClassControllerTest
         var mock = CreateMockService(@class);
         var controller = CreateController(mock);
 
-        var result = await controller.UpdateGroupingRule(TestGuid.ToString(), TestRuleGuid.ToString(), new UpdateGroupingRuleRequest("Renamed"));
+        var result = await controller.UpdateGroupingRule(TestGuid.ToString(), TestRuleGuid.ToString(),
+            new UpdateGroupingRuleRequest("Renamed"));
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var rule = Assert.IsType<GroupingRuleResponse>(okResult.Value);
@@ -764,7 +770,8 @@ public class ClassControllerTest
     public async Task UpdateGroupingRule_NotFoundClass_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroupingRule(Guid.NewGuid().ToString(), TestRuleGuid.ToString(), new UpdateGroupingRuleRequest("R"));
+        var result = await controller.UpdateGroupingRule(Guid.NewGuid().ToString(), TestRuleGuid.ToString(),
+            new UpdateGroupingRuleRequest("R"));
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -773,7 +780,8 @@ public class ClassControllerTest
     public async Task UpdateGroupingRule_NotFoundRule_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroupingRule(TestGuid.ToString(), Guid.NewGuid().ToString(), new UpdateGroupingRuleRequest("R"));
+        var result = await controller.UpdateGroupingRule(TestGuid.ToString(), Guid.NewGuid().ToString(),
+            new UpdateGroupingRuleRequest("R"));
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -782,7 +790,8 @@ public class ClassControllerTest
     public async Task UpdateGroupingRule_InvalidGuid_ReturnsBadRequest()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroupingRule(TestGuid.ToString(), "bad-guid", new UpdateGroupingRuleRequest("R"));
+        var result =
+            await controller.UpdateGroupingRule(TestGuid.ToString(), "bad-guid", new UpdateGroupingRuleRequest("R"));
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
@@ -794,7 +803,8 @@ public class ClassControllerTest
         var mock = CreateMockService(@class);
         var controller = CreateController(mock);
 
-        var result = await controller.UpdateGroup(TestGuid.ToString(), TestRuleGuid.ToString(), TestGroupGuid.ToString(), new UpdateGroupRequest("RenamedGroup"));
+        var result = await controller.UpdateGroup(TestGuid.ToString(), TestRuleGuid.ToString(),
+            TestGroupGuid.ToString(), new UpdateGroupRequest("RenamedGroup"));
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var rule = Assert.IsType<GroupingRuleResponse>(okResult.Value);
@@ -806,7 +816,8 @@ public class ClassControllerTest
     public async Task UpdateGroup_NotFoundClass_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroup(Guid.NewGuid().ToString(), TestRuleGuid.ToString(), TestGroupGuid.ToString(), new UpdateGroupRequest("G"));
+        var result = await controller.UpdateGroup(Guid.NewGuid().ToString(), TestRuleGuid.ToString(),
+            TestGroupGuid.ToString(), new UpdateGroupRequest("G"));
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -815,7 +826,8 @@ public class ClassControllerTest
     public async Task UpdateGroup_NotFoundRule_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroup(TestGuid.ToString(), Guid.NewGuid().ToString(), TestGroupGuid.ToString(), new UpdateGroupRequest("G"));
+        var result = await controller.UpdateGroup(TestGuid.ToString(), Guid.NewGuid().ToString(),
+            TestGroupGuid.ToString(), new UpdateGroupRequest("G"));
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -824,7 +836,8 @@ public class ClassControllerTest
     public async Task UpdateGroup_NotFoundGroup_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroup(TestGuid.ToString(), TestRuleGuid.ToString(), Guid.NewGuid().ToString(), new UpdateGroupRequest("G"));
+        var result = await controller.UpdateGroup(TestGuid.ToString(), TestRuleGuid.ToString(),
+            Guid.NewGuid().ToString(), new UpdateGroupRequest("G"));
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -833,7 +846,8 @@ public class ClassControllerTest
     public async Task UpdateGroup_InvalidRuleGuid_ReturnsBadRequest()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroup(TestGuid.ToString(), "bad-guid", TestGroupGuid.ToString(), new UpdateGroupRequest("G"));
+        var result = await controller.UpdateGroup(TestGuid.ToString(), "bad-guid", TestGroupGuid.ToString(),
+            new UpdateGroupRequest("G"));
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
@@ -842,7 +856,8 @@ public class ClassControllerTest
     public async Task UpdateGroup_InvalidGroupGuid_ReturnsBadRequest()
     {
         var controller = CreateController();
-        var result = await controller.UpdateGroup(TestGuid.ToString(), TestRuleGuid.ToString(), "bad-guid", new UpdateGroupRequest("G"));
+        var result = await controller.UpdateGroup(TestGuid.ToString(), TestRuleGuid.ToString(), "bad-guid",
+            new UpdateGroupRequest("G"));
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
@@ -897,7 +912,8 @@ public class ClassControllerTest
         var mock = CreateMockService(@class);
         var controller = CreateController(mock);
 
-        var result = await controller.DeleteGroup(TestGuid.ToString(), TestRuleGuid.ToString(), TestGroupGuid.ToString());
+        var result =
+            await controller.DeleteGroup(TestGuid.ToString(), TestRuleGuid.ToString(), TestGroupGuid.ToString());
 
         Assert.IsType<NoContentResult>(result);
         Assert.Empty(@class.GroupingRules[0].Groups);
@@ -908,7 +924,8 @@ public class ClassControllerTest
     public async Task DeleteGroup_NotFoundClass_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.DeleteGroup(Guid.NewGuid().ToString(), TestRuleGuid.ToString(), TestGroupGuid.ToString());
+        var result = await controller.DeleteGroup(Guid.NewGuid().ToString(), TestRuleGuid.ToString(),
+            TestGroupGuid.ToString());
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -917,7 +934,8 @@ public class ClassControllerTest
     public async Task DeleteGroup_NotFoundRule_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.DeleteGroup(TestGuid.ToString(), Guid.NewGuid().ToString(), TestGroupGuid.ToString());
+        var result =
+            await controller.DeleteGroup(TestGuid.ToString(), Guid.NewGuid().ToString(), TestGroupGuid.ToString());
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -926,7 +944,8 @@ public class ClassControllerTest
     public async Task DeleteGroup_NotFoundGroup_ReturnsNotFound()
     {
         var controller = CreateController();
-        var result = await controller.DeleteGroup(TestGuid.ToString(), TestRuleGuid.ToString(), Guid.NewGuid().ToString());
+        var result =
+            await controller.DeleteGroup(TestGuid.ToString(), TestRuleGuid.ToString(), Guid.NewGuid().ToString());
 
         Assert.IsType<NotFoundResult>(result);
     }

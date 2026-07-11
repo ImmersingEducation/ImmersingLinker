@@ -1,6 +1,5 @@
 ﻿namespace ImmersingLinker.CLI
 
-open System
 open System.CommandLine
 open ImmersingLinker.CLI.Commands
 

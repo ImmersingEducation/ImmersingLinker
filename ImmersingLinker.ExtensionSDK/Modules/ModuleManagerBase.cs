@@ -29,18 +29,14 @@ public abstract class ModuleManagerBase
         _instances.Add(instance);
     }
 
-    
-    
+
     protected void AddModules(Assembly assembly, ModuleType moduleType)
     {
         var moduleTypes = assembly.GetExportedTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false }
                         && typeof(IAppModule).IsAssignableFrom(t));
 
-        foreach (var type in moduleTypes)
-        {
-            AddModule(type, moduleType);
-        }
+        foreach (var type in moduleTypes) AddModule(type, moduleType);
     }
 
     protected void AddModule(ModuleDescriptor descriptor, IAppModule instance)
@@ -61,42 +57,27 @@ public abstract class ModuleManagerBase
 
     public virtual void PreConfigureServices(ServiceConfigurationContext context)
     {
-        foreach (var module in _instances)
-        {
-            module.PreConfigureServices(context);
-        }
+        foreach (var module in _instances) module.PreConfigureServices(context);
     }
 
     public virtual void ConfigureServices(ServiceConfigurationContext context)
     {
-        foreach (var module in _instances)
-        {
-            module.ConfigureServices(context);
-        }
+        foreach (var module in _instances) module.ConfigureServices(context);
     }
 
     public virtual void PostConfigureServices(ServiceConfigurationContext context)
     {
-        foreach (var module in _instances)
-        {
-            module.PostConfigureServices(context);
-        }
+        foreach (var module in _instances) module.PostConfigureServices(context);
     }
 
     public virtual void OnApplicationInitialization(ApplicationInitializationContext context)
     {
-        foreach (var module in _instances)
-        {
-            module.OnApplicationInitialization(context);
-        }
+        foreach (var module in _instances) module.OnApplicationInitialization(context);
     }
 
     public virtual void OnApplicationShutdown(ApplicationShutdownContext context)
     {
-        for (var i = _instances.Count - 1; i >= 0; i--)
-        {
-            _instances[i].OnApplicationShutdown(context);
-        }
+        for (var i = _instances.Count - 1; i >= 0; i--) _instances[i].OnApplicationShutdown(context);
     }
 
     public void Initialize()

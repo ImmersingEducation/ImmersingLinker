@@ -8,12 +8,12 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.6"/>
-        <PackageReference Include="Scalar.AspNetCore" Version="2.16.3" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.16.3"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ImmersingLinker.Core\ImmersingLinker.Core.csproj" />
-      <ProjectReference Include="..\ImmersingLinker.ExtensionSDK\ImmersingLinker.ExtensionSDK.csproj" />
+        <ProjectReference Include="..\ImmersingLinker.Core\ImmersingLinker.Core.csproj"/>
+        <ProjectReference Include="..\ImmersingLinker.ExtensionSDK\ImmersingLinker.ExtensionSDK.csproj"/>
     </ItemGroup>
 
 </Project>

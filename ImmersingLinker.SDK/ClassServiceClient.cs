@@ -1,13 +1,12 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using ImmersingLinker.Core.Models;
 
 namespace ImmersingLinker.SDK;
 
 public class ClassServiceClient
 {
-    private readonly HttpClient _http;
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -17,6 +16,8 @@ public class ClassServiceClient
             new StudentExtraPropertyConverter()
         }
     };
+
+    private readonly HttpClient _http;
 
     public ClassServiceClient(string port)
     {
@@ -42,7 +43,7 @@ public class ClassServiceClient
     public async Task<Class?> GetClassByGuidAsync(string classGuid)
     {
         var response = await _http.GetAsync($"/class/{classGuid}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Class>(JsonOptions);
     }
@@ -50,7 +51,7 @@ public class ClassServiceClient
     public async Task<List<Student>> GetStudentsByClassGuidAsync(string classGuid)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/student");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return [];
+        if (response.StatusCode == HttpStatusCode.NotFound) return [];
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<List<Student>>(JsonOptions) ?? [];
     }
@@ -58,15 +59,16 @@ public class ClassServiceClient
     public async Task<Student?> GetStudentByStudentIdInClassAsync(string classGuid, int studentId)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/student/{studentId}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Student>(JsonOptions);
     }
 
-    public async Task<List<StudentExtraProperty>> GetExtraPropertiesByStudentIdInClassAsync(string classGuid, int studentId)
+    public async Task<List<StudentExtraProperty>> GetExtraPropertiesByStudentIdInClassAsync(string classGuid,
+        int studentId)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/student/{studentId}/extraProps");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return [];
+        if (response.StatusCode == HttpStatusCode.NotFound) return [];
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<List<StudentExtraProperty>>(JsonOptions) ?? [];
     }
@@ -75,7 +77,7 @@ public class ClassServiceClient
         string classGuid, int studentId, string appId)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/student/{studentId}/extraProps/{appId}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return [];
+        if (response.StatusCode == HttpStatusCode.NotFound) return [];
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<List<StudentExtraProperty>>(JsonOptions) ?? [];
     }
@@ -84,7 +86,7 @@ public class ClassServiceClient
         string classGuid, int studentId, string appId, string propName)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/student/{studentId}/extraProps/{appId}/{propName}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<StudentExtraProperty>(JsonOptions);
     }
@@ -92,7 +94,7 @@ public class ClassServiceClient
     public async Task<List<ClassExtraProperty>> GetExtraPropertiesByClassGuidAsync(string classGuid)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/extraProps");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return [];
+        if (response.StatusCode == HttpStatusCode.NotFound) return [];
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<List<ClassExtraProperty>>(JsonOptions) ?? [];
     }
@@ -100,7 +102,7 @@ public class ClassServiceClient
     public async Task<List<ClassExtraProperty>> GetExtraPropertiesByAppIdInClassAsync(string classGuid, string appId)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/extraProps/{appId}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return [];
+        if (response.StatusCode == HttpStatusCode.NotFound) return [];
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<List<ClassExtraProperty>>(JsonOptions) ?? [];
     }
@@ -109,7 +111,7 @@ public class ClassServiceClient
         string classGuid, string appId, string propName)
     {
         var response = await _http.GetAsync($"/class/{classGuid}/extraProps/{appId}/{propName}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<ClassExtraProperty>(JsonOptions);
     }
@@ -129,22 +131,25 @@ public class ClassServiceClient
     public async Task<Student> AddStudentAsync(string classGuid, CreateStudentRequest request)
     {
         var response = await _http.PostAsJsonAsync($"/class/{classGuid}/student", request, JsonOptions);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Class {classGuid} not found");
-        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
-            throw new InvalidOperationException($"Student with ID {request.StudentIdInClass} already exists in class {classGuid}");
+        if (response.StatusCode == HttpStatusCode.Conflict)
+            throw new InvalidOperationException(
+                $"Student with ID {request.StudentIdInClass} already exists in class {classGuid}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<Student>(JsonOptions);
         return result!;
     }
 
-    public async Task<ClassExtraProperty> AddClassExtraPropertyAsync(string classGuid, CreateExtraPropertyRequest request)
+    public async Task<ClassExtraProperty> AddClassExtraPropertyAsync(string classGuid,
+        CreateExtraPropertyRequest request)
     {
         var response = await _http.PostAsJsonAsync($"/class/{classGuid}/extraProps", request, JsonOptions);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Class {classGuid} not found");
-        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
-            throw new InvalidOperationException($"Extra property '{request.AppId}/{request.Name}' already exists in class {classGuid}");
+        if (response.StatusCode == HttpStatusCode.Conflict)
+            throw new InvalidOperationException(
+                $"Extra property '{request.AppId}/{request.Name}' already exists in class {classGuid}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ClassExtraProperty>(JsonOptions);
         return result!;
@@ -153,11 +158,13 @@ public class ClassServiceClient
     public async Task<StudentExtraProperty> AddStudentExtraPropertyAsync(string classGuid, int studentId,
         CreateExtraPropertyRequest request)
     {
-        var response = await _http.PostAsJsonAsync($"/class/{classGuid}/student/{studentId}/extraProps", request, JsonOptions);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        var response =
+            await _http.PostAsJsonAsync($"/class/{classGuid}/student/{studentId}/extraProps", request, JsonOptions);
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Class {classGuid} or student {studentId} not found");
-        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
-            throw new InvalidOperationException($"Extra property '{request.AppId}/{request.Name}' already exists for student {studentId}");
+        if (response.StatusCode == HttpStatusCode.Conflict)
+            throw new InvalidOperationException(
+                $"Extra property '{request.AppId}/{request.Name}' already exists for student {studentId}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<StudentExtraProperty>(JsonOptions);
         return result!;
@@ -170,7 +177,7 @@ public class ClassServiceClient
     public async Task<Class> UpdateClassAsync(string classGuid, UpdateClassRequest request)
     {
         var response = await _http.PutAsJsonAsync($"/class/{classGuid}", request, JsonOptions);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Class {classGuid} not found");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<Class>(JsonOptions);
@@ -180,7 +187,7 @@ public class ClassServiceClient
     public async Task<Student> UpdateStudentAsync(string classGuid, int studentId, UpdateStudentRequest request)
     {
         var response = await _http.PutAsJsonAsync($"/class/{classGuid}/student/{studentId}", request, JsonOptions);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Class {classGuid} or student {studentId} not found");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<Student>(JsonOptions);
@@ -190,8 +197,9 @@ public class ClassServiceClient
     public async Task<ClassExtraProperty> UpdateClassExtraPropertyAsync(string classGuid, string appId, string propName,
         UpdateExtraPropertyRequest request)
     {
-        var response = await _http.PutAsJsonAsync($"/class/{classGuid}/extraProps/{appId}/{propName}", request, JsonOptions);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        var response =
+            await _http.PutAsJsonAsync($"/class/{classGuid}/extraProps/{appId}/{propName}", request, JsonOptions);
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Extra property '{appId}/{propName}' not found in class {classGuid}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<ClassExtraProperty>(JsonOptions);
@@ -201,10 +209,12 @@ public class ClassServiceClient
     public async Task<StudentExtraProperty> UpdateStudentExtraPropertyAsync(string classGuid, int studentId,
         string appId, string propName, UpdateExtraPropertyRequest request)
     {
-        var response = await _http.PutAsJsonAsync($"/class/{classGuid}/student/{studentId}/extraProps/{appId}/{propName}",
+        var response = await _http.PutAsJsonAsync(
+            $"/class/{classGuid}/student/{studentId}/extraProps/{appId}/{propName}",
             request, JsonOptions);
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            throw new InvalidOperationException($"Extra property '{appId}/{propName}' not found for student {studentId}");
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException(
+                $"Extra property '{appId}/{propName}' not found for student {studentId}");
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<StudentExtraProperty>(JsonOptions);
         return result!;
@@ -223,7 +233,7 @@ public class ClassServiceClient
     public async Task DeleteStudentAsync(string classGuid, int studentId)
     {
         var response = await _http.DeleteAsync($"/class/{classGuid}/student/{studentId}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Class {classGuid} or student {studentId} not found");
         response.EnsureSuccessStatusCode();
     }
@@ -231,7 +241,7 @@ public class ClassServiceClient
     public async Task DeleteClassExtraPropertyAsync(string classGuid, string appId, string propName)
     {
         var response = await _http.DeleteAsync($"/class/{classGuid}/extraProps/{appId}/{propName}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Extra property '{appId}/{propName}' not found in class {classGuid}");
         response.EnsureSuccessStatusCode();
     }
@@ -239,8 +249,9 @@ public class ClassServiceClient
     public async Task DeleteStudentExtraPropertyAsync(string classGuid, int studentId, string appId, string propName)
     {
         var response = await _http.DeleteAsync($"/class/{classGuid}/student/{studentId}/extraProps/{appId}/{propName}");
-        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            throw new InvalidOperationException($"Extra property '{appId}/{propName}' not found for student {studentId}");
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException(
+                $"Extra property '{appId}/{propName}' not found for student {studentId}");
         response.EnsureSuccessStatusCode();
     }
 
@@ -277,7 +288,7 @@ public class ClassServiceClient
         {
             Application = new Application { UniqueId = appId },
             Name = name,
-            Value = value,
+            Value = value
         };
     }
 
@@ -287,7 +298,7 @@ public class ClassServiceClient
         {
             Application = new Application { UniqueId = appId },
             Name = name,
-            Value = value,
+            Value = value
         };
     }
 

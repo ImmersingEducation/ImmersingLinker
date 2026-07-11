@@ -20,13 +20,11 @@ public class ClassStorageService
         if (!dataDir.Exists) return infos;
 
         foreach (var guid in dataDir.GetFiles("*.json").Select(p => Path.GetFileNameWithoutExtension(p.Name)))
-        {
             infos.Add(new ClassInfo
             {
                 Guid = Guid.Parse(guid),
                 Name = GetClass(Guid.Parse(guid)).Result?.Name ?? string.Empty
             });
-        }
 
         return infos;
     }
