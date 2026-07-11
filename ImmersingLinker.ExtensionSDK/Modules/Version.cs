@@ -1,13 +1,13 @@
 namespace ImmersingLinker.ExtensionSDK.Modules;
 
-public record ModuleVersion(
+public record Version(
     int              Major,
     int              Minor,
     int              Patch,
-    ModuleVersionTag Tag
+    VersionTag Tag
 );
 
-public enum ModuleVersionTag
+public enum VersionTag
 {
     Develop,
     Beta,

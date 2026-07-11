@@ -52,7 +52,7 @@ public abstract class ModuleManagerBase
 
     protected virtual ModuleDescriptor CreateDescriptor(Type type, ModuleType moduleType)
     {
-        return new ModuleDescriptor(Guid.NewGuid(), type.Name, string.Empty, string.Empty, moduleType, new ModuleVersion(0, 0, 0, ModuleVersionTag.Develop));
+        return new ModuleDescriptor(Guid.NewGuid(), type.Name, string.Empty, string.Empty, moduleType, new Version(0, 0, 0, VersionTag.Develop));
     }
 
     public virtual void PreConfigureServices(ServiceConfigurationContext context)

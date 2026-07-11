@@ -4,11 +4,11 @@ namespace ImmersingLinker.ExtensionSDK.Modules;
 public class ModuleDescriptor : Attribute
 {
     public ModuleDescriptor(Guid guid,
-                            string name, 
-                            string author,
-                            string description,
-                            ModuleType moduleType, 
-                            ModuleVersion version)
+        string name,
+        string author, 
+        string description, 
+        ModuleType moduleType, 
+        Version version)
     {
         Guid = guid;
         Name = name;
@@ -23,5 +23,25 @@ public class ModuleDescriptor : Attribute
     public string Author { get; }
     public string Description { get; }
     public ModuleType ModuleType { get; }
-    public ModuleVersion Version { get; }
+    public Version Version { get; }
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+public class ControllerDescriptor : Attribute
+{
+    public ControllerDescriptor(Guid guid,
+        string name,
+        string description,
+        Version version)
+    {
+        Guid = guid;
+        Name = name;
+        Description = description;
+        Version = version;
+    }
+    
+    public Guid Guid { get; }
+    public string Name { get; }
+    public string Description { get; }
+    public Version Version { get; }
 }
