@@ -11,6 +11,12 @@ public abstract class ModuleManagerBase
 
     protected abstract void LoadModules();
 
+    protected IReadOnlyList<string> ScanExtensionFiles()
+    {
+        
+        return Directory.GetFiles(@"Extensions", "*.dll", SearchOption.TopDirectoryOnly);
+    }
+
     protected void AddModule<T>()
         where T : IAppModule, new()
     {

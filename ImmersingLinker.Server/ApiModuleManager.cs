@@ -9,8 +9,7 @@ public class ApiModuleManager : ModuleManagerBase
     {
         try
         {
-            var extensionFiles = Directory.GetFiles(@"Extensions", "*.dll", SearchOption.TopDirectoryOnly);
-            foreach (var extensionFile in extensionFiles)
+            foreach (var extensionFile in ScanExtensionFiles())
             {
                 var assembly = Assembly.LoadFrom(extensionFile);
                 AddModules(assembly, ModuleType.API);
