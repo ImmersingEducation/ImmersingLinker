@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImmersingLinker.Core.Models;
+using ImmersingLinker.Core.Models.Class;
 
 namespace ImmersingLinker.SDK;
 

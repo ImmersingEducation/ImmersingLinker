@@ -1,4 +1,5 @@
 using ImmersingLinker.Core.Models;
+using ImmersingLinker.Core.Models.Class;
 using ImmersingLinker.Server.Controllers;
 using ImmersingLinker.Server.Services;
 using Microsoft.AspNetCore.Mvc;

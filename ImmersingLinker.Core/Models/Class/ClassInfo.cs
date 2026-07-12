@@ -1,4 +1,4 @@
-namespace ImmersingLinker.Core.Models;
+namespace ImmersingLinker.Core.Models.Class;
 
 public class ClassInfo
 {

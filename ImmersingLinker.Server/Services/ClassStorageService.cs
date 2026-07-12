@@ -1,5 +1,6 @@
 using System.Text.Json;
 using ImmersingLinker.Core.Models;
+using ImmersingLinker.Core.Models.Class;
 
 namespace ImmersingLinker.Server.Services;
 
