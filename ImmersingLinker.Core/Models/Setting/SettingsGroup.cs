@@ -19,4 +19,6 @@ public class SettingsGroup : SettingItemBase
             item.ValueChanged += (s, e) => OnValueChanged(e);
         }
     }
+    
+    public SettingItemBase? this[string key] => SettingItems.FirstOrDefault(x => x.Key == key);
 }
