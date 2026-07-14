@@ -1,7 +1,7 @@
 using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
 using ImmersingLinker.Server.Controllers;
-using ImmersingLinker.Server.Services;
+using ImmersingLinker.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 

@@ -1,6 +1,6 @@
 using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
-using ImmersingLinker.Server.Services;
+using ImmersingLinker.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImmersingLinker.Server.Controllers;

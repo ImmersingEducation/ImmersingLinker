@@ -1,8 +1,7 @@
 using System.Text.Json;
-using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
 
-namespace ImmersingLinker.Server.Services;
+namespace ImmersingLinker.Services.Services;
 
 public class ClassStorageService
 {

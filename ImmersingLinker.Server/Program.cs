@@ -1,6 +1,6 @@
 using ImmersingLinker.ExtensionSDK.Modules;
 using ImmersingLinker.Server;
-using ImmersingLinker.Server.Services;
+using ImmersingLinker.Services.Services;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

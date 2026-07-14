@@ -14,6 +14,11 @@
     <ItemGroup>
         <ProjectReference Include="..\ImmersingLinker.Core\ImmersingLinker.Core.csproj"/>
         <ProjectReference Include="..\ImmersingLinker.ExtensionSDK\ImmersingLinker.ExtensionSDK.csproj"/>
+        <ProjectReference Include="..\ImmersingLinker.Services\ImmersingLinker.Services.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\" />
     </ItemGroup>
 
 </Project>
