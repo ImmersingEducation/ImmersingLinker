@@ -12,6 +12,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ImmersingLinker.CLI", "Imme
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.ExtensionSDK", "ImmersingLinker.ExtensionSDK\ImmersingLinker.ExtensionSDK.csproj", "{21ECC089-FFA5-4712-962B-6FA606667F3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.Services", "ImmersingLinker.Services\ImmersingLinker.Services.csproj", "{9856DF65-4F00-4197-BC8B-CBE29A32BEEE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{21ECC089-FFA5-4712-962B-6FA606667F3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21ECC089-FFA5-4712-962B-6FA606667F3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21ECC089-FFA5-4712-962B-6FA606667F3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9856DF65-4F00-4197-BC8B-CBE29A32BEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9856DF65-4F00-4197-BC8B-CBE29A32BEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9856DF65-4F00-4197-BC8B-CBE29A32BEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9856DF65-4F00-4197-BC8B-CBE29A32BEEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
