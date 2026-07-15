@@ -1,4 +1,3 @@
-using ImmersingLinker.ExtensionSDK.Modules;
 using ImmersingLinker.Server;
 using ImmersingLinker.Services.Services;
 using ImmersingLinker.Services.Services.Storage;
@@ -14,17 +13,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddSingleton<ClassStorageService>();
 
-var moduleManager = new ApiModuleManager();
-moduleManager.Initialize();
-moduleManager.PreConfigureServices(new ServiceConfigurationContext(builder.Services));
-moduleManager.ConfigureServices(new ServiceConfigurationContext(builder.Services));
-builder.Services.AddSingleton(moduleManager);
-
 var app = builder.Build();
-
-moduleManager.OnApplicationInitialization(new ApplicationInitializationContext(app.Services));
-app.Lifetime.ApplicationStopping.Register(() =>
-    moduleManager.OnApplicationShutdown(new ApplicationShutdownContext(app.Services)));
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
