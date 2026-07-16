@@ -23,7 +23,7 @@ public class RuleSet : RuleBase
 
     public void AddRule(RuleBase rule)
     {
-        if (Rules.Find(r => r.Guid == rule.Guid) is not null)
+        if (Rules.Find(r => r.Guid == rule.Guid) is null)
             Rules.Add(rule);
         else
             throw new ArgumentException($"Rule {rule.Guid} already exists");
