@@ -1,4 +1,5 @@
 using ImmersingLinker.Core.Abstractions.Automation;
+using ImmersingLinker.Core.Services.Automation;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
 
 namespace ImmersingLinker.Core.Models.Automation;
@@ -13,38 +14,39 @@ public class AutomationPlan
     public RuleSet RuleSet { get; set; }
     public List<Action> Actions { get; set; }
 
-    public Task Loaded()
+    public async Task Loaded(AutomationPipeline pipeline)
     {
-        /*
-         * 如果 Trigger 继承了 IQueryNecessaryTrigger
-         * 就将其推进轮询流水线
-         */
-        throw new NotImplementedException();
+        pipeline.SubscribeTrigger(this);
+        if (Trigger is IQueryNecessaryTrigger queryNecessaryTrigger)
+        {
+            await pipeline.RegisterPollingTrigger(this, queryNecessaryTrigger);
+        }
     }
 
-    public Task Unloaded()
+    public async Task Unloaded(AutomationPipeline pipeline)
     {
-        /*
-         * 同 Loaded，将 Trigger 推出轮询流水线
-         */
-        throw new NotImplementedException();
+        pipeline.UnsubscribeTrigger(this);
+
+        if (Trigger is IQueryNecessaryTrigger)
+        {
+            await pipeline.UnregisterPollingTrigger(this.Guid);
+        }
     }
 
-    public Task Triggered()
+    public AutomationRunner? Triggered()
     {
-        /*
-         * 开始从上到下执行 Actions 里的行动
-         * 并记录当前执行到的行动
-         */
-        throw new NotImplementedException();
+        if (RuleSet is not null && !RuleSet.IsSatisfied()) return null;
+        var runner = new AutomationRunner(Guid.NewGuid(), false, Actions.ToList());
+        _ = runner.ExecuteAsync();
+        return runner;
     }
 
-    public Task Reverted()
+    public async Task<AutomationRunner?> Reverted(AutomationRunner originalRunner)
     {
-        /*
-         * 等待当前行动执行完毕，从当前行动开始
-         * 逆序回滚所有已执行的行动
-         */
-        throw new NotImplementedException();
+        if (!Revertable) return null;
+
+        var revertRunner = originalRunner.CreateRevertRunner();
+        await revertRunner.ExecuteAsync();
+        return revertRunner;
     }
 }
