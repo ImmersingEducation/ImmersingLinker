@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImmersingLinker.Core.Models.Automation;
 
-namespace ImmersingLinker.Services.Services.Storage;
+namespace ImmersingLinker.Core.Services.Storage;
 
 public sealed class AutomationStorageService
 {

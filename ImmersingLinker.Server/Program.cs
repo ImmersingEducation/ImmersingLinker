@@ -1,5 +1,5 @@
 using ImmersingLinker.Core.Services.Automation;
-using ImmersingLinker.Services.Services.Storage;
+using ImmersingLinker.Core.Services.Storage;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

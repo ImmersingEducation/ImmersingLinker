@@ -1,7 +1,7 @@
 using System.Text.Json;
 using ImmersingLinker.Core.Models.Setting;
 
-namespace ImmersingLinker.Services.Services.Setting;
+namespace ImmersingLinker.Core.Services.Setting;
 
 public sealed class SettingsService
 {
