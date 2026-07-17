@@ -1,6 +1,7 @@
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Services.Storage;
+using ImmersingLinker.Core.Services.ThirdParty;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddSingleton<IClassStorageService, ClassStorageService>();
 builder.Services.AddSingleton<IAutomationStorageService, AutomationStorageService>();
 builder.Services.AddSingleton<IAutomationPipeline, AutomationPipeline>();
+builder.Services.AddSingleton<ClassIslandService>();
 
 var app = builder.Build();
 
