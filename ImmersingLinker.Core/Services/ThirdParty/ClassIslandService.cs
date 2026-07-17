@@ -27,6 +27,14 @@ public sealed class ClassIslandService
     public bool IsClassPlanLoaded =>  _lessonsService.IsClassPlanLoaded;
     public bool IsLessonConfirmed => _lessonsService.IsLessonConfirmed;
     
+    public string CurrentProfilePath => _profileService.CurrentProfilePath;
+    public bool IsCurrentProfileTrusted => _profileService.IsCurrentProfileTrusted;
+    public Profile Profile => _profileService.Profile;
+
+    public Subject PreviousClassSubject => throw new NotImplementedException();
+    public TimeLayoutItem PreviousBreakingTimeLayoutItem => throw new NotImplementedException();
+    public TimeLayoutItem PreviousClassTimeLayoutItem => throw new NotImplementedException();
+    
     public ClassIslandService()
     {
         _client = new IpcClient();
