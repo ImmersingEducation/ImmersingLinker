@@ -9,9 +9,9 @@ namespace ImmersingLinker.Server.Controllers;
 [Route("[controller]")]
 public class ClassController : ControllerBase
 {
-    private readonly ClassStorageService _classStorageService;
+    private readonly IClassStorageService _classStorageService;
 
-    public ClassController(ClassStorageService classStorageService)
+    public ClassController(IClassStorageService classStorageService)
     {
         _classStorageService = classStorageService;
     }

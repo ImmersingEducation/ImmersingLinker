@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddSingleton<ClassStorageService>();
+builder.Services.AddSingleton<IClassStorageService, ClassStorageService>();
 builder.Services.AddSingleton<AutomationStorageService>();
 builder.Services.AddSingleton<AutomationPipeline>();
 

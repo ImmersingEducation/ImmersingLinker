@@ -66,15 +66,15 @@ public class ClassControllerTest
         };
     }
 
-    private static ClassController CreateController(Mock<ClassStorageService>? mock = null)
+    private static ClassController CreateController(Mock<IClassStorageService>? mock = null)
     {
         mock ??= CreateMockService();
         return new ClassController(mock.Object);
     }
 
-    private static Mock<ClassStorageService> CreateMockService(Class? @class = null)
+    private static Mock<IClassStorageService> CreateMockService(Class? @class = null)
     {
-        var mock = new Mock<ClassStorageService>();
+        var mock = new Mock<IClassStorageService>();
         @class ??= CreateTestClass();
 
         mock.Setup(s => s.GetClass(It.Is<Guid>(g => g == TestGuid)))

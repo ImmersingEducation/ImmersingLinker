@@ -3,7 +3,7 @@ using ImmersingLinker.Core.Models.Class;
 
 namespace ImmersingLinker.Core.Services.Storage;
 
-public sealed class ClassStorageService
+public sealed class ClassStorageService : IClassStorageService
 {
     public static ClassStorageService Instance { get; } = new();
     
