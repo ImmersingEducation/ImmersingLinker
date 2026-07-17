@@ -1,5 +1,4 @@
 using ImmersingLinker.Core.Abstractions.Automation;
-using ImmersingLinker.Core.Services.Automation;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
 
 namespace ImmersingLinker.Core.Models.Automation;
@@ -14,7 +13,7 @@ public class AutomationPlan
     public RuleSet RuleSet { get; set; }
     public List<Action> Actions { get; set; }
 
-    public async Task Loaded(AutomationPipeline pipeline)
+    public async Task Loaded(IAutomationPipeline pipeline)
     {
         pipeline.SubscribeTrigger(this);
         if (Trigger is IQueryNecessaryTrigger queryNecessaryTrigger)
@@ -23,7 +22,7 @@ public class AutomationPlan
         }
     }
 
-    public async Task Unloaded(AutomationPipeline pipeline)
+    public async Task Unloaded(IAutomationPipeline pipeline)
     {
         pipeline.UnsubscribeTrigger(this);
 

@@ -4,7 +4,7 @@ using ImmersingLinker.Core.Models.Automation;
 
 namespace ImmersingLinker.Core.Services.Storage;
 
-public sealed class AutomationStorageService
+public sealed class AutomationStorageService : IAutomationStorageService
 {
     private static readonly JsonSerializerOptions _options = new()
     {

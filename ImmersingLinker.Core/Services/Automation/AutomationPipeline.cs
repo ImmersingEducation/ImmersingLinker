@@ -3,7 +3,7 @@ using ImmersingLinker.Core.Models.Automation;
 
 namespace ImmersingLinker.Core.Services.Automation;
 
-public class AutomationPipeline : IAsyncDisposable
+public class AutomationPipeline : IAutomationPipeline
 {
     private readonly Dictionary<Guid, AutomationPlan> _plans = [];
     private readonly Dictionary<Guid, List<EventHandler<TriggerFiredEventArgs>>> _subscribers = [];
@@ -41,6 +41,11 @@ public class AutomationPipeline : IAsyncDisposable
             await plan.Unloaded(this);
         }
         _plans.Clear();
+    }
+
+    public AutomationPlan? GetRegisteredPlan(Guid planGuid)
+    {
+        return _plans.TryGetValue(planGuid, out var plan) ? plan : null;
     }
 
     // --- Trigger 订阅管理 ---
