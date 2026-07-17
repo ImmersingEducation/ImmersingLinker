@@ -6,7 +6,7 @@ namespace ImmersingLinker.Core.Models.Automation;
 public class RuleSet : RuleBase
 {
     public RuleSetSatisfyMode SatisfyMode { get; set; }
-    public List<RuleBase> Rules { get; private set; }
+    public List<RuleBase> Rules { get; private set; } = [];
     
     public override bool IsSatisfied()
     {

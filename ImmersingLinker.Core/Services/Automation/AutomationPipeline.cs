@@ -20,9 +20,9 @@ public class AutomationPipeline : IAsyncDisposable
 
     public void UnregisterPlan(Guid planGuid)
     {
-        _plans.Remove(planGuid);
         UnsubscribeAll(planGuid);
         UnregisterPollingTriggers(planGuid);
+        _plans.Remove(planGuid);
     }
 
     public async Task LoadAllPlans(IEnumerable<AutomationPlan> plans)

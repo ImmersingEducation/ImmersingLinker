@@ -46,6 +46,11 @@ public class AutomationRunner(Guid guid, bool revertMode, List<Action> actions)
             await action.OnInvoke();
             _executedSteps.Add(CurrentStep);
         }
+
+        if (Actions.Count > 0)
+            CurrentStep = Actions.Count - 1;
+        else
+            CurrentStep = -1;
     }
     
     private async Task ExecuteRevertAsync(CancellationToken ct)

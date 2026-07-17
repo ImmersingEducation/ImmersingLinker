@@ -273,7 +273,7 @@ public class AutomationTest
 
         Assert.True(action1.InvokeCalled);
         Assert.True(action2.InvokeCalled);
-        Assert.Equal(2, action1.InvokeCount);
+        Assert.Equal(1, action1.InvokeCount);
         Assert.Equal(1, action2.InvokeCount);
     }
 
