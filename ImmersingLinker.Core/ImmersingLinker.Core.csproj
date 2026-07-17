@@ -18,4 +18,8 @@
       <None Remove="Services\Automation\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="ClassIsland.Shared.IPC" Version="2.1.0.1" />
+    </ItemGroup>
+
 </Project>
