@@ -1,5 +1,5 @@
 using ImmersingLinker.Core.Abstractions.Automation;
-using ImmersingLinker.Core.Services.Automation;
+using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Services.Storage;
 using Scalar.AspNetCore;
 

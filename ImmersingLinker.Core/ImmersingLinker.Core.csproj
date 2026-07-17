@@ -6,4 +6,16 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Remove="Services\Automation\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Services\Automation\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Services\Automation\**" />
+    </ItemGroup>
+
 </Project>

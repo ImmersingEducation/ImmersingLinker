@@ -2,7 +2,6 @@ using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Enums.Automation;
 using ImmersingLinker.Core.Exceptions.Automations;
 using ImmersingLinker.Core.Models.Automation;
-using ImmersingLinker.Core.Services.Automation;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
 
 namespace ImmersingLinker.Test.Automation;

@@ -1,7 +1,6 @@
 using ImmersingLinker.Core.Abstractions.Automation;
-using ImmersingLinker.Core.Models.Automation;
 
-namespace ImmersingLinker.Core.Services.Automation;
+namespace ImmersingLinker.Core.Models.Automation;
 
 public class AutomationPipeline : IAutomationPipeline
 {
