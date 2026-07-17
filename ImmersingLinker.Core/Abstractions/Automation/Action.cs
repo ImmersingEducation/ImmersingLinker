@@ -1,8 +1,5 @@
-using System.Text.Json.Serialization;
-
 namespace ImmersingLinker.Core.Abstractions.Automation;
 
-[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 public abstract class Action
 {
     public abstract bool Revertable { get; }
