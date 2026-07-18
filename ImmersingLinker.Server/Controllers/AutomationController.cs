@@ -1,5 +1,6 @@
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Models.Automation;
+using ImmersingLinker.Core.Models.Automation.Triggers;
 using ImmersingLinker.Core.Services.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
@@ -105,6 +106,22 @@ public class AutomationController : ControllerBase
         {
             AutomationPlanGuid = plan.Guid,
             FiredAt = DateTime.UtcNow
+        });
+        return Ok();
+    }
+
+    /// <summary>
+    ///     通过 tag 触发 UrlTrigger
+    /// </summary>
+    /// <param name="tag">要匹配的 Tag</param>
+    [HttpPost("invoke/{tag}")]
+    public IActionResult InvokeUrlTrigger(string tag)
+    {
+        UrlTrigger.OnUrlVisited(null, new TriggerFiredEventArgs
+        {
+            AutomationPlanGuid = Guid.Empty,
+            FiredAt = DateTime.UtcNow,
+            Payload = tag
         });
         return Ok();
     }

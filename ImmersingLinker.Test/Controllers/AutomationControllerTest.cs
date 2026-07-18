@@ -1,6 +1,7 @@
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Enums.Automation;
 using ImmersingLinker.Core.Models.Automation;
+using ImmersingLinker.Core.Models.Automation.Triggers;
 using ImmersingLinker.Server.Controllers;
 using ImmersingLinker.Core.Services.Storage;
 using Microsoft.AspNetCore.Mvc;
@@ -226,6 +227,46 @@ public class AutomationControllerTest
         var result = await controller.TriggerPlan("bad-guid");
 
         Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+    // ===== POST Invoke =====
+
+    [Fact]
+    public void InvokeUrlTrigger_ReturnsOk()
+    {
+        var controller = CreateController();
+
+        var result = controller.InvokeUrlTrigger("my-tag");
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public void InvokeUrlTrigger_CallsOnUrlVisitedWithTagAsPayload()
+    {
+        var controller = CreateController();
+        var planGuid = Guid.NewGuid();
+        var trigger = new UrlTrigger("my-tag");
+        TriggerFiredEventArgs? receivedArgs = null;
+        trigger.TriggerFired += (_, args) => receivedArgs = args;
+
+        controller.InvokeUrlTrigger("my-tag");
+
+        Assert.NotNull(receivedArgs);
+        Assert.Equal("my-tag", receivedArgs!.Payload);
+    }
+
+    [Fact]
+    public void InvokeUrlTrigger_NonMatchingTag_DoesNotFireTrigger()
+    {
+        var controller = CreateController();
+        var trigger = new UrlTrigger("expected-tag");
+        var fired = false;
+        trigger.TriggerFired += (_, _) => fired = true;
+
+        controller.InvokeUrlTrigger("wrong-tag");
+
+        Assert.False(fired);
     }
 
     // ===== PUT =====

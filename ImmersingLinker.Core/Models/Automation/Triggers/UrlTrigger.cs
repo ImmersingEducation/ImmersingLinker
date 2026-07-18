@@ -1,5 +1,10 @@
+using System.Runtime.CompilerServices;
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Attributes.Automation;
+
+
+[assembly: InternalsVisibleTo("ImmersingLinker.Server")]
+[assembly: InternalsVisibleTo("ImmersingLinker.Test")]
 
 namespace ImmersingLinker.Core.Models.Automation.Triggers;
 
@@ -16,6 +21,11 @@ public class UrlTrigger : Trigger
         UrlVisited += OnTriggerFired;
     }
 
+    internal static void OnUrlVisited(object? sender, TriggerFiredEventArgs eventArgs)
+    {
+        UrlVisited?.Invoke(sender, eventArgs);
+    }
+    
     protected override void OnTriggerFired(object? sender, TriggerFiredEventArgs? args)
     {
         if (args?.Payload is string url)
