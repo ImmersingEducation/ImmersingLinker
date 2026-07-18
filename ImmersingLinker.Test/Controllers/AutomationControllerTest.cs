@@ -23,7 +23,7 @@ public class AutomationControllerTest
         public void Fire(TriggerFiredEventArgs args)
         {
             Fired = true;
-            OnTriggerFired(args);
+            OnTriggerFired(this, args);
         }
     }
 

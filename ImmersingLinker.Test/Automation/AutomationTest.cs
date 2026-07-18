@@ -17,7 +17,7 @@ public class AutomationTest
     {
         public void Fire(TriggerFiredEventArgs args)
         {
-            OnTriggerFired(args);
+            OnTriggerFired(this, args);
         }
     }
 

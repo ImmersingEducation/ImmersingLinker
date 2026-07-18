@@ -8,8 +8,8 @@ public abstract class Trigger
 {
     public event EventHandler<TriggerFiredEventArgs>? TriggerFired;
 
-    protected void OnTriggerFired(TriggerFiredEventArgs args)
+    protected virtual void OnTriggerFired(object? sender, TriggerFiredEventArgs? args)
     {
-        TriggerFired?.Invoke(this, args);
+        TriggerFired?.Invoke(sender, args);
     }
 }
