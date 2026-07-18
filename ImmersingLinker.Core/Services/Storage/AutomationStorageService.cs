@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Models.Automation;
 
 namespace ImmersingLinker.Core.Services.Storage;
@@ -9,6 +10,10 @@ public sealed class AutomationStorageService : IAutomationStorageService
     private static readonly JsonSerializerOptions _options = new()
     {
         WriteIndented = true,
+        TypeInfoResolver = new PolymorphicTypeResolver(
+            typeof(Trigger),
+            typeof(Abstractions.Automation.Action),
+            typeof(RuleBase)),
         Converters = { new JsonStringEnumConverter() }
     };
 

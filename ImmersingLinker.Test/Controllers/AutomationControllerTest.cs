@@ -1,6 +1,7 @@
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Enums.Automation;
 using ImmersingLinker.Core.Models.Automation;
+using ImmersingLinker.Core.Models.Automation.Triggers;
 using ImmersingLinker.Server.Controllers;
 using ImmersingLinker.Core.Services.Storage;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ public class AutomationControllerTest
         public void Fire(TriggerFiredEventArgs args)
         {
             Fired = true;
-            OnTriggerFired(args);
+            OnTriggerFired(this, args);
         }
     }
 
@@ -72,6 +73,11 @@ public class AutomationControllerTest
         };
     }
 
+    private static TriggerDto CreateTriggerDto()
+    {
+        return new TriggerDto("test.Trigger", null);
+    }
+
     private static Mock<IAutomationStorageService> CreateMockStorage(AutomationPlan? plan = null)
     {
         plan ??= CreateTestPlan();
@@ -103,13 +109,50 @@ public class AutomationControllerTest
         return mock;
     }
 
+    private static Mock<ITriggerResolver> CreateMockTriggerResolver(Trigger? trigger = null)
+    {
+        trigger ??= new TestTrigger();
+        var mock = new Mock<ITriggerResolver>();
+        mock.Setup(r => r.Resolve(It.IsAny<TriggerDto>()))
+            .Returns((trigger, (string?)null));
+        return mock;
+    }
+
+    private static Mock<IRuleResolver> CreateMockRuleResolver(RuleSet? ruleSet = null)
+    {
+        var mock = new Mock<IRuleResolver>();
+        mock.Setup(r => r.ResolveRuleSet(It.IsAny<RuleSetDto?>()))
+            .Returns((ruleSet, (string?)null));
+        return mock;
+    }
+
+    private static Mock<IActionResolver> CreateMockActionResolver(List<Action>? actions = null)
+    {
+        actions ??= [new TestAction()];
+        var mock = new Mock<IActionResolver>();
+        mock.Setup(r => r.ResolveAll(It.IsAny<List<ActionDto>?>()))
+            .Returns((actions, (string?)null));
+        return mock;
+    }
+
     private static AutomationController CreateController(
         Mock<IAutomationStorageService>? storageMock = null,
-        Mock<IAutomationPipeline>? pipelineMock = null)
+        Mock<IAutomationPipeline>? pipelineMock = null,
+        Mock<ITriggerResolver>? triggerResolverMock = null,
+        Mock<IRuleResolver>? ruleResolverMock = null,
+        Mock<IActionResolver>? actionResolverMock = null)
     {
         storageMock ??= CreateMockStorage();
         pipelineMock ??= CreateMockPipeline();
-        return new AutomationController(storageMock.Object, pipelineMock.Object);
+        triggerResolverMock ??= CreateMockTriggerResolver();
+        ruleResolverMock ??= CreateMockRuleResolver();
+        actionResolverMock ??= CreateMockActionResolver();
+        return new AutomationController(
+            storageMock.Object,
+            pipelineMock.Object,
+            triggerResolverMock.Object,
+            ruleResolverMock.Object,
+            actionResolverMock.Object);
     }
 
     // ===== GET =====
@@ -165,9 +208,8 @@ public class AutomationControllerTest
         var pipelineMock = CreateMockPipeline();
         var controller = CreateController(storageMock, pipelineMock);
 
-        var trigger = new TestTrigger();
         var request = new CreateAutomationPlanRequest(
-            "NewPlan", true, trigger, null, [new TestAction()]);
+            "NewPlan", true, CreateTriggerDto(), null, [new ActionDto("test.Action", null)]);
 
         var result = await controller.CreatePlan(request);
 
@@ -178,6 +220,66 @@ public class AutomationControllerTest
         Assert.True(plan.Revertable);
         storageMock.Verify(s => s.SavePlan(It.IsAny<AutomationPlan>()), Times.Once);
         pipelineMock.Verify(p => p.RegisterPlan(It.IsAny<AutomationPlan>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreatePlan_TriggerResolutionFailed_ReturnsBadRequest()
+    {
+        var triggerResolverMock = new Mock<ITriggerResolver>();
+        triggerResolverMock.Setup(r => r.Resolve(It.IsAny<TriggerDto>()))
+            .Returns(((Trigger?)null, "Unknown trigger key: bad.Key"));
+
+        var controller = CreateController(triggerResolverMock: triggerResolverMock);
+
+        var request = new CreateAutomationPlanRequest(
+            "NewPlan", true, new TriggerDto("bad.Key", null), null, []);
+
+        var result = await controller.CreatePlan(request);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Contains("Unknown trigger key", badRequest.Value!.ToString());
+    }
+
+    [Fact]
+    public async Task CreatePlan_RuleResolutionFailed_ReturnsBadRequest()
+    {
+        var ruleResolverMock = new Mock<IRuleResolver>();
+        ruleResolverMock.Setup(r => r.ResolveRuleSet(It.IsAny<RuleSetDto?>()))
+            .Returns(((RuleSet?)null, "Unknown rule key: bad.Rule"));
+
+        var ruleSetDto = new RuleSetDto(RuleSetSatisfyMode.AllSatisfied, false,
+        [
+            new RuleNodeDto { RuleKey = "bad.Rule" }
+        ]);
+
+        var controller = CreateController(ruleResolverMock: ruleResolverMock);
+
+        var request = new CreateAutomationPlanRequest(
+            "NewPlan", true, CreateTriggerDto(), ruleSetDto, []);
+
+        var result = await controller.CreatePlan(request);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Contains("Unknown rule key", badRequest.Value!.ToString());
+    }
+
+    [Fact]
+    public async Task CreatePlan_ActionResolutionFailed_ReturnsBadRequest()
+    {
+        var actionResolverMock = new Mock<IActionResolver>();
+        actionResolverMock.Setup(r => r.ResolveAll(It.IsAny<List<ActionDto>?>()))
+            .Returns(((List<Action>?)null, "Unknown action key: bad.Action"));
+
+        var controller = CreateController(actionResolverMock: actionResolverMock);
+
+        var request = new CreateAutomationPlanRequest(
+            "NewPlan", true, CreateTriggerDto(), null,
+            [new ActionDto("bad.Action", null)]);
+
+        var result = await controller.CreatePlan(request);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Contains("Unknown action key", badRequest.Value!.ToString());
     }
 
     // ===== POST Trigger =====
@@ -228,6 +330,46 @@ public class AutomationControllerTest
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
+    // ===== POST Invoke =====
+
+    [Fact]
+    public void InvokeUrlTrigger_ReturnsOk()
+    {
+        var controller = CreateController();
+
+        var result = controller.InvokeUrlTrigger("my-tag");
+
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public void InvokeUrlTrigger_CallsOnUrlVisitedWithTagAsPayload()
+    {
+        var controller = CreateController();
+        var planGuid = Guid.NewGuid();
+        var trigger = new UrlTrigger("my-tag");
+        TriggerFiredEventArgs? receivedArgs = null;
+        trigger.TriggerFired += (_, args) => receivedArgs = args;
+
+        controller.InvokeUrlTrigger("my-tag");
+
+        Assert.NotNull(receivedArgs);
+        Assert.Equal("my-tag", receivedArgs!.Payload);
+    }
+
+    [Fact]
+    public void InvokeUrlTrigger_NonMatchingTag_DoesNotFireTrigger()
+    {
+        var controller = CreateController();
+        var trigger = new UrlTrigger("expected-tag");
+        var fired = false;
+        trigger.TriggerFired += (_, _) => fired = true;
+
+        controller.InvokeUrlTrigger("wrong-tag");
+
+        Assert.False(fired);
+    }
+
     // ===== PUT =====
 
     [Fact]
@@ -238,7 +380,7 @@ public class AutomationControllerTest
         var controller = CreateController(storageMock, pipelineMock);
 
         var request = new UpdateAutomationPlanRequest(
-            "UpdatedPlan", false, new TestTrigger(), null, [new TestAction()]);
+            "UpdatedPlan", false, CreateTriggerDto(), null, [new ActionDto("test.Action", null)]);
 
         var result = await controller.UpdatePlan(TestPlanGuid.ToString(), request);
 
@@ -255,7 +397,7 @@ public class AutomationControllerTest
     {
         var controller = CreateController();
         var request = new UpdateAutomationPlanRequest(
-            "X", false, new TestTrigger(), null, []);
+            "X", false, CreateTriggerDto(), null, []);
 
         var result = await controller.UpdatePlan(Guid.NewGuid().ToString(), request);
 
@@ -267,7 +409,7 @@ public class AutomationControllerTest
     {
         var controller = CreateController();
         var request = new UpdateAutomationPlanRequest(
-            "X", false, new TestTrigger(), null, []);
+            "X", false, CreateTriggerDto(), null, []);
 
         var result = await controller.UpdatePlan("bad-guid", request);
 

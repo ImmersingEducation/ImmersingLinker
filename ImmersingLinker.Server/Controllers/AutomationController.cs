@@ -1,5 +1,6 @@
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Models.Automation;
+using ImmersingLinker.Core.Models.Automation.Triggers;
 using ImmersingLinker.Core.Services.Storage;
 using Microsoft.AspNetCore.Mvc;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
@@ -12,12 +13,21 @@ public class AutomationController : ControllerBase
 {
     private readonly IAutomationStorageService _automationStorageService;
     private readonly IAutomationPipeline _automationPipeline;
+    private readonly ITriggerResolver _triggerResolver;
+    private readonly IRuleResolver _ruleResolver;
+    private readonly IActionResolver _actionResolver;
 
     public AutomationController(IAutomationStorageService automationStorageService,
-        IAutomationPipeline automationPipeline)
+        IAutomationPipeline automationPipeline,
+        ITriggerResolver triggerResolver,
+        IRuleResolver ruleResolver,
+        IActionResolver actionResolver)
     {
         _automationStorageService = automationStorageService;
         _automationPipeline = automationPipeline;
+        _triggerResolver = triggerResolver;
+        _ruleResolver = ruleResolver;
+        _actionResolver = actionResolver;
     }
 
     #region Logic
@@ -32,6 +42,30 @@ public class AutomationController : ControllerBase
         {
             return null;
         }
+    }
+
+    private async Task<(AutomationPlan? plan, IActionResult? error)> ResolvePlan(
+        Guid guid, string name, bool revertable, TriggerDto triggerDto, RuleSetDto? ruleSetDto, List<ActionDto> actionDtos)
+    {
+        var (trigger, triggerError) = _triggerResolver.Resolve(triggerDto);
+        if (triggerError is not null) return (null, BadRequest(triggerError));
+
+        var (ruleSet, ruleError) = _ruleResolver.ResolveRuleSet(ruleSetDto);
+        if (ruleError is not null) return (null, BadRequest(ruleError));
+
+        var (actions, actionError) = _actionResolver.ResolveAll(actionDtos);
+        if (actionError is not null) return (null, BadRequest(actionError));
+
+        var plan = new AutomationPlan
+        {
+            Guid = guid,
+            Name = name,
+            Revertable = revertable,
+            Trigger = trigger,
+            RuleSet = ruleSet,
+            Actions = actions!
+        };
+        return (plan, null);
     }
 
     #endregion
@@ -71,17 +105,13 @@ public class AutomationController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePlan([FromBody] CreateAutomationPlanRequest request)
     {
-        var plan = new AutomationPlan
-        {
-            Guid = Guid.NewGuid(),
-            Name = request.Name,
-            Revertable = request.Revertable,
-            Trigger = request.Trigger,
-            RuleSet = request.RuleSet,
-            Actions = request.Actions
-        };
-        await _automationStorageService.SavePlan(plan);
-        await plan.Loaded(_automationPipeline);
+        var (plan, error) = await ResolvePlan(
+            Guid.NewGuid(), request.Name, request.Revertable,
+            request.Trigger, request.RuleSet, request.Actions);
+        if (error is not null) return error;
+
+        await _automationStorageService.SavePlan(plan!);
+        await plan!.Loaded(_automationPipeline);
         return CreatedAtAction(nameof(GetPlanByGuid), new { planGuid = plan.Guid }, plan);
     }
 
@@ -109,6 +139,22 @@ public class AutomationController : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    ///     通过 tag 触发 UrlTrigger
+    /// </summary>
+    /// <param name="tag">要匹配的 Tag</param>
+    [HttpPost("invoke/{tag}")]
+    public IActionResult InvokeUrlTrigger(string tag)
+    {
+        UrlTrigger.OnUrlVisited(null, new TriggerFiredEventArgs
+        {
+            AutomationPlanGuid = Guid.Empty,
+            FiredAt = DateTime.UtcNow,
+            Payload = tag
+        });
+        return Ok();
+    }
+
     #endregion
 
     #region PUT
@@ -128,17 +174,13 @@ public class AutomationController : ControllerBase
 
         _automationPipeline.UnregisterPlan(guid.Value);
 
-        var plan = new AutomationPlan
-        {
-            Guid = guid.Value,
-            Name = request.Name,
-            Revertable = request.Revertable,
-            Trigger = request.Trigger,
-            RuleSet = request.RuleSet,
-            Actions = request.Actions
-        };
-        await _automationStorageService.SavePlan(plan);
-        await plan.Loaded(_automationPipeline);
+        var (plan, error) = await ResolvePlan(
+            guid.Value, request.Name, request.Revertable,
+            request.Trigger, request.RuleSet, request.Actions);
+        if (error is not null) return error;
+
+        await _automationStorageService.SavePlan(plan!);
+        await plan!.Loaded(_automationPipeline);
         return Ok(plan);
     }
 
