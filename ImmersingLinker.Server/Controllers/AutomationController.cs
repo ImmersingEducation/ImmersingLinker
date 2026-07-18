@@ -15,16 +15,19 @@ public class AutomationController : ControllerBase
     private readonly IAutomationPipeline _automationPipeline;
     private readonly ITriggerResolver _triggerResolver;
     private readonly IRuleResolver _ruleResolver;
+    private readonly IActionResolver _actionResolver;
 
     public AutomationController(IAutomationStorageService automationStorageService,
         IAutomationPipeline automationPipeline,
         ITriggerResolver triggerResolver,
-        IRuleResolver ruleResolver)
+        IRuleResolver ruleResolver,
+        IActionResolver actionResolver)
     {
         _automationStorageService = automationStorageService;
         _automationPipeline = automationPipeline;
         _triggerResolver = triggerResolver;
         _ruleResolver = ruleResolver;
+        _actionResolver = actionResolver;
     }
 
     #region Logic
@@ -42,13 +45,16 @@ public class AutomationController : ControllerBase
     }
 
     private async Task<(AutomationPlan? plan, IActionResult? error)> ResolvePlan(
-        Guid guid, string name, bool revertable, TriggerDto triggerDto, RuleSetDto? ruleSetDto, List<Action> actions)
+        Guid guid, string name, bool revertable, TriggerDto triggerDto, RuleSetDto? ruleSetDto, List<ActionDto> actionDtos)
     {
         var (trigger, triggerError) = _triggerResolver.Resolve(triggerDto);
         if (triggerError is not null) return (null, BadRequest(triggerError));
 
         var (ruleSet, ruleError) = _ruleResolver.ResolveRuleSet(ruleSetDto);
         if (ruleError is not null) return (null, BadRequest(ruleError));
+
+        var (actions, actionError) = _actionResolver.ResolveAll(actionDtos);
+        if (actionError is not null) return (null, BadRequest(actionError));
 
         var plan = new AutomationPlan
         {
@@ -57,7 +63,7 @@ public class AutomationController : ControllerBase
             Revertable = revertable,
             Trigger = trigger,
             RuleSet = ruleSet,
-            Actions = actions
+            Actions = actions!
         };
         return (plan, null);
     }

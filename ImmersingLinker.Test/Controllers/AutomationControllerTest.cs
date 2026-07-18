@@ -126,21 +126,33 @@ public class AutomationControllerTest
         return mock;
     }
 
+    private static Mock<IActionResolver> CreateMockActionResolver(List<Action>? actions = null)
+    {
+        actions ??= [new TestAction()];
+        var mock = new Mock<IActionResolver>();
+        mock.Setup(r => r.ResolveAll(It.IsAny<List<ActionDto>?>()))
+            .Returns((actions, (string?)null));
+        return mock;
+    }
+
     private static AutomationController CreateController(
         Mock<IAutomationStorageService>? storageMock = null,
         Mock<IAutomationPipeline>? pipelineMock = null,
         Mock<ITriggerResolver>? triggerResolverMock = null,
-        Mock<IRuleResolver>? ruleResolverMock = null)
+        Mock<IRuleResolver>? ruleResolverMock = null,
+        Mock<IActionResolver>? actionResolverMock = null)
     {
         storageMock ??= CreateMockStorage();
         pipelineMock ??= CreateMockPipeline();
         triggerResolverMock ??= CreateMockTriggerResolver();
         ruleResolverMock ??= CreateMockRuleResolver();
+        actionResolverMock ??= CreateMockActionResolver();
         return new AutomationController(
             storageMock.Object,
             pipelineMock.Object,
             triggerResolverMock.Object,
-            ruleResolverMock.Object);
+            ruleResolverMock.Object,
+            actionResolverMock.Object);
     }
 
     // ===== GET =====
@@ -197,7 +209,7 @@ public class AutomationControllerTest
         var controller = CreateController(storageMock, pipelineMock);
 
         var request = new CreateAutomationPlanRequest(
-            "NewPlan", true, CreateTriggerDto(), null, [new TestAction()]);
+            "NewPlan", true, CreateTriggerDto(), null, [new ActionDto("test.Action", null)]);
 
         var result = await controller.CreatePlan(request);
 
@@ -249,6 +261,25 @@ public class AutomationControllerTest
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Contains("Unknown rule key", badRequest.Value!.ToString());
+    }
+
+    [Fact]
+    public async Task CreatePlan_ActionResolutionFailed_ReturnsBadRequest()
+    {
+        var actionResolverMock = new Mock<IActionResolver>();
+        actionResolverMock.Setup(r => r.ResolveAll(It.IsAny<List<ActionDto>?>()))
+            .Returns(((List<Action>?)null, "Unknown action key: bad.Action"));
+
+        var controller = CreateController(actionResolverMock: actionResolverMock);
+
+        var request = new CreateAutomationPlanRequest(
+            "NewPlan", true, CreateTriggerDto(), null,
+            [new ActionDto("bad.Action", null)]);
+
+        var result = await controller.CreatePlan(request);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Contains("Unknown action key", badRequest.Value!.ToString());
     }
 
     // ===== POST Trigger =====
@@ -349,7 +380,7 @@ public class AutomationControllerTest
         var controller = CreateController(storageMock, pipelineMock);
 
         var request = new UpdateAutomationPlanRequest(
-            "UpdatedPlan", false, CreateTriggerDto(), null, [new TestAction()]);
+            "UpdatedPlan", false, CreateTriggerDto(), null, [new ActionDto("test.Action", null)]);
 
         var result = await controller.UpdatePlan(TestPlanGuid.ToString(), request);
 

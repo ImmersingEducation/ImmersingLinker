@@ -7,6 +7,8 @@ namespace ImmersingLinker.Core.Models.Automation;
 
 public record TriggerDto(string TriggerKey, JsonElement? Properties);
 
+public record ActionDto(string ActionKey, JsonElement? Properties);
+
 public record RuleNodeDto
 {
     public string? RuleKey { get; init; }
@@ -26,7 +28,7 @@ public record CreateAutomationPlanRequest(
     bool Revertable,
     TriggerDto Trigger,
     RuleSetDto? RuleSet,
-    List<Action> Actions
+    List<ActionDto> Actions
 );
 
 public record UpdateAutomationPlanRequest(
@@ -34,5 +36,5 @@ public record UpdateAutomationPlanRequest(
     bool Revertable,
     TriggerDto Trigger,
     RuleSetDto? RuleSet,
-    List<Action> Actions
+    List<ActionDto> Actions
 );

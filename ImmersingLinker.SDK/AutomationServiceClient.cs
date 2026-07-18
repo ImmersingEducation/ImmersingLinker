@@ -133,14 +133,19 @@ public class AutomationServiceClient
         };
     }
 
+    public static ActionDto CreateActionDtoOffline(string actionKey, JsonElement? properties)
+    {
+        return new ActionDto(actionKey, properties);
+    }
+
     public static CreateAutomationPlanRequest CreatePlanRequestOffline(string name, bool revertable,
-        TriggerDto trigger, RuleSetDto? ruleSet, List<Action> actions)
+        TriggerDto trigger, RuleSetDto? ruleSet, List<ActionDto> actions)
     {
         return new CreateAutomationPlanRequest(name, revertable, trigger, ruleSet, actions);
     }
 
     public static UpdateAutomationPlanRequest UpdatePlanRequestOffline(string name, bool revertable,
-        TriggerDto trigger, RuleSetDto? ruleSet, List<Action> actions)
+        TriggerDto trigger, RuleSetDto? ruleSet, List<ActionDto> actions)
     {
         return new UpdateAutomationPlanRequest(name, revertable, trigger, ruleSet, actions);
     }
