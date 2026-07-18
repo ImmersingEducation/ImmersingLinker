@@ -1,5 +1,7 @@
+using System.Reflection;
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Models.Automation;
+using ImmersingLinker.Core.Services.Automation;
 using ImmersingLinker.Core.Services.Storage;
 using Scalar.AspNetCore;
 
@@ -11,8 +13,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddSingleton<IClassStorageService, ClassStorageService>();
 builder.Services.AddSingleton<IAutomationStorageService, AutomationStorageService>();
 builder.Services.AddSingleton<IAutomationPipeline, AutomationPipeline>();
+builder.Services.AddSingleton<ITriggerService, TriggerService>();
 
 var app = builder.Build();
+
+var triggerService = app.Services.GetRequiredService<ITriggerService>();
+triggerService.ScanAssembly(typeof(Trigger).Assembly);
 
 if (app.Environment.IsDevelopment())
 {
