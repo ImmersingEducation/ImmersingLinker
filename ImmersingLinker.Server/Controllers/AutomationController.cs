@@ -13,12 +13,18 @@ public class AutomationController : ControllerBase
 {
     private readonly IAutomationStorageService _automationStorageService;
     private readonly IAutomationPipeline _automationPipeline;
+    private readonly ITriggerResolver _triggerResolver;
+    private readonly IRuleResolver _ruleResolver;
 
     public AutomationController(IAutomationStorageService automationStorageService,
-        IAutomationPipeline automationPipeline)
+        IAutomationPipeline automationPipeline,
+        ITriggerResolver triggerResolver,
+        IRuleResolver ruleResolver)
     {
         _automationStorageService = automationStorageService;
         _automationPipeline = automationPipeline;
+        _triggerResolver = triggerResolver;
+        _ruleResolver = ruleResolver;
     }
 
     #region Logic
@@ -33,6 +39,27 @@ public class AutomationController : ControllerBase
         {
             return null;
         }
+    }
+
+    private async Task<(AutomationPlan? plan, IActionResult? error)> ResolvePlan(
+        Guid guid, string name, bool revertable, TriggerDto triggerDto, RuleSetDto? ruleSetDto, List<Action> actions)
+    {
+        var (trigger, triggerError) = _triggerResolver.Resolve(triggerDto);
+        if (triggerError is not null) return (null, BadRequest(triggerError));
+
+        var (ruleSet, ruleError) = _ruleResolver.ResolveRuleSet(ruleSetDto);
+        if (ruleError is not null) return (null, BadRequest(ruleError));
+
+        var plan = new AutomationPlan
+        {
+            Guid = guid,
+            Name = name,
+            Revertable = revertable,
+            Trigger = trigger,
+            RuleSet = ruleSet,
+            Actions = actions
+        };
+        return (plan, null);
     }
 
     #endregion
@@ -72,17 +99,13 @@ public class AutomationController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePlan([FromBody] CreateAutomationPlanRequest request)
     {
-        var plan = new AutomationPlan
-        {
-            Guid = Guid.NewGuid(),
-            Name = request.Name,
-            Revertable = request.Revertable,
-            Trigger = request.Trigger,
-            RuleSet = request.RuleSet,
-            Actions = request.Actions
-        };
-        await _automationStorageService.SavePlan(plan);
-        await plan.Loaded(_automationPipeline);
+        var (plan, error) = await ResolvePlan(
+            Guid.NewGuid(), request.Name, request.Revertable,
+            request.Trigger, request.RuleSet, request.Actions);
+        if (error is not null) return error;
+
+        await _automationStorageService.SavePlan(plan!);
+        await plan!.Loaded(_automationPipeline);
         return CreatedAtAction(nameof(GetPlanByGuid), new { planGuid = plan.Guid }, plan);
     }
 
@@ -145,17 +168,13 @@ public class AutomationController : ControllerBase
 
         _automationPipeline.UnregisterPlan(guid.Value);
 
-        var plan = new AutomationPlan
-        {
-            Guid = guid.Value,
-            Name = request.Name,
-            Revertable = request.Revertable,
-            Trigger = request.Trigger,
-            RuleSet = request.RuleSet,
-            Actions = request.Actions
-        };
-        await _automationStorageService.SavePlan(plan);
-        await plan.Loaded(_automationPipeline);
+        var (plan, error) = await ResolvePlan(
+            guid.Value, request.Name, request.Revertable,
+            request.Trigger, request.RuleSet, request.Actions);
+        if (error is not null) return error;
+
+        await _automationStorageService.SavePlan(plan!);
+        await plan!.Loaded(_automationPipeline);
         return Ok(plan);
     }
 

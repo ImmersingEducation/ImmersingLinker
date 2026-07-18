@@ -15,11 +15,17 @@ builder.Services.AddSingleton<IClassStorageService, ClassStorageService>();
 builder.Services.AddSingleton<IAutomationStorageService, AutomationStorageService>();
 builder.Services.AddSingleton<IAutomationPipeline, AutomationPipeline>();
 builder.Services.AddSingleton<ITriggerService, TriggerService>();
+builder.Services.AddSingleton<IRuleService, RuleService>();
+builder.Services.AddSingleton<ITriggerResolver, TriggerResolver>();
+builder.Services.AddSingleton<IRuleResolver, RuleResolver>();
 
 var app = builder.Build();
 
 var triggerService = app.Services.GetRequiredService<ITriggerService>();
 triggerService.ScanAssembly(typeof(Trigger).Assembly);
+
+var ruleService = app.Services.GetRequiredService<IRuleService>();
+ruleService.ScanAssembly(typeof(Trigger).Assembly);
 
 if (app.Environment.IsDevelopment())
 {
