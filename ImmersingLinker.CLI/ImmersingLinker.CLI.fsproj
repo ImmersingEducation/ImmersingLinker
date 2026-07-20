@@ -7,7 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Commands\Helpers.fs"/>
         <Compile Include="Commands\TestConnectionCommand.fs"/>
+        <Compile Include="Commands\AppCommands.fs"/>
+        <Compile Include="Commands\LessonCommands.fs"/>
+        <Compile Include="Commands\ClassCommands.fs"/>
+        <Compile Include="Commands\AutomationCommands.fs"/>
+        <Compile Include="Commands\ProfileCommands.fs"/>
         <Compile Include="Program.fs"/>
     </ItemGroup>
 
