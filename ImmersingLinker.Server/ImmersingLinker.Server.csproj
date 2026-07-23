@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <Version>0.0.1.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

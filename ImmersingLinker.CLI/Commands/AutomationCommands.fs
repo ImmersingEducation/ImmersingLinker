@@ -5,7 +5,6 @@ open System.CommandLine
 open System.Text.Json
 open ImmersingLinker.Core.Models.Automation
 open ImmersingLinker.SDK
-open ImmersingLinker.SDK.JsonConverters
 open ImmersingLinker.CLI.Commands.Helpers
 
 let private emptyTriggerDto = TriggerDto("", Nullable<JsonElement>())
@@ -87,7 +86,7 @@ let private createCommand =
             let jsonInput = parseResult.GetValue(jsonArg)
             let client = AutomationServiceClient(port)
             try
-                let request = JsonSerializer.Deserialize<CreateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Default)
+                let request = JsonSerializer.Deserialize<CreateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Value)
                 let! plan = client.CreatePlanAsync(request) |> Async.AwaitTask
                 let result = {| success = true; guid = string plan.Guid; name = plan.Name |}
                 printOutput json result
@@ -118,7 +117,7 @@ let private updateCommand =
             let jsonInput = parseResult.GetValue(jsonArg)
             let client = AutomationServiceClient(port)
             try
-                let request = JsonSerializer.Deserialize<UpdateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Default)
+                let request = JsonSerializer.Deserialize<UpdateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Value)
                 let! plan = client.UpdatePlanAsync(guid, request) |> Async.AwaitTask
                 let result = {| success = true; guid = string plan.Guid; name = plan.Name |}
                 printOutput json result
