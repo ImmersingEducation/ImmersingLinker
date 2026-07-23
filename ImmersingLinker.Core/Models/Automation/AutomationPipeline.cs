@@ -121,7 +121,7 @@ public class AutomationPipeline : IAutomationPipeline
                     });
                 }
             }
-            catch
+            catch (Exception)
             {
             }
         }, null, interval, interval);

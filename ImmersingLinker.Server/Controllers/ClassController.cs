@@ -1,7 +1,9 @@
 using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
 using ImmersingLinker.Core.Services.Storage;
+using ImmersingLinker.Server.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using static ImmersingLinker.Server.Extensions.GuidHelper;
 
 namespace ImmersingLinker.Server.Controllers;
 
@@ -18,23 +20,11 @@ public class ClassController : ControllerBase
 
     #region Logic
 
-    public Guid? ParseGuidFromString(string guidString)
-    {
-        try
-        {
-            return Guid.Parse(guidString);
-        }
-        catch (FormatException)
-        {
-            return null;
-        }
-    }
-
-    public Class? GetClassByGuidLogic(string guidString)
+    private async Task<Class?> GetClassByGuidLogicAsync(string guidString)
     {
         var guid = ParseGuidFromString(guidString);
         if (guid is null) return null;
-        return _classStorageService.GetClass(guid.Value).Result;
+        return await _classStorageService.GetClass(guid.Value);
     }
 
     private GroupingRuleResponse BuildGroupingRuleResponse(Class @class, GroupingRule rule)
@@ -64,7 +54,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> GetAllClasses()
     {
         List<Class> classes = [];
-        foreach (var classInfo in _classStorageService.GetClassInfos().Result)
+        foreach (var classInfo in await _classStorageService.GetClassInfos())
         {
             var @class = await _classStorageService.GetClass(classInfo.Guid);
             if (@class is not null) classes.Add(@class);
@@ -89,7 +79,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}")]
     public async Task<IActionResult> GetClassByGuid(string classGuid)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is not null) return Ok(@class);
         return NotFound();
     }
@@ -101,7 +91,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}/student")]
     public async Task<IActionResult> GetStudentsByClassGuid(string classGuid)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is not null) return Ok(@class.Students);
         return NotFound();
     }
@@ -114,7 +104,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}/student/{studentId}")]
     public async Task<IActionResult> GetStudentByStudentIdInClass(string classGuid, int studentId)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is not null)
         {
             var student = @class.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
@@ -132,7 +122,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}/student/{studentId}/extraProps")]
     public async Task<IActionResult> GetExtraPropertiesByStudentIdInClass(string classGuid, int studentId)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         if (student != null) return Ok(student.ExtraProperties);
         return NotFound();
@@ -148,7 +138,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> GetExtraPropertiesByStudentIdAndAppIdInClass(string classGuid, int studentId,
         string appId)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         if (student != null) return Ok(student.ExtraProperties.Where(p => p.Application.UniqueId == appId).ToList());
         return NotFound();
@@ -158,7 +148,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> GetExtraPropertyByNameAndStudentIdInClass(string classGuid, int studentId,
         string appId, string propName)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         var prop = student?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop != null) return Ok(prop);
@@ -172,7 +162,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}/extraProps")]
     public async Task<IActionResult> GetExtraPropertiesByClassGuid(string classGuid)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is not null) return Ok(@class.ExtraProperties);
         return NotFound();
     }
@@ -185,7 +175,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}/extraProps/{appId}")]
     public async Task<IActionResult> GetExtraPropertiesByAppIdInClass(string classGuid, string appId)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is not null) return Ok(@class.ExtraProperties.Where(p => p.Application.UniqueId == appId).ToList());
         return NotFound();
     }
@@ -200,7 +190,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> GetExtraPropertyByAppIdAndNameInClass(string classGuid, string appId,
         string propName)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var prop = @class?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop != null) return Ok(prop);
         return NotFound();
@@ -213,7 +203,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}/groupingRule")]
     public async Task<IActionResult> GetGroupingRules(string classGuid)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         var rules = (@class.GroupingRules ?? [])
             .Select(r => BuildGroupingRuleResponse(@class, r))
@@ -229,7 +219,7 @@ public class ClassController : ControllerBase
     [HttpGet("{classGuid}/groupingRule/{ruleGuid}")]
     public async Task<IActionResult> GetGroupingRule(string classGuid, string ruleGuid)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         var parsed = ParseGuidFromString(ruleGuid);
         if (parsed is null) return BadRequest("Invalid GUID format");
@@ -266,7 +256,7 @@ public class ClassController : ControllerBase
     [HttpPost("{classGuid}/student")]
     public async Task<IActionResult> AddStudent(string classGuid, [FromBody] CreateStudentRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
 
         if (@class.Students.Any(s => s.StudentIdInClass == request.StudentIdInClass))
@@ -293,7 +283,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> AddClassExtraProperty(string classGuid,
         [FromBody] CreateExtraPropertyRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
 
         if (@class.ExtraProperties.Any(p => p.Application.UniqueId == request.AppId && p.Name == request.Name))
@@ -317,7 +307,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> AddStudentExtraProperty(string classGuid, int studentId,
         [FromBody] CreateExtraPropertyRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         if (student is null) return NotFound();
 
@@ -341,7 +331,7 @@ public class ClassController : ControllerBase
     [HttpPost("{classGuid}/groupingRules")]
     public async Task<IActionResult> AddGroupingRule(string classGuid, [FromBody] CreateGroupingRuleRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         @class.GroupingRules ??= [];
         var rule = new GroupingRule
@@ -361,7 +351,7 @@ public class ClassController : ControllerBase
     [HttpPost("{classGuid}/groupingRules/{ruleGuid}")]
     public async Task<IActionResult> AddGroup(string classGuid, string ruleGuid, [FromBody] CreateGroupRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         var parsed = ParseGuidFromString(ruleGuid);
         if (parsed is null) return BadRequest("Invalid GUID format");
@@ -388,7 +378,7 @@ public class ClassController : ControllerBase
     [HttpPut("{classGuid}")]
     public async Task<IActionResult> UpdateClass(string classGuid, [FromBody] UpdateClassRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         @class.Name = request.Name;
         await _classStorageService.SaveClass(@class);
@@ -402,7 +392,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> UpdateStudent(string classGuid, int studentId,
         [FromBody] UpdateStudentRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         if (student is null) return NotFound();
         student.Name = request.Name;
@@ -418,7 +408,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> UpdateClassExtraProperty(string classGuid, string appId, string propName,
         [FromBody] UpdateExtraPropertyRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var prop = @class?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
         prop.Value = request.Value;
@@ -433,7 +423,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> UpdateStudentExtraProperty(string classGuid, int studentId, string appId,
         string propName, [FromBody] UpdateExtraPropertyRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         var prop = student?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
@@ -449,7 +439,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> UpdateGroupingRule(string classGuid, string ruleGuid,
         [FromBody] UpdateGroupingRuleRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         var parsed = ParseGuidFromString(ruleGuid);
         if (parsed is null) return BadRequest("Invalid GUID format");
@@ -467,7 +457,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> UpdateGroup(string classGuid, string ruleGuid, string groupGuid,
         [FromBody] UpdateGroupRequest request)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         var ruleParsed = ParseGuidFromString(ruleGuid);
         if (ruleParsed is null) return BadRequest("Invalid GUID format");
@@ -504,7 +494,7 @@ public class ClassController : ControllerBase
     [HttpDelete("{classGuid}/student/{studentId}")]
     public async Task<IActionResult> DeleteStudent(string classGuid, int studentId)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         if (student is null) return NotFound();
         @class.Students.Remove(student);
@@ -518,7 +508,7 @@ public class ClassController : ControllerBase
     [HttpDelete("{classGuid}/extraProps/{appId}/{propName}")]
     public async Task<IActionResult> DeleteClassExtraProperty(string classGuid, string appId, string propName)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var prop = @class?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
         @class.ExtraProperties.Remove(prop);
@@ -533,7 +523,7 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> DeleteStudentExtraProperty(string classGuid, int studentId, string appId,
         string propName)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         var prop = student?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
@@ -548,7 +538,7 @@ public class ClassController : ControllerBase
     [HttpDelete("{classGuid}/groupingRules/{ruleGuid}")]
     public async Task<IActionResult> DeleteGroupingRule(string classGuid, string ruleGuid)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         var parsed = ParseGuidFromString(ruleGuid);
         if (parsed is null) return BadRequest("Invalid GUID format");
@@ -565,7 +555,7 @@ public class ClassController : ControllerBase
     [HttpDelete("{classGuid}/groupingRules/{ruleGuid}/{groupGuid}")]
     public async Task<IActionResult> DeleteGroup(string classGuid, string ruleGuid, string groupGuid)
     {
-        var @class = GetClassByGuidLogic(classGuid);
+        var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         var ruleParsed = ParseGuidFromString(ruleGuid);
         if (ruleParsed is null) return BadRequest("Invalid GUID format");

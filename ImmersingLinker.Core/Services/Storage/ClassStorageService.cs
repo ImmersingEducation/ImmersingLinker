@@ -22,11 +22,15 @@ public sealed class ClassStorageService : IClassStorageService
         if (!dataDir.Exists) return infos;
 
         foreach (var guid in dataDir.GetFiles("*.json").Select(p => Path.GetFileNameWithoutExtension(p.Name)))
+        {
+            var parsedGuid = Guid.Parse(guid);
+            var @class = await GetClass(parsedGuid);
             infos.Add(new ClassInfo
             {
-                Guid = Guid.Parse(guid),
-                Name = GetClass(Guid.Parse(guid)).Result?.Name ?? string.Empty
+                Guid = parsedGuid,
+                Name = @class?.Name ?? string.Empty
             });
+        }
 
         return infos;
     }

@@ -110,19 +110,38 @@ dotnet run --project ImmersingLinker.CLI -- class list --json
 #### 课程信息
 | 方法 | 路由 | 说明 |
 |------|------|------|
-| GET | `/lesson/current` | 当前课程 |
-| GET | `/lesson/next` | 下一节课 |
-| GET | `/lesson/previous` | 上一节课 |
-| GET | `/lesson/timer` | 时间信息 |
-| GET | `/lesson/plan` | 课程表 |
+| GET | `/lesson/current/subject` | 当前课程科目 |
+| GET | `/lesson/current/next-class-subject` | 下一节课科目 |
+| GET | `/lesson/current/state` | 当前时间状态 |
+| GET | `/lesson/current/time-layout-item` | 当前时间布局项 |
+| GET | `/lesson/current/class-plan` | 当前课程表 |
+| GET | `/lesson/current/selected-index` | 当前选中索引 |
+| GET | `/lesson/current/is-class-plan-enabled` | 课程表是否启用 |
+| GET | `/lesson/current/is-class-plan-loaded` | 课程表是否已加载 |
+| GET | `/lesson/current/is-lesson-confirmed` | 课程是否已确认 |
+| GET | `/lesson/next/class-time-layout-item` | 下一节课时间布局项 |
+| GET | `/lesson/next/breaking-time-layout-item` | 下一休息时间布局项 |
+| GET | `/lesson/previous/class-subject` | 上一节课科目 |
+| GET | `/lesson/previous/class-time-layout-item` | 上一节课时间布局项 |
+| GET | `/lesson/previous/breaking-time-layout-item` | 上一休息时间布局项 |
+| GET | `/lesson/timer/on-class-left` | 当前课程剩余时间 |
+| GET | `/lesson/timer/on-breaking-left` | 当前休息剩余时间 |
+| GET | `/lesson/timer/elapsed-since-previous-class` | 自上节课以来经过时间 |
+| GET | `/lesson/timer/elapsed-since-previous-breaking` | 自上休息以来经过时间 |
+| GET | `/lesson/timer/elapsed-since-previous-any` | 自上事件以来经过时间 |
+| GET | `/lesson/profile/current-profile-path` | 当前配置文件路径 |
+| GET | `/lesson/profile/is-trusted` | 当前配置文件是否受信任 |
+| GET | `/lesson/profile` | 获取配置文件 |
 
 #### 自动化管理
 | 方法 | 路由 | 说明 |
 |------|------|------|
-| GET | `/automation` | 获取所有计划 |
+| GET | `/automation` | 获取所有计划信息 |
 | GET | `/automation/{planGuid}` | 获取指定计划 |
 | POST | `/automation` | 创建计划 |
 | POST | `/automation/{planGuid}/trigger` | 手动触发 |
+| POST | `/automation/invoke/{tag}` | 通过 tag 触发 UrlTrigger |
+| PUT | `/automation/{planGuid}` | 更新计划 |
 | DELETE | `/automation/{planGuid}` | 删除计划 |
 
 ## SDK 使用

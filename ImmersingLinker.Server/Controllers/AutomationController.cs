@@ -2,8 +2,10 @@ using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Models.Automation.Triggers;
 using ImmersingLinker.Core.Services.Storage;
+using ImmersingLinker.Server.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
+using static ImmersingLinker.Server.Extensions.GuidHelper;
 
 namespace ImmersingLinker.Server.Controllers;
 
@@ -31,18 +33,6 @@ public class AutomationController : ControllerBase
     }
 
     #region Logic
-
-    public Guid? ParseGuidFromString(string guidString)
-    {
-        try
-        {
-            return Guid.Parse(guidString);
-        }
-        catch (FormatException)
-        {
-            return null;
-        }
-    }
 
     private async Task<(AutomationPlan? plan, IActionResult? error)> ResolvePlan(
         Guid guid, string name, bool revertable, TriggerDto triggerDto, RuleSetDto? ruleSetDto, List<ActionDto> actionDtos)

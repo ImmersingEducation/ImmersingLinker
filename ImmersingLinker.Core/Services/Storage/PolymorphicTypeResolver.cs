@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
@@ -23,6 +24,7 @@ public sealed class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
             .SelectMany(a =>
             {
                 try { return a.GetTypes(); }
+                catch (ReflectionTypeLoadException) { return []; }
                 catch { return []; }
             })
             .Where(t => t is { IsClass: true, IsAbstract: false } && typeInfo.Type.IsAssignableFrom(t));
