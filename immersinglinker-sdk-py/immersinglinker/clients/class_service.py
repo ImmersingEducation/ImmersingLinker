@@ -19,6 +19,11 @@ from ..types import (
     UpdateStudentRequest,
     CreateExtraPropertyRequest,
     UpdateExtraPropertyRequest,
+    GroupingRuleResponse,
+    CreateGroupingRuleRequest,
+    UpdateGroupingRuleRequest,
+    CreateGroupRequest,
+    UpdateGroupRequest,
 )
 from .base import ImmersingLinkerError
 
@@ -258,6 +263,93 @@ class ClassServiceClient:
         await self._request(
             "DELETE",
             f"/class/{class_guid}/student/{student_id}/extraProps/{app_id}/{prop_name}",
+            raise_on_404=True,
+        )
+
+    # endregion
+
+    # region Grouping Rules
+
+    async def get_all_grouping_rules(
+        self, class_guid: str
+    ) -> list[GroupingRuleResponse]:
+        text = await self._request(
+            "GET", f"/class/{class_guid}/groupingRule", raise_on_404=True
+        )
+        data = json.loads(text) if text else []
+        return [GroupingRuleResponse.from_dict(item) for item in data]
+
+    async def get_grouping_rule_by_guid(
+        self, class_guid: str, rule_guid: str
+    ) -> GroupingRuleResponse | None:
+        text = await self._request(
+            "GET", f"/class/{class_guid}/groupingRule/{rule_guid}"
+        )
+        return GroupingRuleResponse.from_dict(json.loads(text)) if text else None
+
+    async def add_grouping_rule(
+        self, class_guid: str, request: CreateGroupingRuleRequest
+    ) -> GroupingRuleResponse:
+        text = await self._request(
+            "POST",
+            f"/class/{class_guid}/groupingRules",
+            body=request,
+            raise_on_404=True,
+        )
+        return GroupingRuleResponse.from_dict(json.loads(text))
+
+    async def add_group(
+        self, class_guid: str, rule_guid: str, request: CreateGroupRequest
+    ) -> GroupingRuleResponse:
+        text = await self._request(
+            "POST",
+            f"/class/{class_guid}/groupingRules/{rule_guid}",
+            body=request,
+            raise_on_404=True,
+        )
+        return GroupingRuleResponse.from_dict(json.loads(text))
+
+    async def update_grouping_rule(
+        self, class_guid: str, rule_guid: str, request: UpdateGroupingRuleRequest
+    ) -> GroupingRuleResponse:
+        text = await self._request(
+            "PUT",
+            f"/class/{class_guid}/groupingRules/{rule_guid}",
+            body=request,
+            raise_on_404=True,
+        )
+        return GroupingRuleResponse.from_dict(json.loads(text))
+
+    async def update_group(
+        self,
+        class_guid: str,
+        rule_guid: str,
+        group_guid: str,
+        request: UpdateGroupRequest,
+    ) -> GroupingRuleResponse:
+        text = await self._request(
+            "PUT",
+            f"/class/{class_guid}/groupingRules/{rule_guid}/{group_guid}",
+            body=request,
+            raise_on_404=True,
+        )
+        return GroupingRuleResponse.from_dict(json.loads(text))
+
+    async def delete_grouping_rule(
+        self, class_guid: str, rule_guid: str
+    ) -> None:
+        await self._request(
+            "DELETE",
+            f"/class/{class_guid}/groupingRules/{rule_guid}",
+            raise_on_404=True,
+        )
+
+    async def delete_group(
+        self, class_guid: str, rule_guid: str, group_guid: str
+    ) -> None:
+        await self._request(
+            "DELETE",
+            f"/class/{class_guid}/groupingRules/{rule_guid}/{group_guid}",
             raise_on_404=True,
         )
 
