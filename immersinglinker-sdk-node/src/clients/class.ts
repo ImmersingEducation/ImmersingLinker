@@ -5,12 +5,17 @@ import type {
   Student,
   ClassExtraProperty,
   StudentExtraProperty,
+  GroupingRuleResponse,
   CreateClassRequest,
   UpdateClassRequest,
   CreateStudentRequest,
   UpdateStudentRequest,
   CreateExtraPropertyRequest,
   UpdateExtraPropertyRequest,
+  CreateGroupingRuleRequest,
+  UpdateGroupingRuleRequest,
+  CreateGroupRequest,
+  UpdateGroupRequest,
 } from '../types/class.js';
 import type { Application, Gender } from '../types/common.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -100,6 +105,23 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  async getGroupingRules(
+    classGuid: string,
+  ): Promise<GroupingRuleResponse[]> {
+    return this._getOrEmpty<GroupingRuleResponse>(
+      `/class/${classGuid}/groupingRule`,
+    );
+  }
+
+  async getGroupingRule(
+    classGuid: string,
+    ruleGuid: string,
+  ): Promise<GroupingRuleResponse | null> {
+    return this._getOrNull<GroupingRuleResponse>(
+      `/class/${classGuid}/groupingRule/${ruleGuid}`,
+    );
+  }
+
   // #endregion
 
   // #region POST
@@ -132,6 +154,27 @@ export class ClassServiceClient extends ServiceClientBase {
   ): Promise<StudentExtraProperty> {
     return this._post<StudentExtraProperty>(
       `/class/${classGuid}/student/${studentId}/extraProps`,
+      request,
+    );
+  }
+
+  async addGroupingRule(
+    classGuid: string,
+    request: CreateGroupingRuleRequest,
+  ): Promise<GroupingRuleResponse> {
+    return this._post<GroupingRuleResponse>(
+      `/class/${classGuid}/groupingRules`,
+      request,
+    );
+  }
+
+  async addGroup(
+    classGuid: string,
+    ruleGuid: string,
+    request: CreateGroupRequest,
+  ): Promise<GroupingRuleResponse> {
+    return this._post<GroupingRuleResponse>(
+      `/class/${classGuid}/groupingRules/${ruleGuid}`,
       request,
     );
   }
@@ -183,6 +226,29 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  async updateGroupingRule(
+    classGuid: string,
+    ruleGuid: string,
+    request: UpdateGroupingRuleRequest,
+  ): Promise<GroupingRuleResponse> {
+    return this._put<GroupingRuleResponse>(
+      `/class/${classGuid}/groupingRules/${ruleGuid}`,
+      request,
+    );
+  }
+
+  async updateGroup(
+    classGuid: string,
+    ruleGuid: string,
+    groupGuid: string,
+    request: UpdateGroupRequest,
+  ): Promise<GroupingRuleResponse> {
+    return this._put<GroupingRuleResponse>(
+      `/class/${classGuid}/groupingRules/${ruleGuid}/${groupGuid}`,
+      request,
+    );
+  }
+
   // #endregion
 
   // #region DELETE
@@ -213,6 +279,23 @@ export class ClassServiceClient extends ServiceClientBase {
   ): Promise<void> {
     return this._delete(
       `/class/${classGuid}/student/${studentId}/extraProps/${appId}/${propName}`,
+    );
+  }
+
+  async deleteGroupingRule(
+    classGuid: string,
+    ruleGuid: string,
+  ): Promise<void> {
+    return this._delete(`/class/${classGuid}/groupingRules/${ruleGuid}`);
+  }
+
+  async deleteGroup(
+    classGuid: string,
+    ruleGuid: string,
+    groupGuid: string,
+  ): Promise<void> {
+    return this._delete(
+      `/class/${classGuid}/groupingRules/${ruleGuid}/${groupGuid}`,
     );
   }
 

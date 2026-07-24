@@ -44,6 +44,15 @@ const mockExtraProp = {
   value: 'val',
 };
 
+const mockGroupingRuleResponse = {
+  guid: 'gggggggg-hhhh-iiii-jjjj-kkkkkkkkkkkk',
+  name: 'Group 1',
+  groups: [
+    { guid: '11111111-1111-1111-1111-111111111111', name: 'Team A', contains: [] },
+  ],
+  unassignedStudentGuids: [],
+};
+
 describe('ClassServiceClient', () => {
   const client = new ClassServiceClient(5000);
 
@@ -157,6 +166,32 @@ describe('ClassServiceClient', () => {
       const result = await client.getExtraPropertyByAppIdAndNameInClass('test-guid', 'myapp', 'missing');
       expect(result).toBeNull();
     });
+
+    it('getGroupingRules returns GroupingRuleResponse[]', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(200, [mockGroupingRuleResponse]));
+      const result = await client.getGroupingRules('test-guid');
+      expect(result).toEqual([mockGroupingRuleResponse]);
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRule');
+    });
+
+    it('getGroupingRules returns [] on 404', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(404));
+      const result = await client.getGroupingRules('nonexistent');
+      expect(result).toEqual([]);
+    });
+
+    it('getGroupingRule returns GroupingRuleResponse on 200', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(200, mockGroupingRuleResponse));
+      const result = await client.getGroupingRule('test-guid', 'rule-guid');
+      expect(result).toEqual(mockGroupingRuleResponse);
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRule/rule-guid');
+    });
+
+    it('getGroupingRule returns null on 404', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(404));
+      const result = await client.getGroupingRule('test-guid', 'nonexistent');
+      expect(result).toBeNull();
+    });
   });
 
   describe('POST endpoints', () => {
@@ -205,6 +240,26 @@ describe('ClassServiceClient', () => {
       const result = await client.addStudentExtraProperty('test-guid', 1, req);
       expect(result).toEqual(mockExtraProp);
     });
+
+    it('addGroupingRule sends request and returns GroupingRuleResponse', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(200, mockGroupingRuleResponse));
+      const result = await client.addGroupingRule('test-guid', { name: 'New Rule' });
+      expect(result).toEqual(mockGroupingRuleResponse);
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRules', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ name: 'New Rule' }),
+      }));
+    });
+
+    it('addGroup sends request and returns GroupingRuleResponse', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(200, mockGroupingRuleResponse));
+      const result = await client.addGroup('test-guid', 'rule-guid', { name: 'Team B' });
+      expect(result).toEqual(mockGroupingRuleResponse);
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRules/rule-guid', expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ name: 'Team B' }),
+      }));
+    });
   });
 
   describe('PUT endpoints', () => {
@@ -251,6 +306,38 @@ describe('ClassServiceClient', () => {
       const result = await client.updateStudentExtraProperty('test-guid', 1, 'myapp', 'key', { value: 'newval' });
       expect(result).toEqual(mockExtraProp);
     });
+
+    it('updateGroupingRule sends request and returns GroupingRuleResponse', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(200, mockGroupingRuleResponse));
+      const result = await client.updateGroupingRule('test-guid', 'rule-guid', { name: 'Renamed' });
+      expect(result).toEqual(mockGroupingRuleResponse);
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRules/rule-guid', expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ name: 'Renamed' }),
+      }));
+    });
+
+    it('updateGroupingRule throws on 404', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(404));
+      await expect(client.updateGroupingRule('test-guid', 'nonexistent', { name: 'N' }))
+        .rejects.toThrow(NotFoundError);
+    });
+
+    it('updateGroup sends request and returns GroupingRuleResponse', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(200, mockGroupingRuleResponse));
+      const result = await client.updateGroup('test-guid', 'rule-guid', 'group-guid', { name: 'Renamed' });
+      expect(result).toEqual(mockGroupingRuleResponse);
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRules/rule-guid/group-guid', expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ name: 'Renamed' }),
+      }));
+    });
+
+    it('updateGroup throws on 404', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(404));
+      await expect(client.updateGroup('test-guid', 'rule-guid', 'nonexistent', { name: 'N' }))
+        .rejects.toThrow(NotFoundError);
+    });
   });
 
   describe('DELETE endpoints', () => {
@@ -287,6 +374,32 @@ describe('ClassServiceClient', () => {
     it('deleteStudentExtraProperty throws on 404', async () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(404));
       await expect(client.deleteStudentExtraProperty('test-guid', 1, 'myapp', 'missing')).rejects.toThrow(NotFoundError);
+    });
+
+    it('deleteGroupingRule deletes on success', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(204));
+      await expect(client.deleteGroupingRule('test-guid', 'rule-guid')).resolves.toBeUndefined();
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRules/rule-guid', expect.objectContaining({
+        method: 'DELETE',
+      }));
+    });
+
+    it('deleteGroupingRule throws on 404', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(404));
+      await expect(client.deleteGroupingRule('test-guid', 'nonexistent')).rejects.toThrow(NotFoundError);
+    });
+
+    it('deleteGroup deletes on success', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(204));
+      await expect(client.deleteGroup('test-guid', 'rule-guid', 'group-guid')).resolves.toBeUndefined();
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRules/rule-guid/group-guid', expect.objectContaining({
+        method: 'DELETE',
+      }));
+    });
+
+    it('deleteGroup throws on 404', async () => {
+      vi.mocked(fetch).mockResolvedValue(createResponse(404));
+      await expect(client.deleteGroup('test-guid', 'rule-guid', 'nonexistent')).rejects.toThrow(NotFoundError);
     });
   });
 
