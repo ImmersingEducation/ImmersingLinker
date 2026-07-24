@@ -17,7 +17,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -31,7 +32,8 @@
   },
   "type": "module",
   "devDependencies": {
-    "typescript": "~5.7.3"
+    "typescript": "~5.7.3",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "uuid": "^14.0.1"
