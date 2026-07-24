@@ -42,6 +42,14 @@ from .types import (
     Profile,
 )
 
+from .clients import (
+    AppServiceClient,
+    LessonServiceClient,
+    ClassServiceClient,
+    AutomationServiceClient,
+    ImmersingLinkerError,
+)
+
 __all__ = [
     "Gender",
     "RuleSetSatisfyMode",
@@ -84,4 +92,9 @@ __all__ = [
     "TimeLayoutItem",
     "ClassPlan",
     "Profile",
+    "AppServiceClient",
+    "LessonServiceClient",
+    "ClassServiceClient",
+    "AutomationServiceClient",
+    "ImmersingLinkerError",
 ]
