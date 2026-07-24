@@ -2,37 +2,37 @@ import type { JsonElement } from './common.js';
 
 /** 规则集满足模式 */
 export enum RuleSetSatisfyMode {
-  /** 全部满足 */
+  /** 所有子规则必须全部满足 */
   AllSatisfied = 0,
-  /** 任一满足 */
+  /** 任一子规则满足即可 */
   AnySatisfied = 1,
 }
 
-/** 触发器 DTO */
+/** 触发器 DTO（数据传输对象） */
 export interface TriggerDto {
-  /** 触发器键 */
+  /** 触发器键（如 "ilinker.UrlTrigger"） */
   triggerKey: string;
-  /** 触发器属性 (JSON) */
+  /** 触发器属性（JSON 格式） */
   properties?: JsonElement;
 }
 
-/** 动作 DTO */
+/** 动作 DTO（数据传输对象） */
 export interface ActionDto {
-  /** 动作键 */
+  /** 动作键（如 "some.action"） */
   actionKey: string;
-  /** 动作属性 (JSON) */
+  /** 动作属性（JSON 格式） */
   properties?: JsonElement;
 }
 
-/** 规则节点 DTO */
+/** 规则节点 DTO，叶子节点使用 ruleKey，非叶子节点使用 ruleSet */
 export interface RuleNodeDto {
-  /** 规则键 (叶子规则使用，规则集为 null) */
+  /** 规则键（叶子规则使用，规则集节点为 null） */
   ruleKey?: string | null;
-  /** 规则属性 (JSON) */
+  /** 规则属性（JSON 格式） */
   properties?: JsonElement;
   /** 是否取反 */
   not?: boolean;
-  /** 嵌套规则集 (非叶子节点使用) */
+  /** 嵌套规则集（非叶子节点使用） */
   ruleSet?: RuleSetDto | null;
 }
 
@@ -42,7 +42,7 @@ export interface RuleSetDto {
   satisfyMode: RuleSetSatisfyMode;
   /** 是否取反 */
   not?: boolean;
-  /** 规则列表 */
+  /** 子规则列表 */
   rules: RuleNodeDto[];
 }
 
@@ -54,13 +54,13 @@ export interface CreateAutomationPlanRequest {
   revertable: boolean;
   /** 触发器 */
   trigger: TriggerDto;
-  /** 规则集 (可选) */
+  /** 规则集（可选） */
   ruleSet?: RuleSetDto | null;
   /** 动作列表 */
   actions: ActionDto[];
 }
 
-/** 更新自动化方案请求 */
+/** 更新自动化方案请求（结构与创建相同） */
 export type UpdateAutomationPlanRequest = CreateAutomationPlanRequest;
 
 /** 自动化方案摘要信息 */
@@ -71,13 +71,13 @@ export interface AutomationPlanInfo {
   name: string;
 }
 
-/** 触发器基类 (C# abstract) */
+/** 触发器基类（映射 C# abstract Trigger） */
 export interface Trigger {
-  /** 触发事件 */
+  /** 触发事件回调 */
   onTriggerFired?: (sender: unknown, args: TriggerFiredEventArgs) => void;
 }
 
-/** 动作基类 (C# abstract) */
+/** 动作基类（映射 C# abstract Action） */
 export interface Action {
   /** 是否可回退 */
   revertable: boolean;
@@ -89,7 +89,7 @@ export interface Action {
   onRevertFailed?: (error: Error) => void;
 }
 
-/** 规则基类 (C# abstract) */
+/** 规则基类（映射 C# abstract RuleBase） */
 export interface RuleBase {
   /** 规则 GUID */
   guid: string;
@@ -99,14 +99,14 @@ export interface RuleBase {
   isSatisfied: boolean;
 }
 
-/** 规则 (叶子规则，C# abstract) */
+/** 叶子规则（映射 C# abstract Rule） */
 export interface Rule extends RuleBase {}
 
-/** 规则集 */
+/** 规则集（映射 C# RuleSet） */
 export interface RuleSet extends RuleBase {
   /** 满足模式 */
   satisfyMode: RuleSetSatisfyMode;
-  /** 规则列表 */
+  /** 子规则列表 */
   rules: RuleBase[];
 }
 
@@ -134,15 +134,15 @@ export interface AutomationRunner {
   revertMode: boolean;
   /** 动作列表 */
   actions: Action[];
-  /** 当前步骤索引 (-1 表示未开始) */
+  /** 当前步骤索引（-1 表示未开始） */
   currentStep: number;
 }
 
 /** 触发器触发事件参数 */
 export interface TriggerFiredEventArgs {
-  /** 自动化方案 GUID */
+  /** 关联的自动化方案 GUID */
   automationPlanGuid: string;
-  /** 触发时间 */
+  /** 触发时间（ISO 字符串） */
   firedAt: string;
   /** 附加载荷 */
   payload?: unknown;
@@ -150,7 +150,7 @@ export interface TriggerFiredEventArgs {
 
 /** 方案触发事件参数 */
 export interface PlanTriggeredEventArgs {
-  /** 自动化方案 */
+  /** 关联的自动化方案 */
   plan: AutomationPlan;
   /** 执行器 */
   runner: AutomationRunner;
@@ -158,7 +158,7 @@ export interface PlanTriggeredEventArgs {
 
 /** 方案回退事件参数 */
 export interface PlanRevertedEventArgs {
-  /** 自动化方案 */
+  /** 关联的自动化方案 */
   plan: AutomationPlan;
   /** 执行器 */
   runner: AutomationRunner;
@@ -178,7 +178,7 @@ export interface RunnerFailedEventArgs {
   exception: Error;
 }
 
-/** URL 触发器 */
+/** URL 触发器（映射 C# UrlTrigger） */
 export interface UrlTrigger extends Trigger {
   /** 触发标签 */
   tag: string;

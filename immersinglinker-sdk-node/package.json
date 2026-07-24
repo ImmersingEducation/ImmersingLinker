@@ -21,7 +21,7 @@
     "test:watch": "vitest"
   },
   "keywords": [],
-  "author": "",
+  "author": "ImmersingEducation",
   "license": "ISC",
   "devEngines": {
     "packageManager": {

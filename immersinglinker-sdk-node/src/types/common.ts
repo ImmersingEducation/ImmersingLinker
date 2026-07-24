@@ -1,6 +1,8 @@
 /** 性别枚举 */
 export enum Gender {
+  /** 男 */
   Male = 0,
+  /** 女 */
   Female = 1,
 }
 
@@ -22,5 +24,8 @@ export interface ExtraPropertyBase {
   value: unknown;
 }
 
-/** JSON 序列化元素，对应 System.Text.Json.JsonElement */
+/**
+ * JSON 序列化元素，对应 System.Text.Json.JsonElement。
+ * 在运行时可能包含 { ValueKind, GetString(), GetInt32() } 等方法。
+ */
 export type JsonElement = unknown;

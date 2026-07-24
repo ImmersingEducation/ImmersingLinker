@@ -20,25 +20,31 @@ import type {
 import type { Application, Gender } from '../types/common.js';
 import { v4 as uuidv4 } from 'uuid';
 
+/** 班级管理客户端，提供班级/学生/扩展属性/分组规则的 CRUD 操作 */
 export class ClassServiceClient extends ServiceClientBase {
   // #region GET
 
+  /** 获取所有班级 */
   async getAllClasses(): Promise<Class[]> {
     return this._get<Class[]>('/class');
   }
 
+  /** 获取所有班级摘要信息 */
   async getAllClassInfos(): Promise<ClassInfo[]> {
     return this._get<ClassInfo[]>('/class/infos');
   }
 
+  /** 根据 GUID 获取指定班级，不存在时返回 null */
   async getClassByGuid(classGuid: string): Promise<Class | null> {
     return this._getOrNull<Class>(`/class/${classGuid}`);
   }
 
+  /** 获取指定班级内的所有学生 */
   async getStudentsByClassGuid(classGuid: string): Promise<Student[]> {
     return this._getOrEmpty<Student>(`/class/${classGuid}/student`);
   }
 
+  /** 根据学号获取指定班级内的指定学生，不存在时返回 null */
   async getStudentByStudentIdInClass(
     classGuid: string,
     studentId: number,
@@ -48,6 +54,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 获取指定班级内指定学生的所有扩展属性 */
   async getExtraPropertiesByStudentIdInClass(
     classGuid: string,
     studentId: number,
@@ -57,6 +64,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 获取指定班级内指定学生、指定应用的扩展属性列表 */
   async getExtraPropertiesByStudentIdAndAppIdInClass(
     classGuid: string,
     studentId: number,
@@ -67,6 +75,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 根据应用 ID 和属性名获取指定学生扩展属性，不存在时返回 null */
   async getExtraPropertyByNameAndStudentIdInClass(
     classGuid: string,
     studentId: number,
@@ -78,6 +87,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 获取指定班级的所有扩展属性 */
   async getExtraPropertiesByClassGuid(
     classGuid: string,
   ): Promise<ClassExtraProperty[]> {
@@ -86,6 +96,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 获取指定班级内指定应用的扩展属性列表 */
   async getExtraPropertiesByAppIdInClass(
     classGuid: string,
     appId: string,
@@ -95,6 +106,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 根据应用 ID 和属性名获取班级扩展属性，不存在时返回 null */
   async getExtraPropertyByAppIdAndNameInClass(
     classGuid: string,
     appId: string,
@@ -105,6 +117,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 获取指定班级的所有分组规则 */
   async getGroupingRules(
     classGuid: string,
   ): Promise<GroupingRuleResponse[]> {
@@ -113,6 +126,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 获取指定班级的指定分组规则，不存在时返回 null */
   async getGroupingRule(
     classGuid: string,
     ruleGuid: string,
@@ -126,10 +140,12 @@ export class ClassServiceClient extends ServiceClientBase {
 
   // #region POST
 
+  /** 创建班级 */
   async createClass(request: CreateClassRequest): Promise<Class> {
     return this._post<Class>('/class', request);
   }
 
+  /** 向指定班级添加学生 */
   async addStudent(
     classGuid: string,
     request: CreateStudentRequest,
@@ -137,6 +153,7 @@ export class ClassServiceClient extends ServiceClientBase {
     return this._post<Student>(`/class/${classGuid}/student`, request);
   }
 
+  /** 向指定班级添加扩展属性 */
   async addClassExtraProperty(
     classGuid: string,
     request: CreateExtraPropertyRequest,
@@ -147,6 +164,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 向指定班级的指定学生添加扩展属性 */
   async addStudentExtraProperty(
     classGuid: string,
     studentId: number,
@@ -158,6 +176,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 向指定班级添加分组规则 */
   async addGroupingRule(
     classGuid: string,
     request: CreateGroupingRuleRequest,
@@ -168,6 +187,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 向指定班级的指定分组规则中添加小组 */
   async addGroup(
     classGuid: string,
     ruleGuid: string,
@@ -183,6 +203,7 @@ export class ClassServiceClient extends ServiceClientBase {
 
   // #region PUT
 
+  /** 更新班级名称 */
   async updateClass(
     classGuid: string,
     request: UpdateClassRequest,
@@ -190,6 +211,7 @@ export class ClassServiceClient extends ServiceClientBase {
     return this._put<Class>(`/class/${classGuid}`, request);
   }
 
+  /** 更新指定班级内的学生信息 */
   async updateStudent(
     classGuid: string,
     studentId: number,
@@ -201,6 +223,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 更新指定班级扩展属性值 */
   async updateClassExtraProperty(
     classGuid: string,
     appId: string,
@@ -213,6 +236,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 更新指定学生扩展属性值 */
   async updateStudentExtraProperty(
     classGuid: string,
     studentId: number,
@@ -226,6 +250,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 更新分组规则名称 */
   async updateGroupingRule(
     classGuid: string,
     ruleGuid: string,
@@ -237,6 +262,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 更新指定小组名称 */
   async updateGroup(
     classGuid: string,
     ruleGuid: string,
@@ -253,14 +279,17 @@ export class ClassServiceClient extends ServiceClientBase {
 
   // #region DELETE
 
+  /** 删除指定班级 */
   async deleteClass(classGuid: string): Promise<void> {
     return this._delete(`/class/${classGuid}`);
   }
 
+  /** 删除指定班级内的指定学生 */
   async deleteStudent(classGuid: string, studentId: number): Promise<void> {
     return this._delete(`/class/${classGuid}/student/${studentId}`);
   }
 
+  /** 删除指定班级扩展属性 */
   async deleteClassExtraProperty(
     classGuid: string,
     appId: string,
@@ -271,6 +300,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 删除指定学生扩展属性 */
   async deleteStudentExtraProperty(
     classGuid: string,
     studentId: number,
@@ -282,6 +312,7 @@ export class ClassServiceClient extends ServiceClientBase {
     );
   }
 
+  /** 删除指定分组规则 */
   async deleteGroupingRule(
     classGuid: string,
     ruleGuid: string,
@@ -289,6 +320,7 @@ export class ClassServiceClient extends ServiceClientBase {
     return this._delete(`/class/${classGuid}/groupingRules/${ruleGuid}`);
   }
 
+  /** 删除指定小组 */
   async deleteGroup(
     classGuid: string,
     ruleGuid: string,
@@ -303,6 +335,7 @@ export class ClassServiceClient extends ServiceClientBase {
 
   // #region Offline factory methods
 
+  /** 创建一个离线班级对象（不经过服务器） */
   static createClassOffline(name: string): Class {
     return {
       guid: uuidv4(),
@@ -313,6 +346,7 @@ export class ClassServiceClient extends ServiceClientBase {
     };
   }
 
+  /** 创建一个离线学生对象（不经过服务器） */
   static createStudentOffline(
     name: string,
     studentIdInClass: number,
@@ -327,6 +361,7 @@ export class ClassServiceClient extends ServiceClientBase {
     };
   }
 
+  /** 创建一个离线班级扩展属性对象 */
   static createClassExtraPropertyOffline(
     appId: string,
     name: string,
@@ -339,6 +374,7 @@ export class ClassServiceClient extends ServiceClientBase {
     };
   }
 
+  /** 创建一个离线学生扩展属性对象 */
   static createStudentExtraPropertyOffline(
     appId: string,
     name: string,
