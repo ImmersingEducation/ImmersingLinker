@@ -67,13 +67,25 @@ class LessonServiceClient:
         return int(await self._get("/lesson/current/selected-index"))
 
     async def get_is_class_plan_enabled(self) -> bool:
-        return (await self._get("/lesson/current/is-class-plan-enabled")).strip().lower() == "true"
+        raw = await self._get("/lesson/current/is-class-plan-enabled")
+        value = json.loads(raw)
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() == "true"
 
     async def get_is_class_plan_loaded(self) -> bool:
-        return (await self._get("/lesson/current/is-class-plan-loaded")).strip().lower() == "true"
+        raw = await self._get("/lesson/current/is-class-plan-loaded")
+        value = json.loads(raw)
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() == "true"
 
     async def get_is_lesson_confirmed(self) -> bool:
-        return (await self._get("/lesson/current/is-lesson-confirmed")).strip().lower() == "true"
+        raw = await self._get("/lesson/current/is-lesson-confirmed")
+        value = json.loads(raw)
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() == "true"
 
     # endregion
 
@@ -131,7 +143,11 @@ class LessonServiceClient:
         return json.loads(raw)
 
     async def get_is_current_profile_trusted(self) -> bool:
-        return (await self._get("/lesson/profile/is-trusted")).strip().lower() == "true"
+        raw = await self._get("/lesson/profile/is-trusted")
+        value = json.loads(raw)
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() == "true"
 
     async def get_profile(self) -> Profile:
         text = await self._get("/lesson/profile")
