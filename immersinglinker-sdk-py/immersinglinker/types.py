@@ -1,3 +1,10 @@
+"""数据传输类型定义。
+
+本模块包含 ImmerseLinker 所有模型类、多态注册表以及离线工厂方法。
+多态类通过 ``PolymorphicRegistry`` 实现 ``@classmethod from_dict``，
+支持基类引用反序列化为具体子类实例。
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field, fields, asdict
@@ -70,14 +77,24 @@ def _deserialize_rule_base(data: dict[str, Any]) -> RuleBase | None:
 
 @dataclass
 class Application:
+    """表示一个已注册的应用程序。"""
+
     UniqueId: str
+    """应用唯一标识符（AppId）。"""
+
     Name: str
+    """应用显示名称。"""
 
 
 @dataclass
 class ClassInfo:
+    """表示一个班级的简要信息（GUID + 名称）。"""
+
     Guid: UUID
+    """班级唯一标识符。"""
+
     Name: str
+    """班级名称。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ClassInfo:
@@ -89,9 +106,16 @@ class ClassInfo:
 
 @dataclass
 class ClassExtraProperty:
+    """班级扩展属性，由外部应用注册。"""
+
     Application: Application
+    """拥有此属性的应用。"""
+
     Name: str
+    """属性名称。"""
+
     Value: Any = None
+    """属性值。"""
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {}
@@ -114,9 +138,16 @@ class ClassExtraProperty:
 
 @dataclass
 class StudentExtraProperty:
+    """学生扩展属性，由外部应用注册。"""
+
     Application: Application
+    """拥有此属性的应用。"""
+
     Name: str
+    """属性名称。"""
+
     Value: Any = None
+    """属性值。"""
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {}
@@ -139,11 +170,22 @@ class StudentExtraProperty:
 
 @dataclass
 class Student:
+    """表示一个学生。"""
+
     Guid: UUID
+    """学生唯一标识符。"""
+
     Name: str
+    """学生姓名。"""
+
     StudentIdInClass: int
+    """学生在班级内的学号。"""
+
     Gender: Gender
+    """学生性别。"""
+
     ExtraProperties: list[StudentExtraProperty] = field(default_factory=list)
+    """学生扩展属性列表。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Student:
@@ -160,9 +202,16 @@ class Student:
 
 @dataclass
 class Group:
+    """表示一个分组，包含一组学生 GUID。"""
+
     Guid: UUID
+    """分组唯一标识符。"""
+
     Name: str
+    """分组名称。"""
+
     Contains: set[UUID] = field(default_factory=set)
+    """该分组包含的学生 GUID 集合。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Group:
@@ -177,9 +226,16 @@ class Group:
 
 @dataclass
 class GroupingRule:
+    """表示一个分组规则。"""
+
     Guid: UUID
+    """分组规则唯一标识符。"""
+
     Name: str
+    """分组规则名称。"""
+
     Groups: list[Group] = field(default_factory=list)
+    """该规则下的分组列表。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> GroupingRule:
@@ -192,10 +248,19 @@ class GroupingRule:
 
 @dataclass
 class GroupingRuleResponse:
+    """分组规则查询响应，包含未分配学生列表。"""
+
     Guid: UUID
+    """分组规则唯一标识符。"""
+
     Name: str
+    """分组规则名称。"""
+
     Groups: list[Group] = field(default_factory=list)
+    """该规则下的分组列表。"""
+
     UnassignedStudentGuids: list[UUID] = field(default_factory=list)
+    """未分配到任何分组的学生 GUID 列表。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> GroupingRuleResponse:
@@ -212,11 +277,22 @@ class GroupingRuleResponse:
 
 @dataclass
 class Class:
+    """表示一个完整的班级模型，包含学生、分组规则和扩展属性。"""
+
     Guid: UUID
+    """班级唯一标识符。"""
+
     Name: str
+    """班级名称。"""
+
     Students: list[Student] = field(default_factory=list)
+    """班级内的学生列表。"""
+
     GroupingRules: list[GroupingRule] = field(default_factory=list)
+    """班级的分组规则列表。"""
+
     ExtraProperties: list[ClassExtraProperty] = field(default_factory=list)
+    """班级扩展属性列表。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Class:
@@ -241,58 +317,100 @@ class Class:
 
 @dataclass
 class CreateClassRequest:
+    """创建班级请求。"""
+
     Name: str
+    """班级名称。"""
 
 
 @dataclass
 class UpdateClassRequest:
+    """更新班级请求。"""
+
     Name: str
+    """班级名称。"""
 
 
 @dataclass
 class CreateStudentRequest:
+    """创建学生请求。"""
+
     Name: str
+    """学生姓名。"""
+
     StudentIdInClass: int
+    """学生在班级内的学号。"""
+
     Gender: Gender
+    """学生性别。"""
 
 
 @dataclass
 class UpdateStudentRequest:
+    """更新学生请求。"""
+
     Name: str
+    """学生姓名。"""
+
     Gender: Gender
+    """学生性别。"""
+
     GroupInClass: str
+    """学生所在分组名称。"""
 
 
 @dataclass
 class CreateExtraPropertyRequest:
+    """创建扩展属性请求。"""
+
     AppId: str
+    """应用 AppId。"""
+
     Name: str
+    """属性名称。"""
+
     Value: Any = None
+    """属性值。"""
 
 
 @dataclass
 class UpdateExtraPropertyRequest:
+    """更新扩展属性请求。"""
+
     Value: Any = None
+    """属性值。"""
 
 
 @dataclass
 class CreateGroupingRuleRequest:
+    """创建分组规则请求。"""
+
     Name: str
+    """分组规则名称。"""
 
 
 @dataclass
 class UpdateGroupingRuleRequest:
+    """更新分组规则请求。"""
+
     Name: str
+    """分组规则名称。"""
 
 
 @dataclass
 class CreateGroupRequest:
+    """创建分组请求。"""
+
     Name: str
+    """分组名称。"""
 
 
 @dataclass
 class UpdateGroupRequest:
+    """更新分组请求。"""
+
     Name: str
+    """分组名称。"""
 
 
 # ============================================================================
@@ -302,7 +420,10 @@ class UpdateGroupRequest:
 
 @dataclass
 class Trigger:
+    """自动化触发器基类。"""
+
     TriggerFired: Any = None
+    """触发器触发时的事件/时间点。"""
 
     def to_dict(self) -> dict[str, Any]:
         return {"$type": type(self).__name__}
@@ -314,7 +435,10 @@ class Trigger:
 
 @dataclass
 class Action:
+    """自动化动作基类。"""
+
     Revertable: bool = False
+    """该动作是否支持撤回。"""
 
     def to_dict(self) -> dict[str, Any]:
         return {"$type": type(self).__name__, "Revertable": self.Revertable}
@@ -326,8 +450,13 @@ class Action:
 
 @dataclass
 class RuleBase:
+    """自动化规则基类。"""
+
     Guid: UUID = field(default_factory=uuid4)
+    """规则唯一标识符。"""
+
     Not: bool = False
+    """是否对规则结果取反。"""
 
     def to_dict(self) -> dict[str, Any]:
         return {"$type": type(self).__name__, "Guid": str(self.Guid), "Not": self.Not}
@@ -348,7 +477,10 @@ class RuleBase:
 @_register_trigger
 @dataclass
 class UrlTrigger(Trigger):
+    """URL 触发器，通过轮询 URL 返回的 JSON 值来触发。"""
+
     Tag: str = ""
+    """触发器标签，对应轮询 URL。"""
 
     def to_dict(self) -> dict[str, Any]:
         return {"$type": "UrlTrigger", "Tag": self.Tag}
@@ -360,6 +492,8 @@ class UrlTrigger(Trigger):
 
 @dataclass
 class UnknownTrigger(Trigger):
+    """未知触发器类型，保留原始 JSON 数据以供向前兼容。"""
+
     _raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -372,6 +506,8 @@ class UnknownTrigger(Trigger):
 
 @dataclass
 class UnknownAction(Action):
+    """未知动作类型，保留原始 JSON 数据以供向前兼容。"""
+
     _raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -385,8 +521,13 @@ class UnknownAction(Action):
 @_register_rule_base
 @dataclass
 class RuleSet(RuleBase):
+    """规则集，包含多个子规则及其满足模式。"""
+
     SatisfyMode: RuleSetSatisfyMode = RuleSetSatisfyMode.AllSatisfied
+    """满足模式：AllSatisfied（全部满足）或 AnySatisfied（任一满足）。"""
+
     Rules: list[RuleBase] = field(default_factory=list)
+    """子规则列表。"""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -409,6 +550,8 @@ class RuleSet(RuleBase):
 
 @dataclass
 class UnknownRuleBase(RuleBase):
+    """未知规则类型，保留原始 JSON 数据以供向前兼容。"""
+
     _raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -435,8 +578,13 @@ class UnknownRuleBase(RuleBase):
 
 @dataclass
 class AutomationPlanInfo:
+    """自动化计划简要信息（GUID + 名称）。"""
+
     Guid: UUID
+    """计划唯一标识符。"""
+
     Name: str = ""
+    """计划名称。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> AutomationPlanInfo:
@@ -448,12 +596,25 @@ class AutomationPlanInfo:
 
 @dataclass
 class AutomationPlan:
+    """完整的自动化计划，包含触发器、规则集和动作列表。"""
+
     Guid: UUID
+    """计划唯一标识符。"""
+
     Name: str
+    """计划名称。"""
+
     Revertable: bool
+    """计划是否支持撤回。"""
+
     Trigger: Trigger
+    """触发器。"""
+
     RuleSet: RuleSet | None
+    """规则集，可为 None（无条件触发）。"""
+
     Actions: list[Action]
+    """触发后执行的动作列表。"""
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -489,47 +650,95 @@ class AutomationPlan:
 
 @dataclass
 class TriggerDto:
+    """触发器请求 DTO。"""
+
     TriggerKey: str
+    """触发器类型标识符。"""
+
     Properties: dict[str, Any] | None = None
+    """触发器附加属性。"""
 
 
 @dataclass
 class ActionDto:
+    """动作请求 DTO。"""
+
     ActionKey: str
+    """动作类型标识符。"""
+
     Properties: dict[str, Any] | None = None
+    """动作附加属性。"""
 
 
 @dataclass
 class RuleNodeDto:
+    """规则节点请求 DTO，支持单条规则或嵌套规则集。"""
+
     RuleKey: str | None = None
+    """规则类型标识符，与 RuleSet 二选一。"""
+
     Properties: dict[str, Any] | None = None
+    """规则附加属性。"""
+
     Not: bool = False
+    """是否对规则结果取反。"""
+
     RuleSet: RuleSetDto | None = None
+    """嵌套规则集，与 RuleKey 二选一。"""
 
 
 @dataclass
 class RuleSetDto:
+    """规则集请求 DTO。"""
+
     SatisfyMode: RuleSetSatisfyMode
+    """满足模式。"""
+
     Not: bool
+    """是否对规则集结果取反。"""
+
     Rules: list[RuleNodeDto]
+    """子规则节点列表。"""
 
 
 @dataclass
 class CreateAutomationPlanRequest:
+    """创建自动化计划请求。"""
+
     Name: str
+    """计划名称。"""
+
     Revertable: bool
+    """是否支持撤回。"""
+
     Trigger: TriggerDto
+    """触发器。"""
+
     RuleSet: RuleSetDto | None
+    """规则集。"""
+
     Actions: list[ActionDto]
+    """动作列表。"""
 
 
 @dataclass
 class UpdateAutomationPlanRequest:
+    """更新自动化计划请求。"""
+
     Name: str
+    """计划名称。"""
+
     Revertable: bool
+    """是否支持撤回。"""
+
     Trigger: TriggerDto
+    """触发器。"""
+
     RuleSet: RuleSetDto | None
+    """规则集。"""
+
     Actions: list[ActionDto]
+    """动作列表。"""
 
 
 # ============================================================================
@@ -539,11 +748,22 @@ class UpdateAutomationPlanRequest:
 
 @dataclass
 class Subject:
+    """表示一节课的信息（科目、教师、教室、时间）。"""
+
     Name: str = ""
+    """科目名称。"""
+
     Teacher: str = ""
+    """授课教师。"""
+
     Room: str = ""
+    """教室。"""
+
     StartTime: str = ""
+    """开始时间（HH:MM:SS 格式）。"""
+
     EndTime: str = ""
+    """结束时间（HH:MM:SS 格式）。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Subject:
@@ -558,9 +778,16 @@ class Subject:
 
 @dataclass
 class TimeLayoutItem:
+    """时间布局项，表示一天中的一个时间段。"""
+
     StartTime: str = ""
+    """开始时间（HH:MM:SS 格式）。"""
+
     EndTime: str = ""
+    """结束时间（HH:MM:SS 格式）。"""
+
     TimeType: int = 0
+    """时间段类型（0=上课，1=课间，2=午休等）。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TimeLayoutItem:
@@ -573,8 +800,13 @@ class TimeLayoutItem:
 
 @dataclass
 class ClassPlan:
+    """课程表，包含当天的课程列表和有效时间布局。"""
+
     Classes: list[Subject] = field(default_factory=list)
+    """课程列表。"""
+
     ValidTimeLayoutItems: list[TimeLayoutItem] = field(default_factory=list)
+    """有效时间布局项列表。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ClassPlan:
@@ -588,7 +820,10 @@ class ClassPlan:
 
 @dataclass
 class Profile:
+    """用户档案，包含已注册的科目映射。"""
+
     Subjects: dict[str, Subject] = field(default_factory=dict)
+    """科目名称到 Subject 的映射。"""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Profile:

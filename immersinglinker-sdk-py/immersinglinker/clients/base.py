@@ -1,3 +1,5 @@
+"""基础工具模块，包含异常类、时间跨度解析和 JSON 序列化/反序列化工具。"""
+
 from __future__ import annotations
 
 import json
@@ -11,10 +13,14 @@ from ..types import Subject, TimeLayoutItem, ClassPlan, Profile
 
 
 class ImmersingLinkerError(Exception):
-    pass
+    """ImmersingLinker SDK 统一异常类型。"""
 
 
 def _parse_timedelta(value: Any) -> timedelta:
+    """将多种格式的时间跨度值解析为 timedelta。
+
+    支持的格式：秒数（int/float）、JSON 对象、``HH:MM:SS`` 或 ``d.HH:MM:SS`` 字符串。
+    """
     if isinstance(value, (int, float)):
         return timedelta(seconds=float(value))
     if isinstance(value, str):
@@ -57,6 +63,7 @@ def _parse_timedelta(value: Any) -> timedelta:
 
 
 def _to_json_serializable(obj: Any) -> Any:
+    """递归将对象转换为 JSON 可序列化的形式。"""
     if obj is None:
         return None
     if isinstance(obj, (str, int, float, bool)):
@@ -79,6 +86,7 @@ def _to_json_serializable(obj: Any) -> Any:
 
 
 def _deserialize_json_response(response_json: Any, target_type: type | str) -> Any:
+    """将 JSON 响应反序列化为目标类型实例。"""
     if response_json is None:
         return None
 
