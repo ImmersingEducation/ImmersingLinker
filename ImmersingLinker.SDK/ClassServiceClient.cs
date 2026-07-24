@@ -258,6 +258,88 @@ public class ClassServiceClient
 
     #endregion
 
+    #region GroupingRule
+
+    public async Task<List<GroupingRuleResponse>> GetAllGroupingRulesAsync(string classGuid)
+    {
+        var response = await _http.GetAsync($"/class/{classGuid}/groupingRule");
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException($"Class {classGuid} not found");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<List<GroupingRuleResponse>>(JsonOptions) ?? [];
+    }
+
+    public async Task<GroupingRuleResponse?> GetGroupingRuleByGuidAsync(string classGuid, string ruleGuid)
+    {
+        var response = await _http.GetAsync($"/class/{classGuid}/groupingRule/{ruleGuid}");
+        if (response.StatusCode == HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<GroupingRuleResponse>(JsonOptions);
+    }
+
+    public async Task<GroupingRuleResponse> AddGroupingRuleAsync(string classGuid, CreateGroupingRuleRequest request)
+    {
+        var response = await _http.PostAsJsonAsync($"/class/{classGuid}/groupingRules", request, JsonOptions);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException($"Class {classGuid} not found");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<GroupingRuleResponse>(JsonOptions);
+        return result!;
+    }
+
+    public async Task<GroupingRuleResponse> AddGroupAsync(string classGuid, string ruleGuid, CreateGroupRequest request)
+    {
+        var response = await _http.PostAsJsonAsync($"/class/{classGuid}/groupingRules/{ruleGuid}", request, JsonOptions);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException($"Class {classGuid} or rule {ruleGuid} not found");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<GroupingRuleResponse>(JsonOptions);
+        return result!;
+    }
+
+    public async Task<GroupingRuleResponse> UpdateGroupingRuleAsync(string classGuid, string ruleGuid,
+        UpdateGroupingRuleRequest request)
+    {
+        var response = await _http.PutAsJsonAsync($"/class/{classGuid}/groupingRules/{ruleGuid}", request, JsonOptions);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException($"Class {classGuid} or rule {ruleGuid} not found");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<GroupingRuleResponse>(JsonOptions);
+        return result!;
+    }
+
+    public async Task<GroupingRuleResponse> UpdateGroupAsync(string classGuid, string ruleGuid, string groupGuid,
+        UpdateGroupRequest request)
+    {
+        var response = await _http.PutAsJsonAsync(
+            $"/class/{classGuid}/groupingRules/{ruleGuid}/{groupGuid}", request, JsonOptions);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException(
+                $"Class {classGuid}, rule {ruleGuid} or group {groupGuid} not found");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<GroupingRuleResponse>(JsonOptions);
+        return result!;
+    }
+
+    public async Task DeleteGroupingRuleAsync(string classGuid, string ruleGuid)
+    {
+        var response = await _http.DeleteAsync($"/class/{classGuid}/groupingRules/{ruleGuid}");
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException($"Class {classGuid} or rule {ruleGuid} not found");
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteGroupAsync(string classGuid, string ruleGuid, string groupGuid)
+    {
+        var response = await _http.DeleteAsync($"/class/{classGuid}/groupingRules/{ruleGuid}/{groupGuid}");
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException(
+                $"Class {classGuid}, rule {ruleGuid} or group {groupGuid} not found");
+        response.EnsureSuccessStatusCode();
+    }
+
+    #endregion
+
     #region OffLine
 
     public static Class CreateClassOffline(string name)
