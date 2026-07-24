@@ -1,4 +1,4 @@
-from .enums import Gender, RuleSetSatisfyMode
+from .enums import Gender, RuleSetSatisfyMode, TimeState
 
 from .types import (
     Application,
@@ -53,6 +53,7 @@ from .clients import (
 __all__ = [
     "Gender",
     "RuleSetSatisfyMode",
+    "TimeState",
     "Application",
     "ClassInfo",
     "ClassExtraProperty",

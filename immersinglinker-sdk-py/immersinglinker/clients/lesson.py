@@ -5,6 +5,7 @@ from datetime import timedelta
 
 import aiohttp
 
+from ..enums import TimeState
 from ..types import Subject, TimeLayoutItem, ClassPlan, Profile
 from .base import ImmersingLinkerError, _parse_timedelta
 
@@ -52,8 +53,8 @@ class LessonServiceClient:
         text = await self._get("/lesson/current/next-class-subject")
         return Subject.from_dict(json.loads(text))
 
-    async def get_current_state(self) -> int:
-        return int(await self._get("/lesson/current/state"))
+    async def get_current_state(self) -> TimeState:
+        return TimeState(int(json.loads(await self._get("/lesson/current/state"))))
 
     async def get_current_time_layout_item(self) -> TimeLayoutItem:
         text = await self._get("/lesson/current/time-layout-item")
