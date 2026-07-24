@@ -26,7 +26,7 @@ describe('AppServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(true));
       const result = await client.testConnection();
       expect(result).toBe(true);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/app/hello');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/app/hello', expect.objectContaining({}));
     });
 
     it('should return false on non-ok response', async () => {

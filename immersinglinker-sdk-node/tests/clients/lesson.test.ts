@@ -28,7 +28,7 @@ describe('LessonServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, subject));
       const result = await client.getCurrentSubject();
       expect(result).toEqual(subject);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/current/subject');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/current/subject', expect.objectContaining({}));
     });
 
     it('getCurrentSubject returns null on 404', async () => {
@@ -42,14 +42,14 @@ describe('LessonServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, subject));
       const result = await client.getNextClassSubject();
       expect(result).toEqual(subject);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/current/next-class-subject');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/current/next-class-subject', expect.objectContaining({}));
     });
 
     it('getCurrentState returns TimeState', async () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, 1));
       const result = await client.getCurrentState();
       expect(result).toBe(1);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/current/state');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/current/state', expect.objectContaining({}));
     });
 
     it('getCurrentTimeLayoutItem returns TimeLayoutItem', async () => {
@@ -103,7 +103,7 @@ describe('LessonServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, item));
       const result = await client.getNextClassTimeLayoutItem();
       expect(result).toEqual(item);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/next/class-time-layout-item');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/next/class-time-layout-item', expect.objectContaining({}));
     });
 
     it('getNextBreakingTimeLayoutItem', async () => {
@@ -111,7 +111,7 @@ describe('LessonServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, item));
       const result = await client.getNextBreakingTimeLayoutItem();
       expect(result).toEqual(item);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/next/breaking-time-layout-item');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/lesson/next/breaking-time-layout-item', expect.objectContaining({}));
     });
   });
 

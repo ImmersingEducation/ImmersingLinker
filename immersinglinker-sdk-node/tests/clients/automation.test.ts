@@ -47,7 +47,7 @@ describe('AutomationServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, [mockPlanInfo]));
       const result = await client.getAllPlanInfos();
       expect(result).toEqual([mockPlanInfo]);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/automation');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/automation', expect.objectContaining({}));
     });
 
     it('getAllPlanInfos throws on 500', async () => {
@@ -59,7 +59,7 @@ describe('AutomationServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, mockPlan));
       const result = await client.getPlanByGuid('test-guid');
       expect(result).toEqual(mockPlan);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/automation/test-guid');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/automation/test-guid', expect.objectContaining({}));
     });
 
     it('getPlanByGuid returns null on 404', async () => {

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   ServiceClientBase,
   ImmersingLinkerError,
+  TimeoutError,
   NotFoundError,
   ConflictError,
   BadRequestError,
@@ -94,7 +95,7 @@ describe('ServiceClientBase', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, data));
       const result = await client.getTest<typeof data>('/api/test');
       expect(result).toEqual(data);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api/test');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/api/test', expect.objectContaining({}));
     });
 
     it('should return undefined for empty 200 response', async () => {
@@ -259,19 +260,38 @@ describe('ServiceClientBase', () => {
     });
   });
 
+  describe('timeout', () => {
+    it('should throw TimeoutError when fetch aborts', async () => {
+      vi.mocked(fetch).mockRejectedValue(new DOMException('The operation was aborted', 'AbortError'));
+      await expect(client.getTest('/api/test')).rejects.toThrow(TimeoutError);
+    });
+
+    it('should not throw TimeoutError on normal fetch error', async () => {
+      vi.mocked(fetch).mockRejectedValue(new TypeError('Failed to fetch'));
+      await expect(client.getTest('/api/test')).rejects.not.toThrow(TimeoutError);
+    });
+  });
+
   describe('constructor', () => {
     it('should accept number port', async () => {
       const c = new TestClient(3000);
       vi.mocked(fetch).mockResolvedValue(createResponse(200, { ok: true }));
       await c.getTest('/test');
-      expect(fetch).toHaveBeenCalledWith('http://localhost:3000/test');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:3000/test', expect.objectContaining({}));
     });
 
     it('should accept string port', async () => {
       const c = new TestClient('8080');
       vi.mocked(fetch).mockResolvedValue(createResponse(200, { ok: true }));
       await c.getTest('/test');
-      expect(fetch).toHaveBeenCalledWith('http://localhost:8080/test');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:8080/test', expect.objectContaining({}));
+    });
+
+    it('should accept custom timeout', async () => {
+      const c = new TestClient(5000, 10000);
+      vi.mocked(fetch).mockResolvedValue(createResponse(200, { ok: true }));
+      await c.getTest('/test');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/test', expect.objectContaining({}));
     });
   });
 });

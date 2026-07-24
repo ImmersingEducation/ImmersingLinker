@@ -8,7 +8,7 @@ export class AppServiceClient extends ServiceClientBase {
    */
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch(`${this._baseUrl}/app/hello`);
+      const response = await this._fetchWithTimeout('/app/hello');
       return response.ok;
     } catch {
       return false;

@@ -61,14 +61,14 @@ describe('ClassServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, [mockClass]));
       const result = await client.getAllClasses();
       expect(result).toEqual([mockClass]);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class', expect.objectContaining({}));
     });
 
     it('getAllClassInfos returns ClassInfo[]', async () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, [mockClassInfo]));
       const result = await client.getAllClassInfos();
       expect(result).toEqual([mockClassInfo]);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/infos');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/infos', expect.objectContaining({}));
     });
 
     it('getClassByGuid returns Class on 200', async () => {
@@ -171,7 +171,7 @@ describe('ClassServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, [mockGroupingRuleResponse]));
       const result = await client.getGroupingRules('test-guid');
       expect(result).toEqual([mockGroupingRuleResponse]);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRule');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRule', expect.objectContaining({}));
     });
 
     it('getGroupingRules returns [] on 404', async () => {
@@ -184,7 +184,7 @@ describe('ClassServiceClient', () => {
       vi.mocked(fetch).mockResolvedValue(createResponse(200, mockGroupingRuleResponse));
       const result = await client.getGroupingRule('test-guid', 'rule-guid');
       expect(result).toEqual(mockGroupingRuleResponse);
-      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRule/rule-guid');
+      expect(fetch).toHaveBeenCalledWith('http://localhost:5000/class/test-guid/groupingRule/rule-guid', expect.objectContaining({}));
     });
 
     it('getGroupingRule returns null on 404', async () => {
