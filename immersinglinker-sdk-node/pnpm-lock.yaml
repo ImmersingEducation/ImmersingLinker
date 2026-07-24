@@ -206,6 +206,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      uuid:
+        specifier: ^14.0.1
+        version: 14.0.1
     devDependencies:
       typescript:
         specifier: ~5.7.3
@@ -218,6 +222,12 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  uuid@14.0.1:
+    resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
+    hasBin: true
+
 snapshots:
 
   typescript@5.7.3: {}
+
+  uuid@14.0.1: {}
