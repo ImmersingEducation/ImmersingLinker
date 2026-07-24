@@ -4,6 +4,9 @@
     <attachedFolders>
       <Path>immersinglinker-sdk-node</Path>
     </attachedFolders>
+    <attachedFolders>
+      <Path>immersinglinker-sdk-py</Path>
+    </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />
   </component>
