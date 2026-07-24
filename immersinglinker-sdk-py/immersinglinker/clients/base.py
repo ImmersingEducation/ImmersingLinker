@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import timedelta
 from enum import Enum
 from typing import Any
@@ -17,6 +18,18 @@ def _parse_timedelta(value: Any) -> timedelta:
     if isinstance(value, (int, float)):
         return timedelta(seconds=float(value))
     if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, dict):
+                return timedelta(
+                    days=parsed.get("Days", 0),
+                    hours=parsed.get("Hours", 0),
+                    minutes=parsed.get("Minutes", 0),
+                    seconds=parsed.get("Seconds", 0),
+                    milliseconds=parsed.get("Milliseconds", 0),
+                )
+        except (json.JSONDecodeError, TypeError):
+            pass
         parts = value.split(":")
         if len(parts) == 3:
             h, m, s = parts

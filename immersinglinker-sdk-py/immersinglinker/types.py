@@ -79,6 +79,13 @@ class ClassInfo:
     Guid: UUID
     Name: str
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ClassInfo:
+        return cls(
+            Guid=UUID(data["Guid"]) if isinstance(data["Guid"], str) else data["Guid"],
+            Name=data.get("Name", ""),
+        )
+
 
 @dataclass
 class ClassExtraProperty:
