@@ -154,23 +154,14 @@ export class ServiceClientBase {
   /**
    * 发起 DELETE 请求。
    * @throws {NotFoundError} 404 时抛出
-   * @throws {ImmersingLinkerError} 其他错误时抛出
+   * @throws {ConflictError} 409 时抛出
+   * @throws {BadRequestError} 400 时抛出
    */
   protected async _delete(path: string): Promise<void> {
     const response = await fetch(`${this._baseUrl}${path}`, {
       method: 'DELETE',
     });
-    if (response.status === 404) {
-      const urlPath = path;
-      throw new NotFoundError(urlPath);
-    }
-    if (!response.ok) {
-      throw new ImmersingLinkerError(
-        `HTTP ${response.status}: ${response.statusText}`,
-        response.status,
-        path,
-      );
-    }
+    await this._handlePostPutError(response, path);
   }
 
   /** 统一处理 POST/PUT 响应的错误状态码 */
