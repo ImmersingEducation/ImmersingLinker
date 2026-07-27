@@ -3,9 +3,13 @@ export enum TimeState {
   /** 无 */
   None = 0,
   /** 上课 */
-  OnClass = 1,
+  Class = 1,
+  /** 准备上课（预留） */
+  PrepareOnClass = 2,
   /** 课间 */
-  OnBreaking = 2,
+  OnBreaking = 3,
+  /** 放学 */
+  AfterSchool = 4,
 }
 
 /** 科目（映射 ClassIsland.Shared.Subject） */
