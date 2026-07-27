@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using ImmersingLinker.Core.Models.Setting;
@@ -96,6 +98,31 @@ public sealed class SettingsService
         SaveSettings();
     }
 
+    private static readonly ConcurrentDictionary<Type, (Func<object, object?>? Getter, Action<object, object?>? Setter)> _valueAccessors = new();
+
+    private static (Func<object, object?>? Getter, Action<object, object?>? Setter) GetOrCreateValueAccessors(Type type)
+    {
+        return _valueAccessors.GetOrAdd(type, t =>
+        {
+            var prop = t.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+            if (prop is null) return (null, null);
+
+            var instanceParam = Expression.Parameter(typeof(object), "instance");
+            var instanceCast = Expression.Convert(instanceParam, t);
+            var propertyAccess = Expression.Property(instanceCast, prop);
+
+            var getter = Expression.Lambda<Func<object, object?>>(
+                Expression.Convert(propertyAccess, typeof(object)), instanceParam).Compile();
+
+            var valueParam = Expression.Parameter(typeof(object), "value");
+            var setter = Expression.Lambda<Action<object, object?>>(
+                Expression.Assign(propertyAccess, Expression.Convert(valueParam, prop.PropertyType)),
+                instanceParam, valueParam).Compile();
+
+            return (getter, setter);
+        });
+    }
+
     private static Dictionary<string, JsonElement> CollectGroupValues(SettingsGroup group)
     {
         var result = new Dictionary<string, JsonElement>();
@@ -117,11 +144,11 @@ public sealed class SettingsService
             return;
         }
 
-        var valueProperty = item.GetType().GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
-        if (valueProperty is null)
+        var (getter, _) = GetOrCreateValueAccessors(item.GetType());
+        if (getter is null)
             return;
 
-        var value = valueProperty.GetValue(item);
+        var value = getter(item);
         if (value is not null)
             result[item.Key] = JsonSerializer.SerializeToElement(value, value.GetType());
     }
@@ -154,7 +181,7 @@ public sealed class SettingsService
 
         var valueType = itemType.GetGenericArguments()[0];
         var value = JsonSerializer.Deserialize(element.GetRawText(), valueType);
-        var valueProperty = itemType.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
-        valueProperty?.SetValue(item, value);
+        var (_, setter) = GetOrCreateValueAccessors(itemType);
+        setter?.Invoke(item, value);
     }
 }
