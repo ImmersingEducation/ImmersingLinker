@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <PackageReference Include="ClassIsland.Shared.IPC" Version="2.1.0.1" />
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
     </ItemGroup>
 
 </Project>
