@@ -1,22 +1,28 @@
+using System.Reflection;
 using System.Text.Json;
 using ImmersingLinker.Core.Models.Setting;
+using ImmersingLinker.Core.Services.Storage;
 
 namespace ImmersingLinker.Core.Services.Setting;
 
 public sealed class SettingsService
 {
     public static SettingsService Instance { get; } = new();
-    
-    private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
-    private static readonly string _dataDirectory = Path.Combine(AppContext.BaseDirectory, "Data", "Settings");
+
+    private readonly ISettingsStorageService _storageService;
+
+    private List<SettingsGroup> _mountedSettingsGroups = [];
 
     public event EventHandler AnyChanged;
-    
-    private List<SettingsGroup> _mountedSettingsGroups;
-    
-    private SettingsService()
+
+    private SettingsService() : this(new SettingsStorageService())
     {
-        Directory.CreateDirectory(_dataDirectory);
+    }
+
+    internal SettingsService(ISettingsStorageService storageService)
+    {
+        _storageService = storageService;
+        _mountedSettingsGroups = [];
         LoadSettings();
         AnyChanged += SaveSettingsTrigger;
     }
@@ -54,22 +60,101 @@ public sealed class SettingsService
                 _ => throw new NotImplementedException()
             };
         }
-        
+
         return item;
     }
 
     public async Task LoadSettings()
     {
-        throw new NotImplementedException();
+        var data = await _storageService.LoadSettingsAsync();
+        if (data is null)
+            return;
+
+        foreach (var (groupKey, items) in data)
+        {
+            var group = _mountedSettingsGroups.Find(g => g.Key == groupKey);
+            if (group is null)
+                continue;
+
+            ApplySettingsToGroup(group, items);
+        }
     }
 
     public async Task SaveSettings()
     {
-        throw new NotImplementedException();
+        var data = new Dictionary<string, Dictionary<string, JsonElement>>();
+        foreach (var group in _mountedSettingsGroups)
+        {
+            data[group.Key] = CollectGroupValues(group);
+        }
+
+        await _storageService.SaveSettingsAsync(data);
     }
 
     public void SaveSettingsTrigger(object? sender, EventArgs e)
     {
         SaveSettings();
+    }
+
+    private static Dictionary<string, JsonElement> CollectGroupValues(SettingsGroup group)
+    {
+        var result = new Dictionary<string, JsonElement>();
+        foreach (var item in group.SettingItems)
+        {
+            CollectItemValue(item, result);
+        }
+        return result;
+    }
+
+    private static void CollectItemValue(SettingItemBase item, Dictionary<string, JsonElement> result)
+    {
+        if (item is SettingsGroup subGroup)
+        {
+            foreach (var child in subGroup.SettingItems)
+            {
+                CollectItemValue(child, result);
+            }
+            return;
+        }
+
+        var valueProperty = item.GetType().GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+        if (valueProperty is null)
+            return;
+
+        var value = valueProperty.GetValue(item);
+        if (value is not null)
+            result[item.Key] = JsonSerializer.SerializeToElement(value, value.GetType());
+    }
+
+    private static void ApplySettingsToGroup(SettingsGroup group, Dictionary<string, JsonElement> items)
+    {
+        foreach (var item in group.SettingItems)
+        {
+            ApplySettingValue(item, items);
+        }
+    }
+
+    private static void ApplySettingValue(SettingItemBase item, Dictionary<string, JsonElement> items)
+    {
+        if (item is SettingsGroup subGroup)
+        {
+            foreach (var child in subGroup.SettingItems)
+            {
+                ApplySettingValue(child, items);
+            }
+            return;
+        }
+
+        if (!items.TryGetValue(item.Key, out var element))
+            return;
+
+        var itemType = item.GetType();
+        if (!itemType.IsGenericType || itemType.GetGenericTypeDefinition() != typeof(SettingItem<>))
+            return;
+
+        var valueType = itemType.GetGenericArguments()[0];
+        var value = JsonSerializer.Deserialize(element.GetRawText(), valueType);
+        var valueProperty = itemType.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+        valueProperty?.SetValue(item, value);
     }
 }
