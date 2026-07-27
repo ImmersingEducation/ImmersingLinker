@@ -1,8 +1,8 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using DynamicExpresso;
 using ImmersingLinker.Core.Models.Setting;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
 
 namespace ImmersingLinker.Core.Services.Setting;
 
@@ -64,7 +64,21 @@ public sealed class SettingsGroupLoader
                 : default,
             Validator = string.IsNullOrWhiteSpace(validatorScript)
                 ? _ => true
-                : CSharpScript.EvaluateAsync<Func<T?, bool>>(validatorScript).GetAwaiter().GetResult()
+                : ParseValidator<T>(validatorScript)
         };
+    }
+
+    private static Func<T?, bool> ParseValidator<T>(string script)
+    {
+        var body = ExtractExpressionBody(script);
+        return new Interpreter().ParseAsDelegate<Func<T?, bool>>(body, "x");
+    }
+
+    private static string ExtractExpressionBody(string script)
+    {
+        var arrowIndex = script.IndexOf("=>", StringComparison.Ordinal);
+        return arrowIndex >= 0
+            ? script[(arrowIndex + 2)..].Trim()
+            : script.Trim();
     }
 }

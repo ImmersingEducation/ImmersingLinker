@@ -13,7 +13,7 @@
 
     <ItemGroup>
       <PackageReference Include="ClassIsland.Shared.IPC" Version="2.1.0.1" />
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
+      <PackageReference Include="DynamicExpresso.Core" Version="2.19.3" />
     </ItemGroup>
 
     <ItemGroup>
