@@ -16,4 +16,10 @@
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Assets\Settings\iedu.ilinker.basic.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

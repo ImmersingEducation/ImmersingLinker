@@ -1,0 +1,17 @@
+{
+  "name": "基本设置",
+  "items": {
+    "iedu.ilinker.basic.launch-on-startup": {
+      "general": "bool",
+      "name": "开机自动启动",
+      "default-value": false,
+      "validator": "x => true"
+    },
+    "iedu.ilinker.basic.server-port": {
+      "general": "int",
+      "name": "服务器端口",
+      "default-value": 5157,
+      "validator": "x => x >= 0 && x <= 65535"
+    }
+  }
+}
