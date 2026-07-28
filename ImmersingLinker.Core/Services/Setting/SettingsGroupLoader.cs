@@ -72,8 +72,8 @@ public sealed class SettingsGroupLoader
             Key = key,
             Name = name,
             Description = description,
-            DefaultValue = node?["default-value"] is JsonValue jv
-                ? jv.GetValue<T>()
+            DefaultValue = node?["default-value"] is { } defaultValueNode
+                ? JsonSerializer.Deserialize<T>(defaultValueNode)
                 : default,
             Validator = string.IsNullOrWhiteSpace(validatorScript)
                 ? _ => true

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -69,60 +70,43 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         }
     }
 
-#pragma warning disable RS1024 // Compare symbols correctly
     private static IEnumerable<string> ExtractValidatorExpressions(string json)
     {
         var results = new List<string>();
-        int searchStart = 0;
 
-        while (true)
-        {
-            var keyIndex = json.IndexOf("\"validator\"", searchStart, System.StringComparison.OrdinalIgnoreCase);
-            if (keyIndex < 0)
-                break;
-
-            var colonIndex = json.IndexOf(':', keyIndex + 11);
-            if (colonIndex < 0)
-                break;
-
-            var quoteStart = json.IndexOf('"', colonIndex + 1);
-            if (quoteStart < 0)
-                break;
-
-            var valueStart = quoteStart + 1;
-            var sb = new StringBuilder();
-            int i = valueStart;
-
-            while (i < json.Length)
-            {
-                if (json[i] == '\\')
-                {
-                    sb.Append(json[i]);
-                    i++;
-                    if (i < json.Length)
-                    {
-                        sb.Append(json[i]);
-                        i++;
-                    }
-                }
-                else if (json[i] == '"')
-                {
-                    break;
-                }
-                else
-                {
-                    sb.Append(json[i]);
-                    i++;
-                }
-            }
-
-            var value = sb.ToString();
-            if (!string.IsNullOrWhiteSpace(value))
-                results.Add(value);
-
-            searchStart = i + 1;
-        }
+        using var doc = JsonDocument.Parse(json);
+        CollectValidatorValues(doc.RootElement, results);
 
         return results;
+    }
+
+    private static void CollectValidatorValues(JsonElement element, List<string> results)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                foreach (var property in element.EnumerateObject())
+                {
+                    if (property.NameEquals("validator")
+                        && property.Value.ValueKind == JsonValueKind.String)
+                    {
+                        var value = property.Value.GetString();
+                        if (!string.IsNullOrWhiteSpace(value))
+                            results.Add(value);
+                    }
+                    else
+                    {
+                        CollectValidatorValues(property.Value, results);
+                    }
+                }
+                break;
+
+            case JsonValueKind.Array:
+                foreach (var item in element.EnumerateArray())
+                {
+                    CollectValidatorValues(item, results);
+                }
+                break;
+        }
     }
 }
