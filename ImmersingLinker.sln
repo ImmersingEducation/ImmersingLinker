@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.SourceGener
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImmersingLinker.Benchmark", "ImmersingLinker.Benchmark\ImmersingLinker.Benchmark.csproj", "{7BCCDB5A-AEB4-4285-A2D0-768A65A7B987}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{CA5B9735-A534-48E1-B050-D12F3C559D66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,5 +113,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{25D335DA-99C2-4252-BFEB-818DB22A85F9} = {CA5B9735-A534-48E1-B050-D12F3C559D66}
+		{7BCCDB5A-AEB4-4285-A2D0-768A65A7B987} = {CA5B9735-A534-48E1-B050-D12F3C559D66}
 	EndGlobalSection
 EndGlobal
