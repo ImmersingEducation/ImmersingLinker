@@ -27,6 +27,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <AdditionalFiles Include="Assets\Settings\iedu.ilinker.basic.json" />
+      <None Update="Assets\Settings\settings-group.schema.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

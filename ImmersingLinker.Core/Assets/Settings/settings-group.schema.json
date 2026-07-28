@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://immersinglinker.local/schemas/settings-group.json",
+  "title": "ImmersingLinker Settings Group",
+  "description": "设置组定义文件的 JSON Schema，用于描述一组相关的应用设置项。支持嵌套分组。",
+  "type": "object",
+  "required": ["name", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "设置组的显示名称",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "设置组的描述信息",
+      "default": ""
+    },
+    "items": {
+      "type": "object",
+      "description": "设置项或嵌套分组的字典，key 为设置项的唯一标识符",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/settingEntry"
+      }
+    }
+  },
+  "$defs": {
+    "settingEntry": {
+      "description": "设置条目：可以是一个叶子设置项（SettingItem），也可以是一个嵌套的设置组（SettingsGroup）",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/settingItem"
+        },
+        {
+          "$ref": "#/$defs/nestedGroup"
+        }
+      ]
+    },
+
+    "settingItem": {
+      "description": "叶子设置项，包含具体的类型、默认值和验证规则",
+      "type": "object",
+      "required": ["general", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "general": {
+          "type": "string",
+          "description": "设置项的数据类型，支持 C# 类型别名或完整类型名",
+          "examples": ["bool", "int", "string", "double", "float", "long", "decimal", "List<string>", "Dictionary<string, int>"]
+        },
+        "name": {
+          "type": "string",
+          "description": "设置项的显示名称",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "设置项的描述信息",
+          "default": ""
+        },
+        "default-value": {
+          "description": "设置项的默认值，应与 general 字段指定的类型兼容"
+        },
+        "validator": {
+          "type": "string",
+          "description": "DynamicExpresso 验证表达式，形如 \"x => x >= 0 && x <= 100\"。参数 x 的类型由 general 决定，返回 bool",
+          "default": "",
+          "examples": [
+            "x => true",
+            "x => x >= 0",
+            "x => x >= 0 && x <= 65535",
+            "x => x > 0",
+            "x => !string.IsNullOrEmpty(x)"
+          ]
+        }
+      }
+    },
+
+    "nestedGroup": {
+      "description": "嵌套设置组，包含自身的名称、描述和子设置项",
+      "type": "object",
+      "required": ["name", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "嵌套设置组的显示名称",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "description": "嵌套设置组的描述信息",
+          "default": ""
+        },
+        "items": {
+          "type": "object",
+          "description": "子设置项或子分组的字典",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/settingEntry"
+          }
+        }
+      }
+    },
+
+    "typeName": {
+      "description": "C# 类型名称：支持别名、完整类型名、可空类型(?)、泛型类型(List<T>等)",
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_.]+(\\?|(<([a-zA-Z0-9_., ]+)>))?$",
+      "examples": [
+        "bool",
+        "int",
+        "string",
+        "double",
+        "decimal",
+        "int?",
+        "List<string>",
+        "Dictionary<string, int>",
+        "HashSet<bool>",
+        "System.DateTime"
+      ]
+    }
+  }
+}

@@ -1,4 +1,5 @@
 {
+  "$schema": "settings-group.schema.json",
   "name": "基本设置",
   "items": {
     "iedu.ilinker.basic.launch-on-startup": {
