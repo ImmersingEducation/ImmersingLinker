@@ -9,30 +9,21 @@ namespace ImmersingLinker.Core.Services.Setting;
 
 public sealed class SettingsService
 {
-    public static SettingsService Instance { get; } = new();
-
     private readonly ISettingsStorageService _storageService;
+    private readonly List<SettingsGroup> _mountedSettingsGroups = [];
+    private bool _initialized;
 
-    private List<SettingsGroup> _mountedSettingsGroups = [];
+    public event EventHandler? AnyChanged;
 
-    public event EventHandler AnyChanged;
-
-    private SettingsService() : this(new SettingsStorageService())
-    {
-    }
-
-    internal SettingsService(ISettingsStorageService storageService)
+    public SettingsService(ISettingsStorageService storageService)
     {
         _storageService = storageService;
-        _mountedSettingsGroups = [];
-        LoadSettings();
-        AnyChanged += SaveSettingsTrigger;
     }
 
-    public void OnAnyChanged(object? sender, EventArgs e)
-    {
-        AnyChanged?.Invoke(this, e);
-    }
+    public IReadOnlyList<SettingsGroup> GetAllGroups() => _mountedSettingsGroups.AsReadOnly();
+
+    public SettingsGroup? GetGroupByKey(string key) =>
+        _mountedSettingsGroups.Find(x => x.Key == key);
 
     public async Task MountSettingsGroup(SettingsGroup group)
     {
@@ -66,7 +57,18 @@ public sealed class SettingsService
         return item;
     }
 
-    public async Task LoadSettings()
+    public async Task InitializeAsync()
+    {
+        if (_initialized)
+            return;
+
+        AnyChanged += SaveSettingsTrigger;
+        await LoadSettingsAsync();
+        ApplyDefaultValues();
+        _initialized = true;
+    }
+
+    public async Task LoadSettingsAsync()
     {
         var data = await _storageService.LoadSettingsAsync();
         if (data is null)
@@ -82,7 +84,7 @@ public sealed class SettingsService
         }
     }
 
-    public async Task SaveSettings()
+    public async Task SaveSettingsAsync()
     {
         var data = new Dictionary<string, Dictionary<string, JsonElement>>();
         foreach (var group in _mountedSettingsGroups)
@@ -93,9 +95,59 @@ public sealed class SettingsService
         await _storageService.SaveSettingsAsync(data);
     }
 
-    public void SaveSettingsTrigger(object? sender, EventArgs e)
+    private void OnAnyChanged(object? sender, EventArgs e)
     {
-        SaveSettings();
+        AnyChanged?.Invoke(this, e);
+    }
+
+    private async void SaveSettingsTrigger(object? sender, EventArgs e)
+    {
+        await SaveSettingsAsync();
+    }
+
+    private void ApplyDefaultValues()
+    {
+        foreach (var group in _mountedSettingsGroups)
+        {
+            ApplyGroupDefaults(group);
+        }
+    }
+
+    private static void ApplyGroupDefaults(SettingsGroup group)
+    {
+        foreach (var item in group.SettingItems)
+        {
+            if (item is SettingsGroup subGroup)
+            {
+                ApplyGroupDefaults(subGroup);
+                continue;
+            }
+
+            ApplyItemDefault(item);
+        }
+    }
+
+    private static void ApplyItemDefault(SettingItemBase item)
+    {
+        var itemType = item.GetType();
+        if (!itemType.IsGenericType || itemType.GetGenericTypeDefinition() != typeof(SettingItem<>))
+            return;
+
+        var (getter, setter) = GetOrCreateValueAccessors(itemType);
+        if (getter is null || setter is null)
+            return;
+
+        var currentValue = getter(item);
+        if (currentValue is not null)
+            return;
+
+        var defaultValueProp = itemType.GetProperty("DefaultValue", BindingFlags.Public | BindingFlags.Instance);
+        if (defaultValueProp is null)
+            return;
+
+        var defaultValue = defaultValueProp.GetValue(item);
+        if (defaultValue is not null)
+            setter(item, defaultValue);
     }
 
     private static readonly ConcurrentDictionary<Type, (Func<object, object?>? Getter, Action<object, object?>? Setter)> _valueAccessors = new();

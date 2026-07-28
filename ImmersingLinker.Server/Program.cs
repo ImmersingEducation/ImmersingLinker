@@ -1,7 +1,9 @@
 using System.Reflection;
+using System.Text.Json.Nodes;
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Services.Automation;
+using ImmersingLinker.Core.Services.Setting;
 using ImmersingLinker.Core.Services.Storage;
 using Microsoft.AspNetCore.Mvc;
 using ImmersingLinker.Core.Services.ThirdParty;
@@ -22,6 +24,8 @@ builder.Services.AddSingleton<ITriggerResolver, TriggerResolver>();
 builder.Services.AddSingleton<IRuleResolver, RuleResolver>();
 builder.Services.AddSingleton<IActionResolver, ActionResolver>();
 builder.Services.AddSingleton<ClassIslandService>();
+builder.Services.AddSingleton<ISettingsStorageService, SettingsStorageService>();
+builder.Services.AddSingleton<SettingsService>();
 
 var app = builder.Build();
 
@@ -33,6 +37,22 @@ ruleService.ScanAssembly(typeof(Trigger).Assembly);
 
 var actionService = app.Services.GetRequiredService<IActionService>();
 actionService.ScanAssembly(typeof(Trigger).Assembly);
+
+var settingsService = app.Services.GetRequiredService<SettingsService>();
+var settingsLoader = new SettingsGroupLoader();
+var settingsDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Settings");
+if (Directory.Exists(settingsDir))
+{
+    foreach (var file in Directory.GetFiles(settingsDir, "*.json"))
+    {
+        var groupKey = Path.GetFileNameWithoutExtension(file);
+        var json = await File.ReadAllTextAsync(file);
+        var node = JsonNode.Parse(json);
+        var group = settingsLoader.LoadFromJson(groupKey, node);
+        await settingsService.MountSettingsGroup(group);
+    }
+}
+await settingsService.InitializeAsync();
 
 if (app.Environment.IsDevelopment())
 {
