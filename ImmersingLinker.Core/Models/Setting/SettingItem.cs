@@ -13,7 +13,7 @@ public class SettingItem<T> : SettingItemBase
             {
                 var old = field;
                 field = value;
-                OnValueChanged(new SettingValueEventArg<T> { Key = Key, OldValue = old, NewValue = value });
+                OnValueChanged(new SettingValueEventArgs<T> { Key = Key, OldValue = old, NewValue = value });
             }
             else
             {

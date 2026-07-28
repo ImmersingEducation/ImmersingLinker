@@ -1,6 +1,6 @@
 namespace ImmersingLinker.Core.Models.Setting;
 
-public class SettingValueEventArg<T> : EventArgs
+public class SettingValueEventArgs<T> : EventArgs
 {
     public required string Key { get; init; }
     public required T? OldValue { get; init; }
