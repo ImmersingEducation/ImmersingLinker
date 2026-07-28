@@ -12,15 +12,6 @@ public sealed class SettingsGroupLoader
     private static readonly ConcurrentDictionary<string, Delegate> _validatorCache = new();
     private readonly Dictionary<Type, Func<string, JsonNode?, SettingItemBase>> _loadItemCache = new();
 
-    private readonly Dictionary<string, string> _aliasMap = new()
-    {
-        ["int"] = "System.Int32",
-        ["string"] = "System.String",
-        ["bool"] = "System.Boolean",
-        ["double"] = "System.Double",
-        ["long"] = "System.Int64",
-    };
-
     public SettingsGroup LoadFromJson(string groupKey, JsonNode? node)
     {
         var groupName = node?["name"]?.GetValue<string>() ?? "NULL";
@@ -38,9 +29,7 @@ public sealed class SettingsGroupLoader
             }
             else
             {
-                var typeName = _aliasMap.TryGetValue(general, out var mapped) ? mapped : general;
-                var type = Type.GetType(typeName)
-                    ?? throw new InvalidOperationException($"Cannot resolve type '{general}'.");
+                var type = TypeNameResolver.Resolve(general);
 
                 if (!_loadItemCache.TryGetValue(type, out var loadFunc))
                 {
