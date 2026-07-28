@@ -17,7 +17,7 @@ public class SettingItem<T> : SettingItemBase
             }
             else
             {
-
+                throw new ArgumentException($"Setting value {value} is not valid.");
             }
         }
     }
