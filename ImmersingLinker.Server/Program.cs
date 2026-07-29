@@ -1,13 +1,9 @@
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using ImmersingLinker.Core.Abstractions.AccessControl;
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Abstractions.Permission;
 using ImmersingLinker.Core.Abstractions.Storage;
-using ImmersingLinker.Core.Models.AccessControl;
 using ImmersingLinker.Core.Models.Automation;
-using ImmersingLinker.Core.Models.Class;
-using ImmersingLinker.Core.Models.Permission;
 using ImmersingLinker.Core.Services.AccessControl;
 using ImmersingLinker.Core.Services.Automation;
 using ImmersingLinker.Core.Services.Permission;
@@ -91,37 +87,19 @@ await permissionService.LoadAsync();
 await accessControlService.LoadAsync();
 
 var adminCredPath = Path.Combine(AppContext.BaseDirectory, "Data", "admin-credential.json");
-if (!File.Exists(adminCredPath))
-{
-    var adminId = Guid.NewGuid().ToString();
-    var adminSecret = Guid.NewGuid().ToString();
-    var adminApp = new RegisteredApp(
-        new Application { UniqueId = adminId, Name = "AdminUI" },
-        adminSecret,
-        DateTime.UtcNow);
+var adminManager = new AdminCredentialManager(adminCredPath, permissionService, accessControlService);
 
-    permissionService.Register(adminApp);
-    accessControlService.AddToWhitelist(new AccessControlEntry(
-        new Application { UniqueId = adminId, Name = "AdminUI" },
-        null,
-        DateTime.UtcNow));
+var adminCred = await adminManager.EnsureValidAsync();
 
-    await permissionService.SaveAsync();
-    await accessControlService.SaveAsync();
-
-    var adminDir = Path.GetDirectoryName(adminCredPath);
-    if (adminDir is not null) Directory.CreateDirectory(adminDir);
-    await File.WriteAllTextAsync(adminCredPath, JsonSerializer.Serialize(
-        new { AppId = adminId, Secret = adminSecret },
-        new JsonSerializerOptions { WriteIndented = true }));
-
-    Console.WriteLine("======================================");
-    Console.WriteLine("Admin UI Credentials generated:");
-    Console.WriteLine($"  AppId:  {adminId}");
-    Console.WriteLine($"  Secret: {adminSecret}");
-    Console.WriteLine($"  Saved to: {adminCredPath}");
-    Console.WriteLine("======================================");
-}
+Console.WriteLine("======================================");
+Console.WriteLine("Admin UI Credentials:");
+Console.WriteLine($"  AppId:  {adminCred.AppId}");
+Console.WriteLine($"  Secret: {adminCred.Secret}");
+if (adminCred.CreatedAt == adminCred.ExpiresAt - TimeSpan.FromDays(7))
+    Console.WriteLine("  (Credentials newly generated)");
+Console.WriteLine($"  Expires: {adminCred.ExpiresAt:yyyy-MM-dd HH:mm:ss} UTC");
+Console.WriteLine($"  Saved to: {adminCredPath}");
+Console.WriteLine("======================================");
 
 app.Lifetime.ApplicationStopping.Register(async () => { await pipeline.DisposeAsync(); });
 
