@@ -18,6 +18,34 @@ public class AutomationServiceClient
         _http = new HttpClient { BaseAddress = new Uri($"http://localhost:{port}") };
     }
 
+    #region PUT
+
+    public async Task<AutomationPlan> UpdatePlanAsync(string planGuid, UpdateAutomationPlanRequest request)
+    {
+        var response = await _http.PutAsJsonAsync($"/automation/{planGuid}", request, AutomationJsonOptions.Value);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException($"Plan {planGuid} not found");
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+            throw new InvalidOperationException("Invalid automation plan configuration");
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<AutomationPlan>(AutomationJsonOptions.Value);
+        return result!;
+    }
+
+    #endregion
+
+    #region DELETE
+
+    public async Task DeletePlanAsync(string planGuid)
+    {
+        var response = await _http.DeleteAsync($"/automation/{planGuid}");
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            throw new InvalidOperationException($"Plan {planGuid} not found");
+        response.EnsureSuccessStatusCode();
+    }
+
+    #endregion
+
     #region GET
 
     public async Task<List<AutomationPlanInfo>> GetAllPlanInfosAsync()
@@ -62,34 +90,6 @@ public class AutomationServiceClient
     public async Task InvokeUrlTriggerAsync(string tag)
     {
         var response = await _http.PostAsync($"/automation/invoke/{tag}", null);
-        response.EnsureSuccessStatusCode();
-    }
-
-    #endregion
-
-    #region PUT
-
-    public async Task<AutomationPlan> UpdatePlanAsync(string planGuid, UpdateAutomationPlanRequest request)
-    {
-        var response = await _http.PutAsJsonAsync($"/automation/{planGuid}", request, AutomationJsonOptions.Value);
-        if (response.StatusCode == HttpStatusCode.NotFound)
-            throw new InvalidOperationException($"Plan {planGuid} not found");
-        if (response.StatusCode == HttpStatusCode.BadRequest)
-            throw new InvalidOperationException("Invalid automation plan configuration");
-        response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<AutomationPlan>(AutomationJsonOptions.Value);
-        return result!;
-    }
-
-    #endregion
-
-    #region DELETE
-
-    public async Task DeletePlanAsync(string planGuid)
-    {
-        var response = await _http.DeleteAsync($"/automation/{planGuid}");
-        if (response.StatusCode == HttpStatusCode.NotFound)
-            throw new InvalidOperationException($"Plan {planGuid} not found");
         response.EnsureSuccessStatusCode();
     }
 

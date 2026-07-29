@@ -11,7 +11,7 @@ public sealed class ActionService : IActionService
 
     public void RegisterAction(Type actionType)
     {
-        var attr = actionType.GetCustomAttribute<ActionAttribute>(inherit: false);
+        var attr = actionType.GetCustomAttribute<ActionAttribute>(false);
         if (attr is null) return;
 
         _actionTypes[attr.Key] = actionType;
@@ -32,9 +32,6 @@ public sealed class ActionService : IActionService
         var actionTypes = assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(Action).IsAssignableFrom(t));
 
-        foreach (var type in actionTypes)
-        {
-            RegisterAction(type);
-        }
+        foreach (var type in actionTypes) RegisterAction(type);
     }
 }

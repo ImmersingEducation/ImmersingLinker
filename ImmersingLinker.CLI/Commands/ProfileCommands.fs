@@ -6,25 +6,26 @@ open ImmersingLinker.CLI.Commands.Helpers
 
 let private showCommand =
     let cmd = Command("show", "Show current profile information")
+
     cmd.SetAction(fun parseResult ->
         async {
             let port = getPort parseResult
             let json = getJson parseResult
             let client = LessonServiceClient(port)
+
             try
                 let! path = client.GetCurrentProfilePathAsync() |> Async.AwaitTask
                 let! trusted = client.GetIsCurrentProfileTrustedAsync() |> Async.AwaitTask
-                let result = {|
-                    path = path
-                    trusted = trusted
-                |}
+                let result = {| path = path; trusted = trusted |}
                 printOutput json result
                 return 0
-            with
-            | ex ->
+            with ex ->
                 printErrorOutput json $"Failed to get profile: %s{ex.Message}"
                 return 1
-        } |> Async.StartAsTask |> _.Result)
+        }
+        |> Async.StartAsTask
+        |> _.Result)
+
     cmd
 
 let profileCommand =

@@ -6,7 +6,8 @@ namespace ImmersingLinker.Core.Services.Setting;
 
 public static class SettingItemAccessor
 {
-    private static readonly ConcurrentDictionary<Type, (Func<object, object?>? Getter, Action<object, object?>? Setter)> _valueAccessors = new();
+    private static readonly ConcurrentDictionary<Type, (Func<object, object?>? Getter, Action<object, object?>? Setter)>
+        _valueAccessors = new();
 
     public static (Func<object, object?>? Getter, Action<object, object?>? Setter) GetOrCreateValueAccessors(Type type)
     {

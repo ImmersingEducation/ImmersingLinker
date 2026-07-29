@@ -3,27 +3,31 @@ using System.Reflection;
 using System.Text.Json;
 using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Setting;
-using ImmersingLinker.Core.Services.Storage;
 
 namespace ImmersingLinker.Core.Services.Setting;
 
 public sealed class SettingsService
 {
-    private readonly ISettingsStorageService _storageService;
     private readonly ConcurrentDictionary<string, SettingsGroup> _mountedSettingsGroups = [];
+    private readonly ISettingsStorageService _storageService;
     private bool _initialized;
-
-    public event EventHandler? AnyChanged;
 
     public SettingsService(ISettingsStorageService storageService)
     {
         _storageService = storageService;
     }
 
-    public IReadOnlyList<SettingsGroup> GetAllGroups() => _mountedSettingsGroups.Values.ToList().AsReadOnly();
+    public event EventHandler? AnyChanged;
 
-    public SettingsGroup? GetGroupByKey(string key) =>
-        _mountedSettingsGroups.TryGetValue(key, out var group) ? group : null;
+    public IReadOnlyList<SettingsGroup> GetAllGroups()
+    {
+        return _mountedSettingsGroups.Values.ToList().AsReadOnly();
+    }
+
+    public SettingsGroup? GetGroupByKey(string key)
+    {
+        return _mountedSettingsGroups.TryGetValue(key, out var group) ? group : null;
+    }
 
     public void MountSettingsGroup(SettingsGroup group)
     {
@@ -42,14 +46,13 @@ public sealed class SettingsService
     {
         SettingItemBase? item = null;
         foreach (var key in keys)
-        {
             item = item switch
             {
                 null => _mountedSettingsGroups.TryGetValue(key, out var g) ? g : throw new KeyNotFoundException(),
                 SettingsGroup g => g[key] ?? throw new KeyNotFoundException(),
-                _ => throw new InvalidOperationException($"Cannot navigate into setting item of type '{item.GetType().Name}' (key: '{item.Key}'). Only SettingsGroup supports nested paths.")
+                _ => throw new InvalidOperationException(
+                    $"Cannot navigate into setting item of type '{item.GetType().Name}' (key: '{item.Key}'). Only SettingsGroup supports nested paths.")
             };
-        }
 
         return item;
     }
@@ -84,10 +87,7 @@ public sealed class SettingsService
     public async Task SaveSettingsAsync()
     {
         var data = new Dictionary<string, Dictionary<string, JsonElement>>();
-        foreach (var (key, group) in _mountedSettingsGroups)
-        {
-            data[key] = CollectGroupValues(group);
-        }
+        foreach (var (key, group) in _mountedSettingsGroups) data[key] = CollectGroupValues(group);
 
         await _storageService.SaveAsync(data);
     }
@@ -104,10 +104,7 @@ public sealed class SettingsService
 
     private void ApplyDefaultValues()
     {
-        foreach (var group in _mountedSettingsGroups.Values)
-        {
-            ApplyGroupDefaults(group);
-        }
+        foreach (var group in _mountedSettingsGroups.Values) ApplyGroupDefaults(group);
     }
 
     private static void ApplyGroupDefaults(SettingsGroup group)
@@ -150,10 +147,7 @@ public sealed class SettingsService
     private static Dictionary<string, JsonElement> CollectGroupValues(SettingsGroup group)
     {
         var result = new Dictionary<string, JsonElement>();
-        foreach (var item in group.SettingItems)
-        {
-            CollectItemValue(item, result);
-        }
+        foreach (var item in group.SettingItems) CollectItemValue(item, result);
         return result;
     }
 
@@ -161,10 +155,7 @@ public sealed class SettingsService
     {
         if (item is SettingsGroup subGroup)
         {
-            foreach (var child in subGroup.SettingItems)
-            {
-                CollectItemValue(child, result);
-            }
+            foreach (var child in subGroup.SettingItems) CollectItemValue(child, result);
             return;
         }
 
@@ -179,20 +170,14 @@ public sealed class SettingsService
 
     private static void ApplySettingsToGroup(SettingsGroup group, Dictionary<string, JsonElement> items)
     {
-        foreach (var item in group.SettingItems)
-        {
-            ApplySettingValue(item, items);
-        }
+        foreach (var item in group.SettingItems) ApplySettingValue(item, items);
     }
 
     private static void ApplySettingValue(SettingItemBase item, Dictionary<string, JsonElement> items)
     {
         if (item is SettingsGroup subGroup)
         {
-            foreach (var child in subGroup.SettingItems)
-            {
-                ApplySettingValue(child, items);
-            }
+            foreach (var child in subGroup.SettingItems) ApplySettingValue(child, items);
             return;
         }
 

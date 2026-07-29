@@ -1,6 +1,7 @@
 # ImmersingLinker Python SDK
 
-适用于 [ClassIsland](https://github.com/ClassIsland/ClassIsland) 生态的 Python 异步客户端库，提供班级信息管理、课程查询和自动化计划操作的完整 API 封装。
+适用于 [ClassIsland](https://github.com/ClassIsland/ClassIsland) 生态的 Python 异步客户端库，提供班级信息管理、课程查询和自动化计划操作的完整
+API 封装。
 
 ## 安装
 
@@ -45,12 +46,12 @@ asyncio.run(main())
 
 ### 客户端类
 
-| 客户端 | 用途 | 方法数 |
-|--------|------|--------|
-| `AppServiceClient` | 连接测试 | 2 |
-| `ClassServiceClient` | 班级/学生/扩展属性/分组规则 CRUD | 31 |
-| `LessonServiceClient` | 课程查询/时间管理/档案 | 19 |
-| `AutomationServiceClient` | 自动化计划 CRUD + 离线工厂 | 13 |
+| 客户端                       | 用途                   | 方法数 |
+|---------------------------|----------------------|-----|
+| `AppServiceClient`        | 连接测试                 | 2   |
+| `ClassServiceClient`      | 班级/学生/扩展属性/分组规则 CRUD | 31  |
+| `LessonServiceClient`     | 课程查询/时间管理/档案         | 19  |
+| `AutomationServiceClient` | 自动化计划 CRUD + 离线工厂    | 13  |
 
 所有客户端均支持 `async with` 上下文管理器模式。
 

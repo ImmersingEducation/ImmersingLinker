@@ -1,5 +1,11 @@
+from .clients import (
+    AppServiceClient,
+    LessonServiceClient,
+    ClassServiceClient,
+    AutomationServiceClient,
+    ImmersingLinkerError,
+)
 from .enums import Gender, RuleSetSatisfyMode, TimeState
-
 from .types import (
     Application,
     ClassInfo,
@@ -40,14 +46,6 @@ from .types import (
     TimeLayoutItem,
     ClassPlan,
     Profile,
-)
-
-from .clients import (
-    AppServiceClient,
-    LessonServiceClient,
-    ClassServiceClient,
-    AutomationServiceClient,
-    ImmersingLinkerError,
 )
 
 __all__ = [

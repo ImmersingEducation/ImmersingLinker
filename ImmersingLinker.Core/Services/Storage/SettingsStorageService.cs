@@ -5,9 +5,8 @@ namespace ImmersingLinker.Core.Services.Storage;
 
 public sealed class SettingsStorageService : ISettingsStorageService
 {
-    private readonly string _filePath;
-
     private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
+    private readonly string _filePath;
 
     public SettingsStorageService()
         : this(Path.Combine(AppContext.BaseDirectory, "Data", "Settings.json"))

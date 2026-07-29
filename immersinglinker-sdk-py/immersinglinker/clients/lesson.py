@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
+import aiohttp
 import json
 from datetime import timedelta
 
-import aiohttp
-
+from .base import ImmersingLinkerError, _parse_timedelta
 from ..enums import TimeState
 from ..types import Subject, TimeLayoutItem, ClassPlan, Profile
-from .base import ImmersingLinkerError, _parse_timedelta
 
 
 class LessonServiceClient:
@@ -48,7 +47,7 @@ class LessonServiceClient:
         return self._session
 
     async def _get(
-        self, path: str, *, nullable: bool = False
+            self, path: str, *, nullable: bool = False
     ) -> str:
         session = await self._ensure_session()
         async with session.get(path) as response:

@@ -1,7 +1,5 @@
 using System.Text.Json;
-using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Enums.Automation;
-using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
 
 namespace ImmersingLinker.Core.Models.Automation;
 

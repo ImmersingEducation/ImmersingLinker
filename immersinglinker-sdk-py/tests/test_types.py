@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from uuid import UUID, uuid4
-
 import pytest
+from uuid import UUID, uuid4
 
 from immersinglinker.enums import Gender, RuleSetSatisfyMode
 from immersinglinker.types import (
     Action,
-    ActionDto,
     Application,
     AutomationPlan,
     AutomationPlanInfo,
@@ -17,16 +15,12 @@ from immersinglinker.types import (
     ClassPlan,
     CreateAutomationPlanRequest,
     CreateClassRequest,
-    CreateExtraPropertyRequest,
     CreateGroupRequest,
     CreateGroupingRuleRequest,
-    CreateStudentRequest,
     Group,
     GroupingRule,
     GroupingRuleResponse,
     Profile,
-    RuleBase,
-    RuleNodeDto,
     RuleSet,
     RuleSetDto,
     Student,
@@ -38,11 +32,6 @@ from immersinglinker.types import (
     UnknownAction,
     UnknownRuleBase,
     UnknownTrigger,
-    UpdateAutomationPlanRequest,
-    UpdateClassRequest,
-    UpdateExtraPropertyRequest,
-    UpdateGroupRequest,
-    UpdateGroupingRuleRequest,
     UpdateStudentRequest,
     UrlTrigger,
 )

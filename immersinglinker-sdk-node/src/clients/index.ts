@@ -1,10 +1,12 @@
 /** 客户端基础类及错误类型 */
-export { ServiceClientBase, ImmersingLinkerError, TimeoutError, NotFoundError, ConflictError, BadRequestError } from './base.js';
+export {
+    ServiceClientBase, ImmersingLinkerError, TimeoutError, NotFoundError, ConflictError, BadRequestError
+} from './base.js';
 /** 应用基础客户端 */
-export { AppServiceClient } from './app.js';
+export {AppServiceClient} from './app.js';
 /** 课表/课程信息客户端 */
-export { LessonServiceClient } from './lesson.js';
+export {LessonServiceClient} from './lesson.js';
 /** 班级管理客户端 */
-export { ClassServiceClient } from './class.js';
+export {ClassServiceClient} from './class.js';
 /** 自动化管理客户端 */
-export { AutomationServiceClient } from './automation.js';
+export {AutomationServiceClient} from './automation.js';

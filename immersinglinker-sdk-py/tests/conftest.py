@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+import aiohttp
 import json
+import pytest
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
-
-import aiohttp
-import pytest
 
 
 @pytest.fixture

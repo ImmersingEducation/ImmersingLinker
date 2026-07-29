@@ -7,8 +7,8 @@ from datetime import timedelta
 from enum import Enum
 from typing import Any
 
-from ..types import Class, ClassExtraProperty, ClassInfo, Student, StudentExtraProperty
 from ..types import AutomationPlan, AutomationPlanInfo
+from ..types import Class, ClassExtraProperty, ClassInfo, Student, StudentExtraProperty
 from ..types import Subject, TimeLayoutItem, ClassPlan, Profile
 
 

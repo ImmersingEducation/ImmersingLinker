@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import json
+import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-
-import pytest
 
 from immersinglinker.clients.automation import AutomationServiceClient
 from immersinglinker.clients.base import ImmersingLinkerError
 from immersinglinker.enums import RuleSetSatisfyMode
 from immersinglinker.types import (
-    ActionDto,
     CreateAutomationPlanRequest,
     TriggerDto,
     UrlTrigger,

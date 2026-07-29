@@ -1,11 +1,9 @@
 from __future__ import annotations
 
+import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
-
 from immersinglinker.clients.app import AppServiceClient
-from immersinglinker.clients.base import ImmersingLinkerError
 from tests.conftest import _ctx, _resp
 
 

@@ -1,5 +1,3 @@
-using System.Reflection;
-using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Attributes.Automation;
 using ImmersingLinker.Core.Services.Automation;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
@@ -130,37 +128,77 @@ public class ActionServiceTest
     private class StubActionA : Action
     {
         public override bool Revertable => false;
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 
     [Action("test.StubActionB", "Stub B")]
     private class StubActionB : Action
     {
         public override bool Revertable => true;
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 
     [Action("test.StubActionA", "Duplicate A")]
     private class StubActionDuplicate : Action
     {
         public override bool Revertable => false;
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 
     private abstract class AbstractAction : Action
     {
         public override bool Revertable => false;
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 
     private class NoAttributeAction : Action
     {
         public override bool Revertable => false;
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 }

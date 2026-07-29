@@ -22,9 +22,10 @@ public sealed class ActionResolver : IActionResolver
 
         try
         {
-            if (dto.Properties is { } props && props.ValueKind != JsonValueKind.Undefined && props.ValueKind != JsonValueKind.Null)
+            if (dto.Properties is { } props && props.ValueKind != JsonValueKind.Undefined &&
+                props.ValueKind != JsonValueKind.Null)
             {
-                var action = JsonSerializer.Deserialize(props, type) as Action;
+                var action = props.Deserialize(type) as Action;
                 if (action is null)
                     return (null, $"Failed to deserialize action properties for key: {dto.ActionKey}");
                 return (action, null);

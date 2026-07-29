@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json.Nodes;
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Abstractions.Storage;
@@ -6,7 +5,6 @@ using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Services.Automation;
 using ImmersingLinker.Core.Services.Setting;
 using ImmersingLinker.Core.Services.Storage;
-using Microsoft.AspNetCore.Mvc;
 using ImmersingLinker.Core.Services.ThirdParty;
 using Scalar.AspNetCore;
 
@@ -43,8 +41,8 @@ var settingsService = app.Services.GetRequiredService<SettingsService>();
 var settingsLoader = new SettingsGroupLoader();
 var settingsDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Settings");
 if (Directory.Exists(settingsDir))
-{
-    foreach (var file in Directory.GetFiles(settingsDir, "*.json").Where(static f => !f.EndsWith(".schema.json", StringComparison.OrdinalIgnoreCase)))
+    foreach (var file in Directory.GetFiles(settingsDir, "*.json")
+                 .Where(static f => !f.EndsWith(".schema.json", StringComparison.OrdinalIgnoreCase)))
     {
         var groupKey = Path.GetFileNameWithoutExtension(file);
         var json = await File.ReadAllTextAsync(file);
@@ -52,7 +50,7 @@ if (Directory.Exists(settingsDir))
         var group = settingsLoader.LoadFromJson(groupKey, node);
         settingsService.MountSettingsGroup(group);
     }
-}
+
 await settingsService.InitializeAsync();
 
 if (app.Environment.IsDevelopment())
@@ -64,18 +62,16 @@ if (app.Environment.IsDevelopment())
 var pipeline = app.Services.GetRequiredService<IAutomationPipeline>();
 var storage = app.Services.GetRequiredService<IAutomationStorageService>();
 var planInfos = await storage.GetInfos();
-var plans = new List<ImmersingLinker.Core.Models.Automation.AutomationPlan>();
+var plans = new List<AutomationPlan>();
 foreach (var info in planInfos)
 {
     var plan = await storage.GetData(info.Guid);
     if (plan is not null) plans.Add(plan);
 }
+
 await pipeline.LoadAllPlans(plans);
 
-app.Lifetime.ApplicationStopping.Register(async () =>
-{
-    await pipeline.DisposeAsync();
-});
+app.Lifetime.ApplicationStopping.Register(async () => { await pipeline.DisposeAsync(); });
 
 app.UseHttpsRedirection();
 

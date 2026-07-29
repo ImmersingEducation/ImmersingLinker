@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import json
+import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
-
-import pytest
 
 from immersinglinker.clients.base import ImmersingLinkerError
 from immersinglinker.clients.lesson import LessonServiceClient

@@ -4,7 +4,10 @@
   "title": "ImmersingLinker Settings Group",
   "description": "设置组定义文件的 JSON Schema，用于描述一组相关的应用设置项。支持嵌套分组。",
   "type": "object",
-  "required": ["name", "items"],
+  "required": [
+    "name",
+    "items"
+  ],
   "additionalProperties": false,
   "properties": {
     "name": {
@@ -38,17 +41,29 @@
         }
       ]
     },
-
     "settingItem": {
       "description": "叶子设置项，包含具体的类型、默认值和验证规则",
       "type": "object",
-      "required": ["general", "name"],
+      "required": [
+        "general",
+        "name"
+      ],
       "additionalProperties": false,
       "properties": {
         "general": {
           "type": "string",
           "description": "设置项的数据类型，支持 C# 类型别名或完整类型名",
-          "examples": ["bool", "int", "string", "double", "float", "long", "decimal", "List<string>", "Dictionary<string, int>"]
+          "examples": [
+            "bool",
+            "int",
+            "string",
+            "double",
+            "float",
+            "long",
+            "decimal",
+            "List<string>",
+            "Dictionary<string, int>"
+          ]
         },
         "name": {
           "type": "string",
@@ -77,11 +92,13 @@
         }
       }
     },
-
     "nestedGroup": {
       "description": "嵌套设置组，包含自身的名称、描述和子设置项",
       "type": "object",
-      "required": ["name", "items"],
+      "required": [
+        "name",
+        "items"
+      ],
       "additionalProperties": false,
       "properties": {
         "name": {
@@ -104,7 +121,6 @@
         }
       }
     },
-
     "typeName": {
       "description": "C# 类型名称：支持别名、完整类型名、可空类型(?)、泛型类型(List<T>等)",
       "type": "string",

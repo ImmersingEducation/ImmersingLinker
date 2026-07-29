@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Automation;
+using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
 
 namespace ImmersingLinker.Core.Services.Storage;
 
@@ -13,7 +14,7 @@ public sealed class AutomationStorageService : IAutomationStorageService
         WriteIndented = true,
         TypeInfoResolver = new PolymorphicTypeResolver(
             typeof(Trigger),
-            typeof(Abstractions.Automation.Action),
+            typeof(Action),
             typeof(RuleBase)),
         Converters = { new JsonStringEnumConverter() }
     };
@@ -37,13 +38,11 @@ public sealed class AutomationStorageService : IAutomationStorageService
             var guid = Guid.Parse(Path.GetFileNameWithoutExtension(file.Name));
             var plan = await GetData(guid);
             if (plan is not null)
-            {
                 infos.Add(new AutomationPlanInfo
                 {
                     Guid = guid,
                     Name = plan.Name
                 });
-            }
         }
 
         return infos;

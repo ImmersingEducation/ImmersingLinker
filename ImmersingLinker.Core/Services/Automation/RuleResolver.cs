@@ -35,10 +35,7 @@ public sealed class RuleResolver : IRuleResolver
 
     private (RuleBase? rule, string? error) ResolveNode(RuleNodeDto node)
     {
-        if (node.RuleSet is not null)
-        {
-            return ResolveRuleSet(node.RuleSet);
-        }
+        if (node.RuleSet is not null) return ResolveRuleSet(node.RuleSet);
 
         if (node.RuleKey is null)
             return (null, "Rule node must have either RuleKey or RuleSet");
@@ -50,15 +47,12 @@ public sealed class RuleResolver : IRuleResolver
         try
         {
             RuleBase rule;
-            if (node.Properties is { } props && props.ValueKind != JsonValueKind.Undefined && props.ValueKind != JsonValueKind.Null)
-            {
-                rule = JsonSerializer.Deserialize(props, type) as RuleBase
+            if (node.Properties is { } props && props.ValueKind != JsonValueKind.Undefined &&
+                props.ValueKind != JsonValueKind.Null)
+                rule = props.Deserialize(type) as RuleBase
                        ?? (RuleBase)Activator.CreateInstance(type)!;
-            }
             else
-            {
                 rule = (RuleBase)Activator.CreateInstance(type)!;
-            }
 
             rule.Not = node.Not;
             return (rule, null);

@@ -1,6 +1,6 @@
 namespace ImmersingLinker.Core.Models.Setting;
 
-public class SettingItem<T> : SettingItemBase 
+public class SettingItem<T> : SettingItemBase
 {
     public T? DefaultValue { get; init; }
 

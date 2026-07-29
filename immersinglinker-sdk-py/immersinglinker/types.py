@@ -13,7 +13,6 @@ from uuid import UUID, uuid4
 
 from .enums import Gender, RuleSetSatisfyMode
 
-
 # ============================================================================
 # Polymorphic type registry & deserialization helpers
 # ============================================================================
@@ -543,7 +542,9 @@ class RuleSet(RuleBase):
         return cls(
             Guid=UUID(data["Guid"]) if isinstance(data.get("Guid"), str) else data.get("Guid", uuid4()),
             Not=data.get("Not", False),
-            SatisfyMode=RuleSetSatisfyMode(data["SatisfyMode"]) if isinstance(data.get("SatisfyMode"), str) else data.get("SatisfyMode", RuleSetSatisfyMode.AllSatisfied),
+            SatisfyMode=RuleSetSatisfyMode(data["SatisfyMode"]) if isinstance(data.get("SatisfyMode"),
+                                                                              str) else data.get("SatisfyMode",
+                                                                                                 RuleSetSatisfyMode.AllSatisfied),
             Rules=[r for d in data.get("Rules", []) if (r := _deserialize_rule_base(d)) is not None],
         )
 

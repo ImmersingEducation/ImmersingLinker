@@ -10,7 +10,7 @@ public sealed class RuleService : IRuleService
 
     public void RegisterRule(Type ruleType)
     {
-        var attr = ruleType.GetCustomAttribute<RuleAttribute>(inherit: false);
+        var attr = ruleType.GetCustomAttribute<RuleAttribute>(false);
         if (attr is null) return;
 
         _ruleTypes[attr.Key] = ruleType;
@@ -31,9 +31,6 @@ public sealed class RuleService : IRuleService
         var ruleTypes = assembly.GetTypes()
             .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(Rule).IsAssignableFrom(t));
 
-        foreach (var type in ruleTypes)
-        {
-            RegisterRule(type);
-        }
+        foreach (var type in ruleTypes) RegisterRule(type);
     }
 }

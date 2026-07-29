@@ -57,7 +57,7 @@ public class LessonServiceClient
     {
         var response = await _http.GetAsync("/lesson/current/selected-index");
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<int>());
+        return await response.Content.ReadFromJsonAsync<int>();
     }
 
     public async Task<bool> GetIsClassPlanEnabledAsync()
@@ -133,35 +133,35 @@ public class LessonServiceClient
     {
         var response = await _http.GetAsync("/lesson/timer/on-class-left");
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<TimeSpan>());
+        return await response.Content.ReadFromJsonAsync<TimeSpan>();
     }
 
     public async Task<TimeSpan> GetOnBreakingLeftTimeAsync()
     {
         var response = await _http.GetAsync("/lesson/timer/on-breaking-left");
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<TimeSpan>());
+        return await response.Content.ReadFromJsonAsync<TimeSpan>();
     }
 
     public async Task<TimeSpan> GetElapsedSincePreviousClassAsync()
     {
         var response = await _http.GetAsync("/lesson/timer/elapsed-since-previous-class");
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<TimeSpan>());
+        return await response.Content.ReadFromJsonAsync<TimeSpan>();
     }
 
     public async Task<TimeSpan> GetElapsedSincePreviousBreakingAsync()
     {
         var response = await _http.GetAsync("/lesson/timer/elapsed-since-previous-breaking");
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<TimeSpan>());
+        return await response.Content.ReadFromJsonAsync<TimeSpan>();
     }
 
     public async Task<TimeSpan> GetElapsedSincePreviousAnyAsync()
     {
         var response = await _http.GetAsync("/lesson/timer/elapsed-since-previous-any");
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<TimeSpan>());
+        return await response.Content.ReadFromJsonAsync<TimeSpan>();
     }
 
     #endregion

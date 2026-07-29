@@ -8,28 +8,28 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="ImmersingLinker.Test" />
+        <InternalsVisibleTo Include="ImmersingLinker.Test"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="ClassIsland.Shared.IPC" Version="2.1.0.1" />
-      <PackageReference Include="DynamicExpresso.Core" Version="2.19.3" />
+        <PackageReference Include="ClassIsland.Shared.IPC" Version="2.1.0.1"/>
+        <PackageReference Include="DynamicExpresso.Core" Version="2.19.3"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ImmersingLinker.SourceGenerator\ImmersingLinker.SourceGenerator.csproj"
-                        OutputItemType="Analyzer"
-                        ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\ImmersingLinker.SourceGenerator\ImmersingLinker.SourceGenerator.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Assets\Settings\iedu.ilinker.basic.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <AdditionalFiles Include="Assets\Settings\iedu.ilinker.basic.json" />
-      <None Update="Assets\Settings\settings-group.schema.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="Assets\Settings\iedu.ilinker.basic.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <AdditionalFiles Include="Assets\Settings\iedu.ilinker.basic.json"/>
+        <None Update="Assets\Settings\settings-group.schema.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

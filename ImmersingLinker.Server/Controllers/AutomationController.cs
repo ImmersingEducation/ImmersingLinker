@@ -2,10 +2,7 @@ using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Models.Automation.Triggers;
-using ImmersingLinker.Core.Services.Storage;
-using ImmersingLinker.Server.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
 using static ImmersingLinker.Server.Extensions.GuidHelper;
 
 namespace ImmersingLinker.Server.Controllers;
@@ -14,11 +11,11 @@ namespace ImmersingLinker.Server.Controllers;
 [Route("[controller]")]
 public class AutomationController : ControllerBase
 {
-    private readonly IAutomationStorageService _automationStorageService;
-    private readonly IAutomationPipeline _automationPipeline;
-    private readonly ITriggerResolver _triggerResolver;
-    private readonly IRuleResolver _ruleResolver;
     private readonly IActionResolver _actionResolver;
+    private readonly IAutomationPipeline _automationPipeline;
+    private readonly IAutomationStorageService _automationStorageService;
+    private readonly IRuleResolver _ruleResolver;
+    private readonly ITriggerResolver _triggerResolver;
 
     public AutomationController(IAutomationStorageService automationStorageService,
         IAutomationPipeline automationPipeline,
@@ -36,7 +33,8 @@ public class AutomationController : ControllerBase
     #region Logic
 
     private async Task<(AutomationPlan? plan, IActionResult? error)> ResolvePlan(
-        Guid guid, string name, bool revertable, TriggerDto triggerDto, RuleSetDto? ruleSetDto, List<ActionDto> actionDtos)
+        Guid guid, string name, bool revertable, TriggerDto triggerDto, RuleSetDto? ruleSetDto,
+        List<ActionDto> actionDtos)
     {
         var (trigger, triggerError) = _triggerResolver.Resolve(triggerDto);
         if (triggerError is not null) return (null, BadRequest(triggerError));
@@ -57,6 +55,57 @@ public class AutomationController : ControllerBase
             Actions = actions!
         };
         return (plan, null);
+    }
+
+    #endregion
+
+    #region PUT
+
+    /// <summary>
+    ///     更新自动化计划
+    /// </summary>
+    /// <param name="planGuid">计划 GUID</param>
+    [HttpPut("{planGuid}")]
+    public async Task<IActionResult> UpdatePlan(string planGuid, [FromBody] UpdateAutomationPlanRequest request)
+    {
+        var guid = ParseGuidFromString(planGuid);
+        if (guid is null) return BadRequest("Invalid GUID format");
+
+        var existing = await _automationStorageService.GetData(guid.Value);
+        if (existing is null) return NotFound();
+
+        _automationPipeline.UnregisterPlan(guid.Value);
+
+        var (plan, error) = await ResolvePlan(
+            guid.Value, request.Name, request.Revertable,
+            request.Trigger, request.RuleSet, request.Actions);
+        if (error is not null) return error;
+
+        await _automationStorageService.SaveData(plan!);
+        await plan!.Loaded(_automationPipeline);
+        return Ok(plan);
+    }
+
+    #endregion
+
+    #region DELETE
+
+    /// <summary>
+    ///     删除自动化计划
+    /// </summary>
+    /// <param name="planGuid">计划 GUID</param>
+    [HttpDelete("{planGuid}")]
+    public async Task<IActionResult> DeletePlan(string planGuid)
+    {
+        var guid = ParseGuidFromString(planGuid);
+        if (guid is null) return BadRequest("Invalid GUID format");
+
+        var existing = await _automationStorageService.GetData(guid.Value);
+        if (existing is null) return NotFound();
+
+        _automationPipeline.UnregisterPlan(guid.Value);
+        _automationStorageService.DeleteData(guid.Value);
+        return NoContent();
     }
 
     #endregion
@@ -144,57 +193,6 @@ public class AutomationController : ControllerBase
             Payload = tag
         });
         return Ok();
-    }
-
-    #endregion
-
-    #region PUT
-
-    /// <summary>
-    ///     更新自动化计划
-    /// </summary>
-    /// <param name="planGuid">计划 GUID</param>
-    [HttpPut("{planGuid}")]
-    public async Task<IActionResult> UpdatePlan(string planGuid, [FromBody] UpdateAutomationPlanRequest request)
-    {
-        var guid = ParseGuidFromString(planGuid);
-        if (guid is null) return BadRequest("Invalid GUID format");
-
-        var existing = await _automationStorageService.GetData(guid.Value);
-        if (existing is null) return NotFound();
-
-        _automationPipeline.UnregisterPlan(guid.Value);
-
-        var (plan, error) = await ResolvePlan(
-            guid.Value, request.Name, request.Revertable,
-            request.Trigger, request.RuleSet, request.Actions);
-        if (error is not null) return error;
-
-        await _automationStorageService.SaveData(plan!);
-        await plan!.Loaded(_automationPipeline);
-        return Ok(plan);
-    }
-
-    #endregion
-
-    #region DELETE
-
-    /// <summary>
-    ///     删除自动化计划
-    /// </summary>
-    /// <param name="planGuid">计划 GUID</param>
-    [HttpDelete("{planGuid}")]
-    public async Task<IActionResult> DeletePlan(string planGuid)
-    {
-        var guid = ParseGuidFromString(planGuid);
-        if (guid is null) return BadRequest("Invalid GUID format");
-
-        var existing = await _automationStorageService.GetData(guid.Value);
-        if (existing is null) return NotFound();
-
-        _automationPipeline.UnregisterPlan(guid.Value);
-        _automationStorageService.DeleteData(guid.Value);
-        return NoContent();
     }
 
     #endregion

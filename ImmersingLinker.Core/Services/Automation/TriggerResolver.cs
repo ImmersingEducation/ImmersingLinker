@@ -21,9 +21,10 @@ public sealed class TriggerResolver : ITriggerResolver
 
         try
         {
-            if (dto.Properties is { } props && props.ValueKind != JsonValueKind.Undefined && props.ValueKind != JsonValueKind.Null)
+            if (dto.Properties is { } props && props.ValueKind != JsonValueKind.Undefined &&
+                props.ValueKind != JsonValueKind.Null)
             {
-                var trigger = JsonSerializer.Deserialize(props, type) as Trigger;
+                var trigger = props.Deserialize(type) as Trigger;
                 if (trigger is null)
                     return (null, $"Failed to deserialize trigger properties for key: {dto.TriggerKey}");
                 return (trigger, null);

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using ImmersingLinker.Core.Models.Setting;
 using ImmersingLinker.Core.Services.Setting;
@@ -7,7 +6,10 @@ namespace ImmersingLinker.Test.Setting;
 
 public class SettingsGroupLoaderTest
 {
-    private static SettingsGroupLoader CreateLoader() => new();
+    private static SettingsGroupLoader CreateLoader()
+    {
+        return new SettingsGroupLoader();
+    }
 
     #region LoadSettingItem
 
@@ -16,8 +18,8 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {"name": "Test", "default-value": false, "validator": ""}
-            """);
+                                  {"name": "Test", "default-value": false, "validator": ""}
+                                  """);
 
         var item = loader.LoadSettingItem<bool>("test.key", node);
 
@@ -31,8 +33,8 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {"name": "Count", "default-value": 42, "validator": ""}
-            """);
+                                  {"name": "Count", "default-value": 42, "validator": ""}
+                                  """);
 
         var item = loader.LoadSettingItem<int>("test.key", node);
 
@@ -44,8 +46,8 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {"name": "Label", "default-value": "hello", "validator": ""}
-            """);
+                                  {"name": "Label", "default-value": "hello", "validator": ""}
+                                  """);
 
         var item = loader.LoadSettingItem<string>("test.key", node);
 
@@ -57,8 +59,8 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {"name": "Even", "default-value": 0, "validator": "x => x % 2 == 0"}
-            """);
+                                  {"name": "Even", "default-value": 0, "validator": "x => x % 2 == 0"}
+                                  """);
 
         var item = loader.LoadSettingItem<int>("test.key", node);
 
@@ -71,8 +73,8 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {"name": "NoValidator", "default-value": 0, "validator": ""}
-            """);
+                                  {"name": "NoValidator", "default-value": 0, "validator": ""}
+                                  """);
 
         var item = loader.LoadSettingItem<int>("test.key", node);
 
@@ -98,8 +100,8 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {"name": "NoDefault", "validator": ""}
-            """);
+                                  {"name": "NoDefault", "validator": ""}
+                                  """);
 
         var item = loader.LoadSettingItem<int>("test.key", node);
 
@@ -115,18 +117,18 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {
-                "name": "TestGroup",
-                "items": {
-                    "setting1": {
-                        "general": "bool",
-                        "name": "Bool Setting",
-                        "default-value": true,
-                        "validator": ""
-                    }
-                }
-            }
-            """);
+                                  {
+                                      "name": "TestGroup",
+                                      "items": {
+                                          "setting1": {
+                                              "general": "bool",
+                                              "name": "Bool Setting",
+                                              "default-value": true,
+                                              "validator": ""
+                                          }
+                                      }
+                                  }
+                                  """);
 
         var group = loader.LoadFromJson("group.key", node);
 
@@ -143,30 +145,30 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {
-                "name": "MixedGroup",
-                "items": {
-                    "boolVal": {
-                        "general": "bool",
-                        "name": "Bool",
-                        "default-value": true,
-                        "validator": ""
-                    },
-                    "intVal": {
-                        "general": "int",
-                        "name": "Int",
-                        "default-value": 42,
-                        "validator": ""
-                    },
-                    "strVal": {
-                        "general": "string",
-                        "name": "Str",
-                        "default-value": "hello",
-                        "validator": ""
-                    }
-                }
-            }
-            """);
+                                  {
+                                      "name": "MixedGroup",
+                                      "items": {
+                                          "boolVal": {
+                                              "general": "bool",
+                                              "name": "Bool",
+                                              "default-value": true,
+                                              "validator": ""
+                                          },
+                                          "intVal": {
+                                              "general": "int",
+                                              "name": "Int",
+                                              "default-value": 42,
+                                              "validator": ""
+                                          },
+                                          "strVal": {
+                                              "general": "string",
+                                              "name": "Str",
+                                              "default-value": "hello",
+                                              "validator": ""
+                                          }
+                                      }
+                                  }
+                                  """);
 
         var group = loader.LoadFromJson("group.key", node);
 
@@ -182,23 +184,23 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {
-                "name": "Root",
-                "items": {
-                    "sub": {
-                        "name": "SubGroup",
-                        "items": {
-                            "leaf": {
-                                "general": "bool",
-                                "name": "Leaf",
-                                "default-value": false,
-                                "validator": ""
-                            }
-                        }
-                    }
-                }
-            }
-            """);
+                                  {
+                                      "name": "Root",
+                                      "items": {
+                                          "sub": {
+                                              "name": "SubGroup",
+                                              "items": {
+                                                  "leaf": {
+                                                      "general": "bool",
+                                                      "name": "Leaf",
+                                                      "default-value": false,
+                                                      "validator": ""
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                                  """);
 
         var group = loader.LoadFromJson("root", node);
 
@@ -215,40 +217,40 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {
-                "name": "ExampleSettingsGroup",
-                "items": {
-                    "iedu.ilinker.basic": {
-                        "name": "Basic Settings",
-                        "items": {
-                            "iedu.ilinker.basic.launch-on-startup": {
-                                "general": "bool",
-                                "name": "Launch on startup",
-                                "default-value": false,
-                                "validator": "x => x == true"
-                            },
-                            "iedu.ilinker.basic.volume": {
-                                "general": "int",
-                                "name": "Volume",
-                                "default-value": 50,
-                                "validator": "x => x >= 0 && x <= 100"
-                            }
-                        }
-                    },
-                    "iedu.ilinker.advanced": {
-                        "name": "Advanced",
-                        "items": {
-                            "iedu.ilinker.advanced.timeout": {
-                                "general": "double",
-                                "name": "Timeout",
-                                "default-value": 30.0,
-                                "validator": ""
-                            }
-                        }
-                    }
-                }
-            }
-            """);
+                                  {
+                                      "name": "ExampleSettingsGroup",
+                                      "items": {
+                                          "iedu.ilinker.basic": {
+                                              "name": "Basic Settings",
+                                              "items": {
+                                                  "iedu.ilinker.basic.launch-on-startup": {
+                                                      "general": "bool",
+                                                      "name": "Launch on startup",
+                                                      "default-value": false,
+                                                      "validator": "x => x == true"
+                                                  },
+                                                  "iedu.ilinker.basic.volume": {
+                                                      "general": "int",
+                                                      "name": "Volume",
+                                                      "default-value": 50,
+                                                      "validator": "x => x >= 0 && x <= 100"
+                                                  }
+                                              }
+                                          },
+                                          "iedu.ilinker.advanced": {
+                                              "name": "Advanced",
+                                              "items": {
+                                                  "iedu.ilinker.advanced.timeout": {
+                                                      "general": "double",
+                                                      "name": "Timeout",
+                                                      "default-value": 30.0,
+                                                      "validator": ""
+                                                  }
+                                              }
+                                          }
+                                      }
+                                  }
+                                  """);
 
         var root = loader.LoadFromJson("root", node);
 
@@ -288,8 +290,8 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {"name": "Empty", "items": {}}
-            """);
+                                  {"name": "Empty", "items": {}}
+                                  """);
 
         var group = loader.LoadFromJson("empty", node);
 
@@ -301,18 +303,18 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {
-                "name": "Bad",
-                "items": {
-                    "badItem": {
-                        "general": "NonExistentType",
-                        "name": "Bad",
-                        "default-value": 0,
-                        "validator": ""
-                    }
-                }
-            }
-            """);
+                                  {
+                                      "name": "Bad",
+                                      "items": {
+                                          "badItem": {
+                                              "general": "NonExistentType",
+                                              "name": "Bad",
+                                              "default-value": 0,
+                                              "validator": ""
+                                          }
+                                      }
+                                  }
+                                  """);
 
         var ex = Assert.Throws<InvalidOperationException>(() => loader.LoadFromJson("bad", node));
         Assert.Contains("NonExistentType", ex.Message);
@@ -323,24 +325,24 @@ public class SettingsGroupLoaderTest
     {
         var loader = CreateLoader();
         var node = JsonNode.Parse("""
-            {
-                "name": "Dup",
-                "items": {
-                    "duplicate": {
-                        "general": "bool",
-                        "name": "First",
-                        "default-value": true,
-                        "validator": ""
-                    },
-                    "duplicate": {
-                        "general": "bool",
-                        "name": "Second",
-                        "default-value": false,
-                        "validator": ""
-                    }
-                }
-            }
-            """);
+                                  {
+                                      "name": "Dup",
+                                      "items": {
+                                          "duplicate": {
+                                              "general": "bool",
+                                              "name": "First",
+                                              "default-value": true,
+                                              "validator": ""
+                                          },
+                                          "duplicate": {
+                                              "general": "bool",
+                                              "name": "Second",
+                                              "default-value": false,
+                                              "validator": ""
+                                          }
+                                      }
+                                  }
+                                  """);
 
         Assert.Throws<ArgumentException>(() => loader.LoadFromJson("dup", node));
     }

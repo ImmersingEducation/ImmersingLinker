@@ -10,7 +10,7 @@ public sealed class TriggerService : ITriggerService
 
     public void RegisterTrigger(Type triggerType)
     {
-        var attr = triggerType.GetCustomAttribute<TriggerAttribute>(inherit: false);
+        var attr = triggerType.GetCustomAttribute<TriggerAttribute>(false);
         if (attr is null) return;
 
         _triggerTypes[attr.Key] = triggerType;
@@ -31,9 +31,6 @@ public sealed class TriggerService : ITriggerService
         var triggerTypes = assembly.GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && typeof(Trigger).IsAssignableFrom(t));
 
-        foreach (var type in triggerTypes)
-        {
-            RegisterTrigger(type);
-        }
+        foreach (var type in triggerTypes) RegisterTrigger(type);
     }
 }

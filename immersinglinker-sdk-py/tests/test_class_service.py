@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import json
+import pytest
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
-import pytest
-
-from immersinglinker.clients.class_service import ClassServiceClient
 from immersinglinker.clients.base import ImmersingLinkerError
+from immersinglinker.clients.class_service import ClassServiceClient
 from immersinglinker.enums import Gender
 from immersinglinker.types import (
     Class,
@@ -19,7 +18,6 @@ from immersinglinker.types import (
     CreateGroupingRuleRequest,
     CreateStudentRequest,
     GroupingRuleResponse,
-    Student,
     StudentExtraProperty,
     UpdateClassRequest,
     UpdateExtraPropertyRequest,

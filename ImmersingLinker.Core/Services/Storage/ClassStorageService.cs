@@ -9,12 +9,12 @@ public sealed class ClassStorageService : IClassStorageService
     private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
     private static readonly string _dataDirectory = Path.Combine(AppContext.BaseDirectory, "Data", "Classes");
 
-    public static ClassStorageService Instance { get; } = new();
-
     public ClassStorageService()
     {
         Directory.CreateDirectory(_dataDirectory);
     }
+
+    public static ClassStorageService Instance { get; } = new();
 
     public async Task<List<ClassInfo>> GetInfos()
     {

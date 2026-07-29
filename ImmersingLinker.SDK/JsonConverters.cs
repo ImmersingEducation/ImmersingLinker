@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImmersingLinker.Core.Abstractions.Automation;
-using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
 using ImmersingLinker.Core.Services.Storage;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;

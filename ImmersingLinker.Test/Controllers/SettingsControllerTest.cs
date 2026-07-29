@@ -3,7 +3,6 @@ using System.Text.Json.Nodes;
 using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Setting;
 using ImmersingLinker.Core.Services.Setting;
-using ImmersingLinker.Core.Services.Storage;
 using ImmersingLinker.Server.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -19,59 +18,59 @@ public class SettingsControllerTest
     private static SettingsGroup CreateBasicGroup()
     {
         return Loader.LoadFromJson("group.basic", JsonNode.Parse("""
-            {
-                "name": "Basic Settings",
-                "description": "Basic group",
-                "items": {
-                    "group.basic.bool-item": {
-                        "general": "bool",
-                        "name": "Bool Item",
-                        "description": "A bool setting",
-                        "default-value": false,
-                        "validator": "x => true"
-                    },
-                    "group.basic.int-item": {
-                        "general": "int",
-                        "name": "Int Item",
-                        "description": "An int setting",
-                        "default-value": 5157,
-                        "validator": "x => x >= 0 && x <= 65535"
-                    }
-                }
-            }
-            """));
+                                                                 {
+                                                                     "name": "Basic Settings",
+                                                                     "description": "Basic group",
+                                                                     "items": {
+                                                                         "group.basic.bool-item": {
+                                                                             "general": "bool",
+                                                                             "name": "Bool Item",
+                                                                             "description": "A bool setting",
+                                                                             "default-value": false,
+                                                                             "validator": "x => true"
+                                                                         },
+                                                                         "group.basic.int-item": {
+                                                                             "general": "int",
+                                                                             "name": "Int Item",
+                                                                             "description": "An int setting",
+                                                                             "default-value": 5157,
+                                                                             "validator": "x => x >= 0 && x <= 65535"
+                                                                         }
+                                                                     }
+                                                                 }
+                                                                 """));
     }
 
     private static SettingsGroup CreateNestedGroup()
     {
         return Loader.LoadFromJson("group.nested", JsonNode.Parse("""
-            {
-                "name": "Nested Group",
-                "description": "A nested structure",
-                "items": {
-                    "group.nested.sub": {
-                        "name": "Sub Group",
-                        "description": "A sub group",
-                        "items": {
-                            "group.nested.sub.string-item": {
-                                "general": "string",
-                                "name": "String Item",
-                                "description": "A string setting",
-                                "default-value": "hello",
-                                "validator": ""
-                            }
-                        }
-                    },
-                    "group.nested.leaf": {
-                        "general": "double",
-                        "name": "Leaf Double",
-                        "description": "A double setting",
-                        "default-value": 3.14,
-                        "validator": ""
-                    }
-                }
-            }
-            """));
+                                                                  {
+                                                                      "name": "Nested Group",
+                                                                      "description": "A nested structure",
+                                                                      "items": {
+                                                                          "group.nested.sub": {
+                                                                              "name": "Sub Group",
+                                                                              "description": "A sub group",
+                                                                              "items": {
+                                                                                  "group.nested.sub.string-item": {
+                                                                                      "general": "string",
+                                                                                      "name": "String Item",
+                                                                                      "description": "A string setting",
+                                                                                      "default-value": "hello",
+                                                                                      "validator": ""
+                                                                                  }
+                                                                              }
+                                                                          },
+                                                                          "group.nested.leaf": {
+                                                                              "general": "double",
+                                                                              "name": "Leaf Double",
+                                                                              "description": "A double setting",
+                                                                              "default-value": 3.14,
+                                                                              "validator": ""
+                                                                          }
+                                                                      }
+                                                                  }
+                                                                  """));
     }
 
     private static async Task<SettingsService> CreateInitializedService(

@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
 
 namespace ImmersingLinker.SDK;
@@ -289,7 +288,8 @@ public class ClassServiceClient
 
     public async Task<GroupingRuleResponse> AddGroupAsync(string classGuid, string ruleGuid, CreateGroupRequest request)
     {
-        var response = await _http.PostAsJsonAsync($"/class/{classGuid}/groupingRules/{ruleGuid}", request, JsonOptions);
+        var response =
+            await _http.PostAsJsonAsync($"/class/{classGuid}/groupingRules/{ruleGuid}", request, JsonOptions);
         if (response.StatusCode == HttpStatusCode.NotFound)
             throw new InvalidOperationException($"Class {classGuid} or rule {ruleGuid} not found");
         response.EnsureSuccessStatusCode();

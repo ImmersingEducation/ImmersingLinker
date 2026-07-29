@@ -8,93 +8,8 @@ namespace ImmersingLinker.Test.Automation;
 
 public class AutomationTest
 {
-    private static readonly Guid TestPlanGuid = Guid.NewGuid();
     private const string TestPlanName = "TestPlan";
-
-    // ===== Test Stubs =====
-
-    private class TestTrigger : Trigger, IManualTrigger
-    {
-        public void Fire(TriggerFiredEventArgs args)
-        {
-            OnTriggerFired(this, args);
-        }
-    }
-
-    private class TestQueryTrigger : Trigger, IQueryNecessaryTrigger
-    {
-        private readonly Func<Task<bool>> _checkFunc;
-
-        public TestQueryTrigger(Func<Task<bool>> checkFunc, TimeSpan? interval = null)
-        {
-            _checkFunc = checkFunc;
-            PollingInterval = interval ?? TimeSpan.FromSeconds(1);
-        }
-
-        public TimeSpan PollingInterval { get; }
-
-        public Task<bool> CheckConditionAsync()
-        {
-            return _checkFunc();
-        }
-    }
-
-    private class TestRule : Rule
-    {
-        private readonly bool _satisfied;
-
-        public TestRule(bool satisfied)
-        {
-            _satisfied = satisfied;
-        }
-
-        public override bool IsSatisfied() => _satisfied;
-    }
-
-    private class TestAction : Action
-    {
-        private readonly Func<Task>? _onInvoke;
-        private readonly Func<Task>? _onRevert;
-        private readonly Func<Exception, Task>? _onRevertFailed;
-        private readonly bool _revertable;
-
-        public bool InvokeCalled { get; private set; }
-        public bool RevertCalled { get; private set; }
-        public int InvokeCount { get; private set; }
-        public int RevertCount { get; private set; }
-
-        public TestAction(bool revertable = true,
-            Func<Task>? onInvoke = null,
-            Func<Task>? onRevert = null,
-            Func<Exception, Task>? onRevertFailed = null)
-        {
-            _revertable = revertable;
-            _onInvoke = onInvoke;
-            _onRevert = onRevert;
-            _onRevertFailed = onRevertFailed;
-        }
-
-        public override bool Revertable => _revertable;
-
-        public override Task OnInvoke()
-        {
-            InvokeCalled = true;
-            InvokeCount++;
-            return _onInvoke?.Invoke() ?? Task.CompletedTask;
-        }
-
-        public override Task OnRevert()
-        {
-            RevertCalled = true;
-            RevertCount++;
-            return _onRevert?.Invoke() ?? Task.CompletedTask;
-        }
-
-        public override Task OnRevertFailed(Exception e)
-        {
-            return _onRevertFailed?.Invoke(e) ?? Task.CompletedTask;
-        }
-    }
+    private static readonly Guid TestPlanGuid = Guid.NewGuid();
 
     private static RuleSet CreateRuleSet(RuleSetSatisfyMode mode, params RuleBase[] rules)
     {
@@ -306,8 +221,8 @@ public class AutomationTest
     [Fact]
     public async Task AutomationRunner_ExecuteAsync_RevertMode_SkipsNonRevertable()
     {
-        var action1 = new TestAction(revertable: true);
-        var action2 = new TestAction(revertable: false);
+        var action1 = new TestAction();
+        var action2 = new TestAction(false);
         var forwardRunner = new AutomationRunner(Guid.NewGuid(), false, [action1, action2]);
 
         await forwardRunner.ExecuteAsync();
@@ -345,7 +260,11 @@ public class AutomationTest
         RunnerFailedEventArgs? failedArgs = null;
         var events = new List<string>();
         runner.Stopped += (_, _) => events.Add("Stopped");
-        runner.Failed += (_, args) => { events.Add("Failed"); failedArgs = args; };
+        runner.Failed += (_, args) =>
+        {
+            events.Add("Failed");
+            failedArgs = args;
+        };
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => runner.ExecuteAsync());
 
@@ -493,7 +412,7 @@ public class AutomationTest
         var trigger = new TestTrigger();
         var action = new TestAction();
         var ruleSet = CreateRuleSet(RuleSetSatisfyMode.AllSatisfied, new TestRule(true));
-        var plan = CreateTestPlan(trigger: trigger, ruleSet: ruleSet, actions: [action]);
+        var plan = CreateTestPlan(trigger, ruleSet, [action]);
 
         await pipeline.LoadAllPlans([plan]);
 
@@ -518,7 +437,7 @@ public class AutomationTest
         await using var pipeline = new AutomationPipeline();
         var trigger = new TestTrigger();
         var ruleSet = CreateRuleSet(RuleSetSatisfyMode.AllSatisfied, new TestRule(false));
-        var plan = CreateTestPlan(trigger: trigger, ruleSet: ruleSet);
+        var plan = CreateTestPlan(trigger, ruleSet);
 
         await pipeline.LoadAllPlans([plan]);
 
@@ -541,7 +460,7 @@ public class AutomationTest
     {
         await using var pipeline = new AutomationPipeline();
         var trigger = new TestTrigger();
-        var plan = CreateTestPlan(trigger: trigger);
+        var plan = CreateTestPlan(trigger);
 
         await pipeline.LoadAllPlans([plan]);
         pipeline.UnregisterPlan(plan.Guid);
@@ -565,7 +484,7 @@ public class AutomationTest
     {
         var pipeline = new AutomationPipeline();
         var trigger = new TestTrigger();
-        var plan = CreateTestPlan(trigger: trigger);
+        var plan = CreateTestPlan(trigger);
 
         await pipeline.LoadAllPlans([plan]);
         await pipeline.DisposeAsync();
@@ -645,10 +564,10 @@ public class AutomationTest
         var action2 = new TestAction();
         var ruleSet = CreateRuleSet(RuleSetSatisfyMode.AllSatisfied, new TestRule(true));
         var plan = CreateTestPlan(
-            trigger: trigger,
-            ruleSet: ruleSet,
-            actions: [action1, action2],
-            revertable: true);
+            trigger,
+            ruleSet,
+            [action1, action2],
+            true);
 
         await pipeline.LoadAllPlans([plan]);
 
@@ -679,7 +598,7 @@ public class AutomationTest
         await using var pipeline = new AutomationPipeline();
         var trigger = new TestTrigger();
         var action = new TestAction();
-        var plan = CreateTestPlan(trigger: trigger, actions: [action]);
+        var plan = CreateTestPlan(trigger, actions: [action]);
 
         await pipeline.LoadAllPlans([plan]);
 
@@ -709,7 +628,7 @@ public class AutomationTest
         var trigger = new TestTrigger();
         var action = new TestAction(onInvoke: () => throw new InvalidOperationException("fail"));
         var ruleSet = CreateRuleSet(RuleSetSatisfyMode.AllSatisfied, new TestRule(true));
-        var plan = CreateTestPlan(trigger: trigger, ruleSet: ruleSet, actions: [action]);
+        var plan = CreateTestPlan(trigger, ruleSet, [action]);
 
         await pipeline.LoadAllPlans([plan]);
 
@@ -726,5 +645,93 @@ public class AutomationTest
 
         Assert.NotNull(eventArgs);
         await Assert.ThrowsAsync<InvalidOperationException>(() => eventArgs!.Runner.ExecuteAsync());
+    }
+
+    // ===== Test Stubs =====
+
+    private class TestTrigger : Trigger, IManualTrigger
+    {
+        public void Fire(TriggerFiredEventArgs args)
+        {
+            OnTriggerFired(this, args);
+        }
+    }
+
+    private class TestQueryTrigger : Trigger, IQueryNecessaryTrigger
+    {
+        private readonly Func<Task<bool>> _checkFunc;
+
+        public TestQueryTrigger(Func<Task<bool>> checkFunc, TimeSpan? interval = null)
+        {
+            _checkFunc = checkFunc;
+            PollingInterval = interval ?? TimeSpan.FromSeconds(1);
+        }
+
+        public TimeSpan PollingInterval { get; }
+
+        public Task<bool> CheckConditionAsync()
+        {
+            return _checkFunc();
+        }
+    }
+
+    private class TestRule : Rule
+    {
+        private readonly bool _satisfied;
+
+        public TestRule(bool satisfied)
+        {
+            _satisfied = satisfied;
+        }
+
+        public override bool IsSatisfied()
+        {
+            return _satisfied;
+        }
+    }
+
+    private class TestAction : Action
+    {
+        private readonly Func<Task>? _onInvoke;
+        private readonly Func<Task>? _onRevert;
+        private readonly Func<Exception, Task>? _onRevertFailed;
+        private readonly bool _revertable;
+
+        public TestAction(bool revertable = true,
+            Func<Task>? onInvoke = null,
+            Func<Task>? onRevert = null,
+            Func<Exception, Task>? onRevertFailed = null)
+        {
+            _revertable = revertable;
+            _onInvoke = onInvoke;
+            _onRevert = onRevert;
+            _onRevertFailed = onRevertFailed;
+        }
+
+        public bool InvokeCalled { get; private set; }
+        public bool RevertCalled { get; private set; }
+        public int InvokeCount { get; private set; }
+        public int RevertCount { get; private set; }
+
+        public override bool Revertable => _revertable;
+
+        public override Task OnInvoke()
+        {
+            InvokeCalled = true;
+            InvokeCount++;
+            return _onInvoke?.Invoke() ?? Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            RevertCalled = true;
+            RevertCount++;
+            return _onRevert?.Invoke() ?? Task.CompletedTask;
+        }
+
+        public override Task OnRevertFailed(Exception e)
+        {
+            return _onRevertFailed?.Invoke(e) ?? Task.CompletedTask;
+        }
     }
 }

@@ -169,13 +169,19 @@ public class RuleResolverTest
     [Rule("test.TrueRule", "Always true")]
     private class TrueRule : Rule
     {
-        public override bool IsSatisfied() => true;
+        public override bool IsSatisfied()
+        {
+            return true;
+        }
     }
 
     [Rule("test.FalseRule", "Always false")]
     private class FalseRule : Rule
     {
-        public override bool IsSatisfied() => false;
+        public override bool IsSatisfied()
+        {
+            return false;
+        }
     }
 
     [Rule("test.ParameterizedRule", "With property")]
@@ -183,6 +189,9 @@ public class RuleResolverTest
     {
         public int RequiredValue { get; set; }
 
-        public override bool IsSatisfied() => RequiredValue > 0;
+        public override bool IsSatisfied()
+        {
+            return RequiredValue > 0;
+        }
     }
 }

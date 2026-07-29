@@ -1,10 +1,7 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 
 namespace ImmersingLinker.SourceGenerator;
 
@@ -21,7 +18,7 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         "Validator expression '{0}' in '{1}' has syntax error(s): {2}",
         Category,
         DiagnosticSeverity.Error,
-        isEnabledByDefault: true);
+        true);
 
     private static readonly DiagnosticDescriptor GeneralTypeError = new(
         GeneralDiagnosticId,
@@ -29,12 +26,12 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         "General field value '{0}' in '{1}' is not a valid type reference",
         Category,
         DiagnosticSeverity.Error,
-        isEnabledByDefault: true);
+        true);
 
     private static readonly HashSet<string> KnownAliases = new()
     {
         "int", "string", "bool", "double", "long", "float", "decimal",
-        "byte", "sbyte", "short", "ushort", "uint", "ulong", "char", "object",
+        "byte", "sbyte", "short", "ushort", "uint", "ulong", "char", "object"
     };
 
     private static readonly HashSet<string> KnownGenericTypes = new()
@@ -42,7 +39,7 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         "List", "Dictionary", "HashSet", "IList", "IDictionary", "IEnumerable",
         "ICollection", "IReadOnlyList", "IReadOnlyDictionary", "Nullable",
         "KeyValuePair", "Stack", "Queue", "LinkedList", "Task",
-        "ValueTuple", "Tuple",
+        "ValueTuple", "Tuple"
     };
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -63,8 +60,8 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
     {
         var normalized = path.Replace('\\', '/');
         return normalized.EndsWith(".json")
-            && !normalized.EndsWith(".schema.json")
-            && (normalized.Contains("/Assets/Settings/") || normalized.Contains("Assets/Settings/"));
+               && !normalized.EndsWith(".schema.json")
+               && (normalized.Contains("/Assets/Settings/") || normalized.Contains("Assets/Settings/"));
     }
 
     private static void GenerateReport(
@@ -93,15 +90,13 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         {
             var tree = CSharpSyntaxTree.ParseText(
                 expr,
-                options: new CSharpParseOptions(kind: SourceCodeKind.Script),
+                new CSharpParseOptions(kind: SourceCodeKind.Script),
                 cancellationToken: context.CancellationToken);
 
             var errors = new List<string>();
             foreach (var diagnostic in tree.GetDiagnostics())
-            {
                 if (diagnostic.Severity == DiagnosticSeverity.Error)
                     errors.Add(diagnostic.GetMessage());
-            }
 
             if (errors.Count <= 0)
                 continue;
@@ -119,13 +114,9 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         CollectStringValues(root, "general", generalValues);
 
         foreach (var value in generalValues)
-        {
             if (!IsValidTypeReference(value, compilation))
-            {
                 context.ReportDiagnostic(
                     Diagnostic.Create(GeneralTypeError, Location.None, value, file.Path));
-            }
-        }
     }
 
     private static void CollectStringValues(JsonElement element, string propertyName, List<string> results)
@@ -134,7 +125,6 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         {
             case JsonValueKind.Object:
                 foreach (var property in element.EnumerateObject())
-                {
                     if (property.NameEquals(propertyName)
                         && property.Value.ValueKind == JsonValueKind.String)
                     {
@@ -146,14 +136,11 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
                     {
                         CollectStringValues(property.Value, propertyName, results);
                     }
-                }
+
                 break;
 
             case JsonValueKind.Array:
-                foreach (var item in element.EnumerateArray())
-                {
-                    CollectStringValues(item, propertyName, results);
-                }
+                foreach (var item in element.EnumerateArray()) CollectStringValues(item, propertyName, results);
                 break;
         }
     }
@@ -174,7 +161,7 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         {
             var baseType = typeName.Substring(0, typeName.Length - 1);
             return IsValidTypeReference(baseType, compilation)
-                && compilation.GetTypeByMetadataName("System.Nullable`1") != null;
+                   && compilation.GetTypeByMetadataName("System.Nullable`1") != null;
         }
 
         var bracketIndex = FindTopLevelBracket(typeName, '<', '>');
@@ -192,16 +179,14 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
                 return false;
 
             foreach (var arg in args)
-            {
                 if (!IsValidTypeReference(arg.Trim(), compilation))
                     return false;
-            }
 
             return true;
         }
 
         return TypeExistsInCompilation(compilation, typeName, 0)
-            || TypeExistsInCompilation(compilation, typeName, -1);
+               || TypeExistsInCompilation(compilation, typeName, -1);
     }
 
     private static string AliasToClrName(string alias)
@@ -223,7 +208,7 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
             "ulong" => "System.UInt64",
             "char" => "System.Char",
             "object" => "System.Object",
-            _ => alias,
+            _ => alias
         };
     }
 
@@ -277,17 +262,15 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
             "Task" => "System.Threading.Tasks.Task",
             "ValueTuple" => "System.ValueTuple",
             "Tuple" => "System.Tuple",
-            _ => name,
+            _ => name
         };
     }
 
     private static bool TryFindTypeInCompilation(Compilation compilation, string name)
     {
         foreach (var assembly in compilation.SourceModule.ReferencedAssemblySymbols)
-        {
             if (NamespaceContainsType(assembly.GlobalNamespace, name))
                 return true;
-        }
 
         return false;
     }
@@ -295,16 +278,12 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
     private static bool NamespaceContainsType(INamespaceSymbol ns, string name)
     {
         foreach (var type in ns.GetTypeMembers())
-        {
             if (type.Name == name || type.MetadataName == name)
                 return true;
-        }
 
         foreach (var childNs in ns.GetNamespaceMembers())
-        {
             if (NamespaceContainsType(childNs, name))
                 return true;
-        }
 
         return false;
     }
@@ -313,7 +292,6 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
     {
         var depth = 0;
         for (var i = 0; i < s.Length; i++)
-        {
             if (s[i] == open)
             {
                 if (depth == 0)
@@ -326,7 +304,7 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
                     return -2;
                 depth--;
             }
-        }
+
         return -1;
     }
 
@@ -337,7 +315,6 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
         var start = 0;
 
         for (var i = 0; i < s.Length; i++)
-        {
             switch (s[i])
             {
                 case '<':
@@ -351,7 +328,6 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
                     start = i + 1;
                     break;
             }
-        }
 
         parts.Add(s.Substring(start).Trim());
         return parts;

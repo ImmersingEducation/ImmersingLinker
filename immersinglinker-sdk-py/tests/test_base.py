@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+import pytest
 from datetime import timedelta
 from uuid import UUID
-
-import pytest
 
 from immersinglinker.clients.base import (
     ImmersingLinkerError,
@@ -12,7 +11,7 @@ from immersinglinker.clients.base import (
     _to_json_serializable,
 )
 from immersinglinker.enums import Gender
-from immersinglinker.types import ClassInfo, Subject, Student
+from immersinglinker.types import ClassInfo, Subject
 
 
 # ── _parse_timedelta ─────────────────────────────────────────

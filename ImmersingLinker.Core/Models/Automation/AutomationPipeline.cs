@@ -5,12 +5,9 @@ namespace ImmersingLinker.Core.Models.Automation;
 public class AutomationPipeline : IAutomationPipeline
 {
     private readonly Dictionary<Guid, AutomationPlan> _plans = [];
-    private readonly Dictionary<Guid, List<EventHandler<TriggerFiredEventArgs>>> _subscribers = [];
-    private readonly Dictionary<Guid, Timer> _pollingTimers = [];
     private readonly Dictionary<Guid, CancellationTokenSource> _pollingCts = [];
-
-    public event EventHandler<PlanTriggeredEventArgs>? PlanTriggered;
-    public event EventHandler<PlanRevertedEventArgs>? PlanReverted;
+    private readonly Dictionary<Guid, Timer> _pollingTimers = [];
+    private readonly Dictionary<Guid, List<EventHandler<TriggerFiredEventArgs>>> _subscribers = [];
 
     public void RegisterPlan(AutomationPlan plan)
     {
@@ -35,10 +32,7 @@ public class AutomationPipeline : IAutomationPipeline
 
     public async Task UnloadAllPlans()
     {
-        foreach (var plan in _plans.Values)
-        {
-            await plan.Unloaded(this);
-        }
+        foreach (var plan in _plans.Values) await plan.Unloaded(this);
         _plans.Clear();
     }
 
@@ -51,10 +45,7 @@ public class AutomationPipeline : IAutomationPipeline
 
     public void SubscribeTrigger(AutomationPlan plan)
     {
-        var handler = new EventHandler<TriggerFiredEventArgs>((sender, args) =>
-        {
-            OnTriggerFired(plan, args);
-        });
+        var handler = new EventHandler<TriggerFiredEventArgs>((sender, args) => { OnTriggerFired(plan, args); });
         plan.Trigger.TriggerFired += handler;
         if (!_subscribers.ContainsKey(plan.Guid))
             _subscribers[plan.Guid] = [];
@@ -65,37 +56,9 @@ public class AutomationPipeline : IAutomationPipeline
     {
         if (_subscribers.TryGetValue(plan.Guid, out var handlers))
         {
-            foreach (var handler in handlers)
-            {
-                plan.Trigger.TriggerFired -= handler;
-            }
+            foreach (var handler in handlers) plan.Trigger.TriggerFired -= handler;
             handlers.Clear();
         }
-    }
-
-    private void UnsubscribeAll(Guid planGuid)
-    {
-        if (!_subscribers.TryGetValue(planGuid, out var handlers)) return;
-
-        if (_plans.TryGetValue(planGuid, out var plan))
-        {
-            foreach (var handler in handlers)
-            {
-                plan.Trigger.TriggerFired -= handler;
-            }
-        }
-        handlers.Clear();
-    }
-
-    private void OnTriggerFired(AutomationPlan plan, TriggerFiredEventArgs args)
-    {
-        var runner = plan.Triggered();
-        if (runner is null) return;
-        PlanTriggered?.Invoke(this, new PlanTriggeredEventArgs
-        {
-            Plan = plan,
-            Runner = runner
-        });
     }
 
     // --- 轮询触发器管理 ---
@@ -113,13 +76,11 @@ public class AutomationPipeline : IAutomationPipeline
             try
             {
                 if (await queryNecessaryTrigger.CheckConditionAsync())
-                {
                     OnTriggerFired(plan, new TriggerFiredEventArgs
                     {
                         AutomationPlanGuid = plan.Guid,
-                        FiredAt = DateTime.UtcNow,
+                        FiredAt = DateTime.UtcNow
                     });
-                }
             }
             catch (Exception)
             {
@@ -136,30 +97,11 @@ public class AutomationPipeline : IAutomationPipeline
         return Task.CompletedTask;
     }
 
-    private void UnregisterPollingTriggers(Guid planGuid)
-    {
-        if (_pollingCts.TryGetValue(planGuid, out var cts))
-        {
-            cts.Cancel();
-            cts.Dispose();
-            _pollingCts.Remove(planGuid);
-        }
-
-        if (_pollingTimers.TryGetValue(planGuid, out var timer))
-        {
-            timer.Dispose();
-            _pollingTimers.Remove(planGuid);
-        }
-    }
-
     // --- IAsyncDisposable ---
 
     public async ValueTask DisposeAsync()
     {
-        foreach (var plan in _plans.Values)
-        {
-            await plan.Unloaded(this);
-        }
+        foreach (var plan in _plans.Values) await plan.Unloaded(this);
 
         foreach (var timer in _pollingTimers.Values)
             await timer.DisposeAsync();
@@ -177,5 +119,46 @@ public class AutomationPipeline : IAutomationPipeline
         _pollingCts.Clear();
         _plans.Clear();
         _subscribers.Clear();
+    }
+
+    public event EventHandler<PlanTriggeredEventArgs>? PlanTriggered;
+    public event EventHandler<PlanRevertedEventArgs>? PlanReverted;
+
+    private void UnsubscribeAll(Guid planGuid)
+    {
+        if (!_subscribers.TryGetValue(planGuid, out var handlers)) return;
+
+        if (_plans.TryGetValue(planGuid, out var plan))
+            foreach (var handler in handlers)
+                plan.Trigger.TriggerFired -= handler;
+
+        handlers.Clear();
+    }
+
+    private void OnTriggerFired(AutomationPlan plan, TriggerFiredEventArgs args)
+    {
+        var runner = plan.Triggered();
+        if (runner is null) return;
+        PlanTriggered?.Invoke(this, new PlanTriggeredEventArgs
+        {
+            Plan = plan,
+            Runner = runner
+        });
+    }
+
+    private void UnregisterPollingTriggers(Guid planGuid)
+    {
+        if (_pollingCts.TryGetValue(planGuid, out var cts))
+        {
+            cts.Cancel();
+            cts.Dispose();
+            _pollingCts.Remove(planGuid);
+        }
+
+        if (_pollingTimers.TryGetValue(planGuid, out var timer))
+        {
+            timer.Dispose();
+            _pollingTimers.Remove(planGuid);
+        }
     }
 }

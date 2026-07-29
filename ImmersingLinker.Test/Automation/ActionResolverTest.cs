@@ -1,5 +1,4 @@
 using System.Text.Json;
-using ImmersingLinker.Core.Abstractions.Automation;
 using ImmersingLinker.Core.Attributes.Automation;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Services.Automation;
@@ -164,17 +163,33 @@ public class ActionResolverTest
     private class SimpleAction : Action
     {
         public override bool Revertable => false;
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 
     [Action("test.ParameterizedAction", "Parameterized")]
     private class ParameterizedAction : Action
     {
-        public string Message { get; set; } = string.Empty;
+        public string Message { get; } = string.Empty;
 
         public override bool Revertable => true;
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 }

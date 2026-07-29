@@ -13,21 +13,31 @@ let private emptyActions = System.Collections.Generic.List<ActionDto>()
 let private listCommand =
     let cmd = Command("list", "List all automation plans")
     cmd.Aliases.Add("ls")
+
     cmd.SetAction(fun parseResult ->
         async {
             let port = getPort parseResult
             let json = getJson parseResult
             let client = AutomationServiceClient(port)
             let! plans = client.GetAllPlanInfosAsync() |> Async.AwaitTask
+
             if plans.Count = 0 then
                 printSuccess json "No automation plans found."
                 return 0
             else
-                let result = plans |> Seq.map (fun p ->
-                    {| guid = string p.Guid; name = p.Name |}) |> Seq.toList
+                let result =
+                    plans
+                    |> Seq.map (fun p ->
+                        {| guid = string p.Guid
+                           name = p.Name |})
+                    |> Seq.toList
+
                 printOutput json result
                 return 0
-        } |> Async.StartAsTask |> _.Result)
+        }
+        |> Async.StartAsTask
+        |> _.Result)
+
     cmd
 
 let private triggerCommand =
@@ -35,21 +45,25 @@ let private triggerCommand =
     let guidArg = Argument<string>("guid")
     guidArg.Description <- "Plan GUID"
     cmd.Arguments.Add(guidArg)
+
     cmd.SetAction(fun parseResult ->
         async {
             let port = getPort parseResult
             let json = getJson parseResult
             let guid = parseResult.GetValue(guidArg)
             let client = AutomationServiceClient(port)
+
             try
                 do! client.TriggerPlanAsync(guid) |> Async.AwaitTask
                 printSuccess json ("Plan '" + guid + "' triggered.")
                 return 0
-            with
-            | :? System.InvalidOperationException as ex ->
+            with :? System.InvalidOperationException as ex ->
                 printErrorOutput json ex.Message
                 return 1
-        } |> Async.StartAsTask |> _.Result)
+        }
+        |> Async.StartAsTask
+        |> _.Result)
+
     cmd
 
 let private invokeCommand =
@@ -57,21 +71,25 @@ let private invokeCommand =
     let tagArg = Argument<string>("tag")
     tagArg.Description <- "Trigger tag"
     cmd.Arguments.Add(tagArg)
+
     cmd.SetAction(fun parseResult ->
         async {
             let port = getPort parseResult
             let json = getJson parseResult
             let tag = parseResult.GetValue(tagArg)
             let client = AutomationServiceClient(port)
+
             try
                 do! client.InvokeUrlTriggerAsync(tag) |> Async.AwaitTask
                 printSuccess json ("URL trigger '" + tag + "' invoked.")
                 return 0
-            with
-            | ex ->
+            with ex ->
                 printErrorOutput json ex.Message
                 return 1
-        } |> Async.StartAsTask |> _.Result)
+        }
+        |> Async.StartAsTask
+        |> _.Result)
+
     cmd
 
 let private createCommand =
@@ -79,16 +97,25 @@ let private createCommand =
     let jsonArg = Argument<string>("json")
     jsonArg.Description <- "Plan JSON string"
     cmd.Arguments.Add(jsonArg)
+
     cmd.SetAction(fun parseResult ->
         async {
             let port = getPort parseResult
             let json = getJson parseResult
             let jsonInput = parseResult.GetValue(jsonArg)
             let client = AutomationServiceClient(port)
+
             try
-                let request = JsonSerializer.Deserialize<CreateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Value)
+                let request =
+                    JsonSerializer.Deserialize<CreateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Value)
+
                 let! plan = client.CreatePlanAsync(request) |> Async.AwaitTask
-                let result = {| success = true; guid = string plan.Guid; name = plan.Name |}
+
+                let result =
+                    {| success = true
+                       guid = string plan.Guid
+                       name = plan.Name |}
+
                 printOutput json result
                 return 0
             with
@@ -98,7 +125,10 @@ let private createCommand =
             | :? JsonException as ex ->
                 printErrorOutput json ("Invalid JSON: " + ex.Message)
                 return 1
-        } |> Async.StartAsTask |> _.Result)
+        }
+        |> Async.StartAsTask
+        |> _.Result)
+
     cmd
 
 let private updateCommand =
@@ -109,6 +139,7 @@ let private updateCommand =
     jsonArg.Description <- "Updated plan JSON string"
     cmd.Arguments.Add(guidArg)
     cmd.Arguments.Add(jsonArg)
+
     cmd.SetAction(fun parseResult ->
         async {
             let port = getPort parseResult
@@ -116,10 +147,18 @@ let private updateCommand =
             let guid = parseResult.GetValue(guidArg)
             let jsonInput = parseResult.GetValue(jsonArg)
             let client = AutomationServiceClient(port)
+
             try
-                let request = JsonSerializer.Deserialize<UpdateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Value)
+                let request =
+                    JsonSerializer.Deserialize<UpdateAutomationPlanRequest>(jsonInput, AutomationJsonOptions.Value)
+
                 let! plan = client.UpdatePlanAsync(guid, request) |> Async.AwaitTask
-                let result = {| success = true; guid = string plan.Guid; name = plan.Name |}
+
+                let result =
+                    {| success = true
+                       guid = string plan.Guid
+                       name = plan.Name |}
+
                 printOutput json result
                 return 0
             with
@@ -129,7 +168,10 @@ let private updateCommand =
             | :? JsonException as ex ->
                 printErrorOutput json ("Invalid JSON: " + ex.Message)
                 return 1
-        } |> Async.StartAsTask |> _.Result)
+        }
+        |> Async.StartAsTask
+        |> _.Result)
+
     cmd
 
 let private deleteCommand =
@@ -138,21 +180,25 @@ let private deleteCommand =
     let guidArg = Argument<string>("guid")
     guidArg.Description <- "Plan GUID"
     cmd.Arguments.Add(guidArg)
+
     cmd.SetAction(fun parseResult ->
         async {
             let port = getPort parseResult
             let json = getJson parseResult
             let guid = parseResult.GetValue(guidArg)
             let client = AutomationServiceClient(port)
+
             try
                 do! client.DeletePlanAsync(guid) |> Async.AwaitTask
                 printSuccess json ("Plan '" + guid + "' deleted.")
                 return 0
-            with
-            | :? System.InvalidOperationException as ex ->
+            with :? System.InvalidOperationException as ex ->
                 printErrorOutput json ex.Message
                 return 1
-        } |> Async.StartAsTask |> _.Result)
+        }
+        |> Async.StartAsTask
+        |> _.Result)
+
     cmd
 
 let automationCommand =

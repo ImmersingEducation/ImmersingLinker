@@ -19,10 +19,13 @@ let jsonOption =
 
 let getPort (parseResult: ParseResult) : string =
     let value = parseResult.GetValue(portOption)
-    if System.String.IsNullOrEmpty(value) then defaultPort else value
 
-let getJson (parseResult: ParseResult) : bool =
-    parseResult.GetValue(jsonOption)
+    if System.String.IsNullOrEmpty(value) then
+        defaultPort
+    else
+        value
+
+let getJson (parseResult: ParseResult) : bool = parseResult.GetValue(jsonOption)
 
 let serializeJson (obj: obj) =
     JsonSerializer.Serialize(obj, JsonSerializerOptions(WriteIndented = true))

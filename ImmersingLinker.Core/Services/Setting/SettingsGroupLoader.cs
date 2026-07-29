@@ -47,7 +47,8 @@ public sealed class SettingsGroupLoader
             items.Add(item);
         }
 
-        return new SettingsGroup(items) { Key = groupKey, Name = groupName, Description = description, SettingItems = items };
+        return new SettingsGroup(items)
+            { Key = groupKey, Name = groupName, Description = description, SettingItems = items };
     }
 
     public SettingItem<T> LoadSettingItem<T>(string key, JsonNode? node)
@@ -62,7 +63,7 @@ public sealed class SettingsGroupLoader
             Name = name,
             Description = description,
             DefaultValue = node?["default-value"] is { } defaultValueNode
-                ? JsonSerializer.Deserialize<T>(defaultValueNode)
+                ? defaultValueNode.Deserialize<T>()
                 : default,
             Validator = string.IsNullOrWhiteSpace(validatorScript)
                 ? _ => true

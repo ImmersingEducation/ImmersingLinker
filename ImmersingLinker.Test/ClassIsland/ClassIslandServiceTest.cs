@@ -15,7 +15,10 @@ public class ClassIslandServiceTest
     private static readonly Guid ChineseId = Guid.NewGuid();
     private static readonly Guid EnglishId = Guid.NewGuid();
 
-    private static Subject CreateSubject(string name) => new() { Name = name };
+    private static Subject CreateSubject(string name)
+    {
+        return new Subject { Name = name };
+    }
 
     private static ClassPlan CreateClassPlan(
         (int timeType, TimeSpan start, TimeSpan end)[] layout,
@@ -24,7 +27,7 @@ public class ClassIslandServiceTest
         var plan = new ClassPlan();
         var items = new ObservableCollection<TimeLayoutItem>();
         var classes = new ObservableCollection<ClassInfo>();
-        int classIndex = 0;
+        var classIndex = 0;
 
         foreach (var (timeType, start, end) in layout)
         {
@@ -281,12 +284,12 @@ public class ClassIslandServiceTest
         var math = CreateSubject("数学");
         var chinese = CreateSubject("语文");
         var plan = CreateClassPlan(
-        [
-            (0, new TimeSpan(8, 0, 0), new TimeSpan(8, 45, 0)),
-            (1, new TimeSpan(8, 45, 0), new TimeSpan(9, 0, 0)),
-            (0, new TimeSpan(9, 0, 0), new TimeSpan(9, 45, 0))
-        ],
-        [MathId, ChineseId]);
+            [
+                (0, new TimeSpan(8, 0, 0), new TimeSpan(8, 45, 0)),
+                (1, new TimeSpan(8, 45, 0), new TimeSpan(9, 0, 0)),
+                (0, new TimeSpan(9, 0, 0), new TimeSpan(9, 45, 0))
+            ],
+            [MathId, ChineseId]);
 
         var profile = CreateProfile((MathId, math), (ChineseId, chinese));
         var lessons = MockLessonsService(plan, 2);
@@ -301,10 +304,10 @@ public class ClassIslandServiceTest
     public void PreviousClassSubject_SubjectNotFound_ReturnsFallback()
     {
         var plan = CreateClassPlan(
-        [
-            (0, new TimeSpan(8, 0, 0), new TimeSpan(8, 45, 0))
-        ],
-        [MathId]);
+            [
+                (0, new TimeSpan(8, 0, 0), new TimeSpan(8, 45, 0))
+            ],
+            [MathId]);
 
         var profile = CreateProfile();
         var lessons = MockLessonsService(plan, 1);

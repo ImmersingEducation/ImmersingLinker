@@ -1,4 +1,3 @@
-using ClassIsland.Shared.ComponentModels;
 using ClassIsland.Shared.Enums;
 using ClassIsland.Shared.IPC.Abstractions.Services;
 using ClassIsland.Shared.Models.Profile;
@@ -15,7 +14,10 @@ public class LessonControllerTest
     private static readonly Guid ChineseId = Guid.NewGuid();
     private static readonly Guid EnglishId = Guid.NewGuid();
 
-    private static Subject CreateSubject(string name) => new() { Name = name };
+    private static Subject CreateSubject(string name)
+    {
+        return new Subject { Name = name };
+    }
 
     private static Mock<IPublicLessonsService> MockLessonsService(
         ClassPlan? plan = null,
@@ -156,7 +158,7 @@ public class LessonControllerTest
     {
         var plan = new ClassPlan { Name = "TestPlan" };
         var controller = CreateController(
-            MockLessonsService(plan: plan).Object);
+            MockLessonsService(plan).Object);
 
         var result = controller.GetCurrentClassPlan();
 
@@ -168,7 +170,7 @@ public class LessonControllerTest
     public void GetCurrentClassPlan_Null_ReturnsOkWithNull()
     {
         var controller = CreateController(
-            MockLessonsService(plan: null).Object);
+            MockLessonsService().Object);
 
         var result = controller.GetCurrentClassPlan();
 
@@ -296,7 +298,7 @@ public class LessonControllerTest
     public void GetPreviousClassSubject_ReturnsOkWithNullWhenNoClassPlan()
     {
         var controller = CreateController(
-            MockLessonsService(plan: null).Object);
+            MockLessonsService().Object);
 
         var result = controller.GetPreviousClassSubject();
 
@@ -308,7 +310,7 @@ public class LessonControllerTest
     public void GetPreviousClassTimeLayoutItem_ReturnsOkWithEmptyWhenNoClassPlan()
     {
         var controller = CreateController(
-            MockLessonsService(plan: null).Object);
+            MockLessonsService().Object);
 
         var result = controller.GetPreviousClassTimeLayoutItem();
 
@@ -320,7 +322,7 @@ public class LessonControllerTest
     public void GetPreviousBreakingTimeLayoutItem_ReturnsOkWithEmptyWhenNoClassPlan()
     {
         var controller = CreateController(
-            MockLessonsService(plan: null).Object);
+            MockLessonsService().Object);
 
         var result = controller.GetPreviousBreakingTimeLayoutItem();
 
@@ -436,7 +438,7 @@ public class LessonControllerTest
     {
         var profile = new Profile();
         var controller = CreateController(
-            profile: MockProfileService(profile: profile).Object);
+            profile: MockProfileService(profile).Object);
 
         var result = controller.GetProfile();
 

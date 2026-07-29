@@ -8,5 +8,8 @@ public abstract class SettingItemBase
 
     public event EventHandler ValueChanged;
 
-    protected void OnValueChanged(EventArgs e) => ValueChanged?.Invoke(this, e);
+    protected void OnValueChanged(EventArgs e)
+    {
+        ValueChanged?.Invoke(this, e);
+    }
 }

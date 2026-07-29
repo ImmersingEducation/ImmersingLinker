@@ -163,9 +163,12 @@ public class SettingsController : ControllerBase
                 var value = getter?.Invoke(item);
                 dto.Value = value is null ? null : JsonSerializer.SerializeToElement(value, value.GetType());
 
-                var defaultValueProp = itemType.GetProperty("DefaultValue", BindingFlags.Public | BindingFlags.Instance);
+                var defaultValueProp =
+                    itemType.GetProperty("DefaultValue", BindingFlags.Public | BindingFlags.Instance);
                 var defaultValue = defaultValueProp?.GetValue(item);
-                dto.DefaultValue = defaultValue is null ? null : JsonSerializer.SerializeToElement(defaultValue, defaultValue.GetType());
+                dto.DefaultValue = defaultValue is null
+                    ? null
+                    : JsonSerializer.SerializeToElement(defaultValue, defaultValue.GetType());
             }
         }
 

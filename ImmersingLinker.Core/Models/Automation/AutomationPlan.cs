@@ -8,7 +8,7 @@ public class AutomationPlan
     public Guid Guid { get; init; }
     public string Name { get; set; }
     public bool Revertable { get; set; }
-    
+
     public Trigger Trigger { get; set; }
     public RuleSet RuleSet { get; set; }
     public List<Action> Actions { get; set; }
@@ -17,19 +17,14 @@ public class AutomationPlan
     {
         pipeline.SubscribeTrigger(this);
         if (Trigger is IQueryNecessaryTrigger queryNecessaryTrigger)
-        {
             await pipeline.RegisterPollingTrigger(this, queryNecessaryTrigger);
-        }
     }
 
     public async Task Unloaded(IAutomationPipeline pipeline)
     {
         pipeline.UnsubscribeTrigger(this);
 
-        if (Trigger is IQueryNecessaryTrigger)
-        {
-            await pipeline.UnregisterPollingTrigger(this.Guid);
-        }
+        if (Trigger is IQueryNecessaryTrigger) await pipeline.UnregisterPollingTrigger(Guid);
     }
 
     public AutomationRunner? Triggered()

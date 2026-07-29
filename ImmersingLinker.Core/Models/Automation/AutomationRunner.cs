@@ -1,11 +1,11 @@
 using ImmersingLinker.Core.Exceptions.Automations;
+using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
 
 namespace ImmersingLinker.Core.Models.Automation;
 
-using ImmersingLinker.Core.Abstractions.Automation;
-
 public class AutomationRunner(Guid guid, bool revertMode, List<Action> actions)
 {
+    private readonly List<int> _executedSteps = [];
     public Guid Guid { get; init; } = guid;
     public bool RevertMode { get; init; } = revertMode;
     public List<Action> Actions { get; init; } = actions;
@@ -15,8 +15,6 @@ public class AutomationRunner(Guid guid, bool revertMode, List<Action> actions)
     public event EventHandler? Stopped;
     public event EventHandler<RunnerCompletedEventArgs>? Completed;
     public event EventHandler<RunnerFailedEventArgs>? Failed;
-
-    private readonly List<int> _executedSteps = [];
 
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
@@ -52,7 +50,7 @@ public class AutomationRunner(Guid guid, bool revertMode, List<Action> actions)
         else
             CurrentStep = -1;
     }
-    
+
     private async Task ExecuteRevertAsync(CancellationToken ct)
     {
         for (var i = CurrentStep; i >= 0; i--)
@@ -77,7 +75,7 @@ public class AutomationRunner(Guid guid, bool revertMode, List<Action> actions)
     {
         return new AutomationRunner(Guid.NewGuid(), true, Actions.ToList())
         {
-            CurrentStep = CurrentStep,
+            CurrentStep = CurrentStep
         };
     }
 }

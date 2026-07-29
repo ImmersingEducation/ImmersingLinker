@@ -23,7 +23,7 @@ public static class TypeNameResolver
         ["uint"] = "System.UInt32",
         ["ulong"] = "System.UInt64",
         ["char"] = "System.Char",
-        ["object"] = "System.Object",
+        ["object"] = "System.Object"
     };
 
     private static readonly Dictionary<string, string> GenericNameMap = new()
@@ -44,7 +44,7 @@ public static class TypeNameResolver
         ["LinkedList"] = "System.Collections.Generic.LinkedList",
         ["Task"] = "System.Threading.Tasks.Task",
         ["ValueTuple"] = "System.ValueTuple",
-        ["Tuple"] = "System.Tuple",
+        ["Tuple"] = "System.Tuple"
     };
 
     private static Assembly[]? _assemblies;
@@ -75,7 +75,7 @@ public static class TypeNameResolver
 
     private static Type LoadType(string typeName)
     {
-        var type = Type.GetType(typeName, throwOnError: false);
+        var type = Type.GetType(typeName, false);
         if (type != null)
             return type;
 
@@ -83,26 +83,22 @@ public static class TypeNameResolver
 
         foreach (var assembly in _assemblies)
         {
-            type = assembly.GetType(typeName, throwOnError: false);
+            type = assembly.GetType(typeName, false);
             if (type != null)
                 return type;
         }
 
         var candidates = new List<Type>();
         foreach (var assembly in _assemblies)
-        {
             try
             {
                 foreach (var t in assembly.GetTypes())
-                {
                     if (t.FullName == typeName || t.Name == typeName)
                         candidates.Add(t);
-                }
             }
             catch (ReflectionTypeLoadException)
             {
             }
-        }
 
         if (candidates.Count == 1)
             return candidates[0];
@@ -129,7 +125,7 @@ public static class TypeNameResolver
         if (GenericNameMap.TryGetValue(name, out var mapped))
         {
             var withArity = $"{mapped}`{arity}";
-            var type = Type.GetType(withArity, throwOnError: false);
+            var type = Type.GetType(withArity, false);
             if (type != null)
                 return type;
 
@@ -139,7 +135,7 @@ public static class TypeNameResolver
         }
 
         var arityName = $"{name}`{arity}";
-        var directType = Type.GetType(arityName, throwOnError: false);
+        var directType = Type.GetType(arityName, false);
         if (directType != null)
             return directType;
 
@@ -159,19 +155,15 @@ public static class TypeNameResolver
         var targetName = $"{name}`{arity}";
 
         foreach (var assembly in _assemblies)
-        {
             try
             {
                 foreach (var t in assembly.GetTypes())
-                {
                     if (t.IsGenericTypeDefinition && t.Name == targetName)
                         candidates.Add(t);
-                }
             }
             catch (ReflectionTypeLoadException)
             {
             }
-        }
 
         if (candidates.Count == 1)
             return candidates[0];
@@ -190,7 +182,6 @@ public static class TypeNameResolver
     {
         var depth = 0;
         for (var i = 0; i < s.Length; i++)
-        {
             if (s[i] == open)
             {
                 if (depth == 0) return i;
@@ -199,10 +190,10 @@ public static class TypeNameResolver
             else if (s[i] == close)
             {
                 if (depth == 0)
-                    throw new InvalidOperationException($"Unexpected closing bracket '{close}' at position {i} in '{s}'.");
+                    throw new InvalidOperationException(
+                        $"Unexpected closing bracket '{close}' at position {i} in '{s}'.");
                 depth--;
             }
-        }
 
         if (depth > 0)
             throw new InvalidOperationException($"Unclosed opening bracket '{open}' in '{s}'.");
@@ -217,7 +208,6 @@ public static class TypeNameResolver
         var start = 0;
 
         for (var i = 0; i < s.Length; i++)
-        {
             switch (s[i])
             {
                 case '<':
@@ -231,7 +221,6 @@ public static class TypeNameResolver
                     start = i + 1;
                     break;
             }
-        }
 
         parts.Add(s[start..].Trim());
         return [.. parts];

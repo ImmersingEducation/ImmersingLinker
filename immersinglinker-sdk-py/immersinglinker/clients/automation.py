@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import aiohttp
 import json
 from uuid import uuid4
 
-import aiohttp
-
+from .base import ImmersingLinkerError
 from ..enums import RuleSetSatisfyMode
 from ..types import (
     AutomationPlan,
@@ -14,7 +14,6 @@ from ..types import (
     Trigger,
     Action,
     RuleSet,
-    RuleBase,
     TriggerDto,
     ActionDto,
     RuleNodeDto,
@@ -22,7 +21,6 @@ from ..types import (
     CreateAutomationPlanRequest,
     UpdateAutomationPlanRequest,
 )
-from .base import ImmersingLinkerError
 
 
 class AutomationServiceClient:
@@ -34,6 +32,7 @@ class AutomationServiceClient:
             plans = await client.get_all_plan_infos()
             plan = await client.get_plan_by_guid(guid)
     """
+
     def __init__(self, port: str) -> None:
         """初始化客户端。
 
@@ -60,7 +59,7 @@ class AutomationServiceClient:
         return self._session
 
     async def _request(
-        self, method: str, path: str, body: object = None, *, raise_on_404: bool = False
+            self, method: str, path: str, body: object = None, *, raise_on_404: bool = False
     ) -> str:
         session = await self._ensure_session()
         kwargs: dict = {}
@@ -138,7 +137,7 @@ class AutomationServiceClient:
     # region PUT
 
     async def update_plan(
-        self, plan_guid: str, request: UpdateAutomationPlanRequest
+            self, plan_guid: str, request: UpdateAutomationPlanRequest
     ) -> AutomationPlan:
         """更新指定的自动化计划。"""
         text = await self._request("PUT", f"/automation/{plan_guid}", body=request, raise_on_404=True)
@@ -158,11 +157,11 @@ class AutomationServiceClient:
 
     @staticmethod
     def create_automation_plan_offline(
-        name: str,
-        revertable: bool,
-        trigger: Trigger,
-        rule_set: RuleSet | None,
-        actions: list[Action],
+            name: str,
+            revertable: bool,
+            trigger: Trigger,
+            rule_set: RuleSet | None,
+            actions: list[Action],
     ) -> AutomationPlan:
         """离线创建 AutomationPlan 实例（无需网络请求）。"""
         return AutomationPlan(
@@ -171,30 +170,30 @@ class AutomationServiceClient:
             Revertable=revertable,
             Trigger=trigger,
             RuleSet=rule_set
-            or RuleSet(SatisfyMode=RuleSetSatisfyMode.AllSatisfied, Not=False),
+                    or RuleSet(SatisfyMode=RuleSetSatisfyMode.AllSatisfied, Not=False),
             Actions=actions,
         )
 
     @staticmethod
     def create_trigger_dto_offline(
-        trigger_key: str, properties: dict | None = None
+            trigger_key: str, properties: dict | None = None
     ) -> TriggerDto:
         """离线创建 TriggerDto 实例。"""
         return TriggerDto(TriggerKey=trigger_key, Properties=properties)
 
     @staticmethod
     def create_rule_set_offline(
-        satisfy_mode: RuleSetSatisfyMode, not_: bool, rules: list[RuleNodeDto]
+            satisfy_mode: RuleSetSatisfyMode, not_: bool, rules: list[RuleNodeDto]
     ) -> RuleSetDto:
         """离线创建 RuleSetDto 实例。"""
         return RuleSetDto(SatisfyMode=satisfy_mode, Not=not_, Rules=rules)
 
     @staticmethod
     def create_rule_node_offline(
-        rule_key: str | None = None,
-        properties: dict | None = None,
-        not_: bool = False,
-        rule_set: RuleSetDto | None = None,
+            rule_key: str | None = None,
+            properties: dict | None = None,
+            not_: bool = False,
+            rule_set: RuleSetDto | None = None,
     ) -> RuleNodeDto:
         """离线创建 RuleNodeDto 实例。"""
         return RuleNodeDto(
@@ -203,18 +202,18 @@ class AutomationServiceClient:
 
     @staticmethod
     def create_action_dto_offline(
-        action_key: str, properties: dict | None = None
+            action_key: str, properties: dict | None = None
     ) -> ActionDto:
         """离线创建 ActionDto 实例。"""
         return ActionDto(ActionKey=action_key, Properties=properties)
 
     @staticmethod
     def create_plan_request_offline(
-        name: str,
-        revertable: bool,
-        trigger: TriggerDto,
-        rule_set: RuleSetDto | None,
-        actions: list[ActionDto],
+            name: str,
+            revertable: bool,
+            trigger: TriggerDto,
+            rule_set: RuleSetDto | None,
+            actions: list[ActionDto],
     ) -> CreateAutomationPlanRequest:
         """离线创建 CreateAutomationPlanRequest 实例。"""
         return CreateAutomationPlanRequest(
@@ -227,11 +226,11 @@ class AutomationServiceClient:
 
     @staticmethod
     def update_plan_request_offline(
-        name: str,
-        revertable: bool,
-        trigger: TriggerDto,
-        rule_set: RuleSetDto | None,
-        actions: list[ActionDto],
+            name: str,
+            revertable: bool,
+            trigger: TriggerDto,
+            rule_set: RuleSetDto | None,
+            actions: list[ActionDto],
     ) -> UpdateAutomationPlanRequest:
         """离线创建 UpdateAutomationPlanRequest 实例。"""
         return UpdateAutomationPlanRequest(

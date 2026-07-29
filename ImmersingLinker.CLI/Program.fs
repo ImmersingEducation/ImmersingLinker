@@ -1,14 +1,14 @@
 ﻿namespace ImmersingLinker.CLI
 
-open System
 open System.CommandLine
-open System.CommandLine.Parsing
 open ImmersingLinker.CLI.Commands
 
 module Program =
     [<EntryPoint>]
     let main args =
-        let rootCmd = RootCommand("ImmersingLinker CLI - Class information integration platform")
+        let rootCmd =
+            RootCommand("ImmersingLinker CLI - Class information integration platform")
+
         rootCmd.Description <- "Class information integration platform for classroom teaching"
 
         rootCmd.Subcommands.Add(TestConnectionCommand.testConnectionCommand)

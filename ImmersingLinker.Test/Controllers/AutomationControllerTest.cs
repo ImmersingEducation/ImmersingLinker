@@ -3,8 +3,8 @@ using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Enums.Automation;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Models.Automation.Triggers;
-using ImmersingLinker.Server.Controllers;
 using ImmersingLinker.Core.Services.Storage;
+using ImmersingLinker.Server.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Action = ImmersingLinker.Core.Abstractions.Automation.Action;
@@ -13,45 +13,8 @@ namespace ImmersingLinker.Test.Controllers;
 
 public class AutomationControllerTest
 {
-    private static readonly Guid TestPlanGuid = Guid.NewGuid();
     private const string TestPlanName = "TestPlan";
-
-    // ===== Test Stubs =====
-
-    private class TestTrigger : Trigger, IManualTrigger
-    {
-        public bool Fired { get; private set; }
-
-        public void Fire(TriggerFiredEventArgs args)
-        {
-            Fired = true;
-            OnTriggerFired(this, args);
-        }
-    }
-
-    private class TestNonManualTrigger : Trigger
-    {
-    }
-
-    private class TestRule : Rule
-    {
-        private readonly bool _satisfied;
-
-        public TestRule(bool satisfied)
-        {
-            _satisfied = satisfied;
-        }
-
-        public override bool IsSatisfied() => _satisfied;
-    }
-
-    private class TestAction : Action
-    {
-        public override bool Revertable => true;
-
-        public override Task OnInvoke() => Task.CompletedTask;
-        public override Task OnRevert() => Task.CompletedTask;
-    }
+    private static readonly Guid TestPlanGuid = Guid.NewGuid();
 
     // ===== Helpers =====
 
@@ -115,7 +78,7 @@ public class AutomationControllerTest
         trigger ??= new TestTrigger();
         var mock = new Mock<ITriggerResolver>();
         mock.Setup(r => r.Resolve(It.IsAny<TriggerDto>()))
-            .Returns((trigger, (string?)null));
+            .Returns((trigger, null));
         return mock;
     }
 
@@ -123,7 +86,7 @@ public class AutomationControllerTest
     {
         var mock = new Mock<IRuleResolver>();
         mock.Setup(r => r.ResolveRuleSet(It.IsAny<RuleSetDto?>()))
-            .Returns((ruleSet, (string?)null));
+            .Returns((ruleSet, null));
         return mock;
     }
 
@@ -132,7 +95,7 @@ public class AutomationControllerTest
         actions ??= [new TestAction()];
         var mock = new Mock<IActionResolver>();
         mock.Setup(r => r.ResolveAll(It.IsAny<List<ActionDto>?>()))
-            .Returns((actions, (string?)null));
+            .Returns((actions, null));
         return mock;
     }
 
@@ -228,7 +191,7 @@ public class AutomationControllerTest
     {
         var triggerResolverMock = new Mock<ITriggerResolver>();
         triggerResolverMock.Setup(r => r.Resolve(It.IsAny<TriggerDto>()))
-            .Returns(((Trigger?)null, "Unknown trigger key: bad.Key"));
+            .Returns((null, "Unknown trigger key: bad.Key"));
 
         var controller = CreateController(triggerResolverMock: triggerResolverMock);
 
@@ -246,7 +209,7 @@ public class AutomationControllerTest
     {
         var ruleResolverMock = new Mock<IRuleResolver>();
         ruleResolverMock.Setup(r => r.ResolveRuleSet(It.IsAny<RuleSetDto?>()))
-            .Returns(((RuleSet?)null, "Unknown rule key: bad.Rule"));
+            .Returns((null, "Unknown rule key: bad.Rule"));
 
         var ruleSetDto = new RuleSetDto(RuleSetSatisfyMode.AllSatisfied, false,
         [
@@ -269,7 +232,7 @@ public class AutomationControllerTest
     {
         var actionResolverMock = new Mock<IActionResolver>();
         actionResolverMock.Setup(r => r.ResolveAll(It.IsAny<List<ActionDto>?>()))
-            .Returns(((List<Action>?)null, "Unknown action key: bad.Action"));
+            .Returns((null, "Unknown action key: bad.Action"));
 
         var controller = CreateController(actionResolverMock: actionResolverMock);
 
@@ -449,5 +412,52 @@ public class AutomationControllerTest
         var result = await controller.DeletePlan("bad-guid");
 
         Assert.IsType<BadRequestObjectResult>(result);
+    }
+
+    // ===== Test Stubs =====
+
+    private class TestTrigger : Trigger, IManualTrigger
+    {
+        public bool Fired { get; private set; }
+
+        public void Fire(TriggerFiredEventArgs args)
+        {
+            Fired = true;
+            OnTriggerFired(this, args);
+        }
+    }
+
+    private class TestNonManualTrigger : Trigger
+    {
+    }
+
+    private class TestRule : Rule
+    {
+        private readonly bool _satisfied;
+
+        public TestRule(bool satisfied)
+        {
+            _satisfied = satisfied;
+        }
+
+        public override bool IsSatisfied()
+        {
+            return _satisfied;
+        }
+    }
+
+    private class TestAction : Action
+    {
+        public override bool Revertable => true;
+
+        public override Task OnInvoke()
+        {
+            return Task.CompletedTask;
+        }
+
+        public override Task OnRevert()
+        {
+            return Task.CompletedTask;
+        }
     }
 }
