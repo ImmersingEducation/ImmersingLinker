@@ -84,8 +84,8 @@ public class SettingsControllerTest
             .Returns(Task.CompletedTask);
 
         var service = new SettingsService(mockStorage.Object);
-        await service.MountSettingsGroup(CreateBasicGroup());
-        await service.MountSettingsGroup(CreateNestedGroup());
+        service.MountSettingsGroup(CreateBasicGroup());
+        service.MountSettingsGroup(CreateNestedGroup());
         await service.InitializeAsync();
         return service;
     }
@@ -107,11 +107,11 @@ public class SettingsControllerTest
     #region GET
 
     [Fact]
-    public async Task Get_NoPath_ReturnsAllGroupSummaries()
+    public void Get_NoPath_ReturnsAllGroupSummaries()
     {
         var controller = CreateController();
 
-        var result = await controller.Get(null);
+        var result = controller.Get(null);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var groups = Assert.IsType<List<SettingsGroupSummaryDto>>(okResult.Value);
@@ -121,11 +121,11 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Get_TopLevelGroup_ReturnsGroupDetail()
+    public void Get_TopLevelGroup_ReturnsGroupDetail()
     {
         var controller = CreateController();
 
-        var result = await controller.Get("group.basic");
+        var result = controller.Get("group.basic");
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var group = Assert.IsType<SettingsGroupDetailDto>(okResult.Value);
@@ -135,11 +135,11 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Get_NestedGroup_ReturnsGroupDetail()
+    public void Get_NestedGroup_ReturnsGroupDetail()
     {
         var controller = CreateController();
 
-        var result = await controller.Get("group.nested/group.nested.sub");
+        var result = controller.Get("group.nested/group.nested.sub");
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var group = Assert.IsType<SettingsGroupDetailDto>(okResult.Value);
@@ -148,11 +148,11 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Get_TopLevelLeafItem_ReturnsItemValue()
+    public void Get_TopLevelLeafItem_ReturnsItemValue()
     {
         var controller = CreateController();
 
-        var result = await controller.Get("group.basic/group.basic.bool-item");
+        var result = controller.Get("group.basic/group.basic.bool-item");
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var dto = Assert.IsType<SettingItemValueDto>(okResult.Value);
@@ -163,11 +163,11 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Get_DeepNestedLeafItem_ReturnsItemValue()
+    public void Get_DeepNestedLeafItem_ReturnsItemValue()
     {
         var controller = CreateController();
 
-        var result = await controller.Get("group.nested/group.nested.sub/group.nested.sub.string-item");
+        var result = controller.Get("group.nested/group.nested.sub/group.nested.sub.string-item");
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var dto = Assert.IsType<SettingItemValueDto>(okResult.Value);
@@ -176,21 +176,21 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Get_NonExistentPath_ReturnsNotFound()
+    public void Get_NonExistentPath_ReturnsNotFound()
     {
         var controller = CreateController();
 
-        var result = await controller.Get("nonexistent");
+        var result = controller.Get("nonexistent");
 
         Assert.IsType<NotFoundResult>(result);
     }
 
     [Fact]
-    public async Task Get_NonExistentDeepPath_ReturnsNotFound()
+    public void Get_NonExistentDeepPath_ReturnsNotFound()
     {
         var controller = CreateController();
 
-        var result = await controller.Get("group.basic/nonexistent");
+        var result = controller.Get("group.basic/nonexistent");
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -207,7 +207,7 @@ public class SettingsControllerTest
         });
         var controller = CreateController(service);
 
-        var result = await controller.Get("group.basic/group.basic.int-item");
+        var result = controller.Get("group.basic/group.basic.int-item");
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var dto = Assert.IsType<SettingItemValueDto>(okResult.Value);
@@ -219,11 +219,11 @@ public class SettingsControllerTest
     #region PUT
 
     [Fact]
-    public async Task Update_ValidBoolValue_ReturnsOk()
+    public void Update_ValidBoolValue_ReturnsOk()
     {
         var controller = CreateController();
 
-        var result = await controller.Update("group.basic/group.basic.bool-item", CreateRequest(true));
+        var result = controller.Update("group.basic/group.basic.bool-item", CreateRequest(true));
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var dto = Assert.IsType<SettingItemValueDto>(okResult.Value);
@@ -231,11 +231,11 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Update_ValidIntValue_ReturnsOk()
+    public void Update_ValidIntValue_ReturnsOk()
     {
         var controller = CreateController();
 
-        var result = await controller.Update("group.basic/group.basic.int-item", CreateRequest(8080));
+        var result = controller.Update("group.basic/group.basic.int-item", CreateRequest(8080));
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var dto = Assert.IsType<SettingItemValueDto>(okResult.Value);
@@ -243,11 +243,11 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Update_NestedPath_ReturnsOk()
+    public void Update_NestedPath_ReturnsOk()
     {
         var controller = CreateController();
 
-        var result = await controller.Update(
+        var result = controller.Update(
             "group.nested/group.nested.sub/group.nested.sub.string-item",
             CreateRequest("world"));
 
@@ -257,41 +257,41 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Update_EmptyPath_ReturnsBadRequest()
+    public void Update_EmptyPath_ReturnsBadRequest()
     {
         var controller = CreateController();
 
-        var result = await controller.Update("", CreateRequest(true));
+        var result = controller.Update("", CreateRequest(true));
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact]
-    public async Task Update_NonExistentPath_ReturnsNotFound()
+    public void Update_NonExistentPath_ReturnsNotFound()
     {
         var controller = CreateController();
 
-        var result = await controller.Update("nonexistent", CreateRequest(true));
+        var result = controller.Update("nonexistent", CreateRequest(true));
 
         Assert.IsType<NotFoundResult>(result);
     }
 
     [Fact]
-    public async Task Update_GroupPath_ReturnsBadRequest()
+    public void Update_GroupPath_ReturnsBadRequest()
     {
         var controller = CreateController();
 
-        var result = await controller.Update("group.basic", CreateRequest(true));
+        var result = controller.Update("group.basic", CreateRequest(true));
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact]
-    public async Task Update_InvalidValue_ReturnsBadRequest()
+    public void Update_InvalidValue_ReturnsBadRequest()
     {
         var controller = CreateController();
 
-        var result = await controller.Update(
+        var result = controller.Update(
             "group.basic/group.basic.int-item",
             new UpdateSettingValueRequest
             {
@@ -302,11 +302,11 @@ public class SettingsControllerTest
     }
 
     [Fact]
-    public async Task Update_NullPath_ReturnsBadRequest()
+    public void Update_NullPath_ReturnsBadRequest()
     {
         var controller = CreateController();
 
-        var result = await controller.Update(null!, CreateRequest(true));
+        var result = controller.Update(null!, CreateRequest(true));
 
         Assert.IsType<BadRequestObjectResult>(result);
     }

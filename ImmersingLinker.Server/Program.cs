@@ -44,13 +44,13 @@ var settingsLoader = new SettingsGroupLoader();
 var settingsDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Settings");
 if (Directory.Exists(settingsDir))
 {
-    foreach (var file in Directory.GetFiles(settingsDir, "*.json"))
+    foreach (var file in Directory.GetFiles(settingsDir, "*.json").Where(static f => !f.EndsWith(".schema.json", StringComparison.OrdinalIgnoreCase)))
     {
         var groupKey = Path.GetFileNameWithoutExtension(file);
         var json = await File.ReadAllTextAsync(file);
         var node = JsonNode.Parse(json);
         var group = settingsLoader.LoadFromJson(groupKey, node);
-        await settingsService.MountSettingsGroup(group);
+        settingsService.MountSettingsGroup(group);
     }
 }
 await settingsService.InitializeAsync();

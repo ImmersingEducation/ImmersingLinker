@@ -63,6 +63,7 @@ public sealed class SettingsValidatorGenerator : IIncrementalGenerator
     {
         var normalized = path.Replace('\\', '/');
         return normalized.EndsWith(".json")
+            && !normalized.EndsWith(".schema.json")
             && (normalized.Contains("/Assets/Settings/") || normalized.Contains("Assets/Settings/"));
     }
 

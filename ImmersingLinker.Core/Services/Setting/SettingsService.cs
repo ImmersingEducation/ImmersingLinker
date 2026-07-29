@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using ImmersingLinker.Core.Abstractions.Storage;
@@ -11,7 +10,7 @@ namespace ImmersingLinker.Core.Services.Setting;
 public sealed class SettingsService
 {
     private readonly ISettingsStorageService _storageService;
-    private readonly List<SettingsGroup> _mountedSettingsGroups = [];
+    private readonly ConcurrentDictionary<string, SettingsGroup> _mountedSettingsGroups = [];
     private bool _initialized;
 
     public event EventHandler? AnyChanged;
@@ -21,37 +20,34 @@ public sealed class SettingsService
         _storageService = storageService;
     }
 
-    public IReadOnlyList<SettingsGroup> GetAllGroups() => _mountedSettingsGroups.AsReadOnly();
+    public IReadOnlyList<SettingsGroup> GetAllGroups() => _mountedSettingsGroups.Values.ToList().AsReadOnly();
 
     public SettingsGroup? GetGroupByKey(string key) =>
-        _mountedSettingsGroups.Find(x => x.Key == key);
+        _mountedSettingsGroups.TryGetValue(key, out var group) ? group : null;
 
-    public async Task MountSettingsGroup(SettingsGroup group)
+    public void MountSettingsGroup(SettingsGroup group)
     {
-        _mountedSettingsGroups.Add(group);
+        if (!_mountedSettingsGroups.TryAdd(group.Key, group))
+            throw new InvalidOperationException($"A settings group with key '{group.Key}' is already mounted.");
         group.ValueChanged += OnAnyChanged;
     }
 
-    public async Task UnmountSettingsGroup(string key)
+    public void UnmountSettingsGroup(string key)
     {
-        var group = _mountedSettingsGroups.FirstOrDefault(x => x.Key == key);
-        if (group is not null)
-        {
+        if (_mountedSettingsGroups.TryRemove(key, out var group))
             group.ValueChanged -= OnAnyChanged;
-            _mountedSettingsGroups.Remove(group);
-        }
     }
 
-    public async Task<SettingItemBase> GetSettingItem(string[] keys)
+    public SettingItemBase GetSettingItem(string[] keys)
     {
         SettingItemBase? item = null;
         foreach (var key in keys)
         {
             item = item switch
             {
-                null => _mountedSettingsGroups.Find(x => x.Key == key) ?? throw new KeyNotFoundException(),
-                SettingsGroup group => group[key] ?? throw new KeyNotFoundException(),
-                _ => throw new NotImplementedException()
+                null => _mountedSettingsGroups.TryGetValue(key, out var g) ? g : throw new KeyNotFoundException(),
+                SettingsGroup g => g[key] ?? throw new KeyNotFoundException(),
+                _ => throw new InvalidOperationException($"Cannot navigate into setting item of type '{item.GetType().Name}' (key: '{item.Key}'). Only SettingsGroup supports nested paths.")
             };
         }
 
@@ -77,7 +73,7 @@ public sealed class SettingsService
 
         foreach (var (groupKey, items) in data)
         {
-            var group = _mountedSettingsGroups.Find(g => g.Key == groupKey);
+            _mountedSettingsGroups.TryGetValue(groupKey, out var group);
             if (group is null)
                 continue;
 
@@ -88,9 +84,9 @@ public sealed class SettingsService
     public async Task SaveSettingsAsync()
     {
         var data = new Dictionary<string, Dictionary<string, JsonElement>>();
-        foreach (var group in _mountedSettingsGroups)
+        foreach (var (key, group) in _mountedSettingsGroups)
         {
-            data[group.Key] = CollectGroupValues(group);
+            data[key] = CollectGroupValues(group);
         }
 
         await _storageService.SaveAsync(data);
@@ -108,7 +104,7 @@ public sealed class SettingsService
 
     private void ApplyDefaultValues()
     {
-        foreach (var group in _mountedSettingsGroups)
+        foreach (var group in _mountedSettingsGroups.Values)
         {
             ApplyGroupDefaults(group);
         }
@@ -134,7 +130,7 @@ public sealed class SettingsService
         if (!itemType.IsGenericType || itemType.GetGenericTypeDefinition() != typeof(SettingItem<>))
             return;
 
-        var (getter, setter) = GetOrCreateValueAccessors(itemType);
+        var (getter, setter) = SettingItemAccessor.GetOrCreateValueAccessors(itemType);
         if (getter is null || setter is null)
             return;
 
@@ -149,31 +145,6 @@ public sealed class SettingsService
         var defaultValue = defaultValueProp.GetValue(item);
         if (defaultValue is not null)
             setter(item, defaultValue);
-    }
-
-    private static readonly ConcurrentDictionary<Type, (Func<object, object?>? Getter, Action<object, object?>? Setter)> _valueAccessors = new();
-
-    private static (Func<object, object?>? Getter, Action<object, object?>? Setter) GetOrCreateValueAccessors(Type type)
-    {
-        return _valueAccessors.GetOrAdd(type, t =>
-        {
-            var prop = t.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
-            if (prop is null) return (null, null);
-
-            var instanceParam = Expression.Parameter(typeof(object), "instance");
-            var instanceCast = Expression.Convert(instanceParam, t);
-            var propertyAccess = Expression.Property(instanceCast, prop);
-
-            var getter = Expression.Lambda<Func<object, object?>>(
-                Expression.Convert(propertyAccess, typeof(object)), instanceParam).Compile();
-
-            var valueParam = Expression.Parameter(typeof(object), "value");
-            var setter = Expression.Lambda<Action<object, object?>>(
-                Expression.Assign(propertyAccess, Expression.Convert(valueParam, prop.PropertyType)),
-                instanceParam, valueParam).Compile();
-
-            return (getter, setter);
-        });
     }
 
     private static Dictionary<string, JsonElement> CollectGroupValues(SettingsGroup group)
@@ -197,7 +168,7 @@ public sealed class SettingsService
             return;
         }
 
-        var (getter, _) = GetOrCreateValueAccessors(item.GetType());
+        var (getter, _) = SettingItemAccessor.GetOrCreateValueAccessors(item.GetType());
         if (getter is null)
             return;
 
@@ -234,7 +205,7 @@ public sealed class SettingsService
 
         var valueType = itemType.GetGenericArguments()[0];
         var value = JsonSerializer.Deserialize(element.GetRawText(), valueType);
-        var (_, setter) = GetOrCreateValueAccessors(itemType);
+        var (_, setter) = SettingItemAccessor.GetOrCreateValueAccessors(itemType);
         setter?.Invoke(item, value);
     }
 }

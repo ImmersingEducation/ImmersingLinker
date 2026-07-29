@@ -22,7 +22,7 @@ public class SettingsController : ControllerBase
     /// </summary>
     /// <param name="settingPath">点号分隔的路径，如 "groupKey/subKey/subSubKey/itemKey"</param>
     [HttpGet("{**settingPath}")]
-    public async Task<IActionResult> Get(string? settingPath)
+    public IActionResult Get(string? settingPath)
     {
         if (string.IsNullOrEmpty(settingPath))
             return Ok(GetAllGroupSummaries());
@@ -31,7 +31,7 @@ public class SettingsController : ControllerBase
         SettingItemBase item;
         try
         {
-            item = await _settingsService.GetSettingItem(keys);
+            item = _settingsService.GetSettingItem(keys);
         }
         catch (KeyNotFoundException)
         {
@@ -44,13 +44,8 @@ public class SettingsController : ControllerBase
         return Ok(BuildItemValueDto(item));
     }
 
-    /// <summary>
-    ///     更新指定路径的设置项值
-    /// </summary>
-    /// <param name="settingPath">点号分隔的路径，必须指向叶子设置项</param>
-    /// <param name="request">新值</param>
     [HttpPut("{**settingPath}")]
-    public async Task<IActionResult> Update(string settingPath,
+    public IActionResult Update(string settingPath,
         [FromBody] UpdateSettingValueRequest request)
     {
         if (string.IsNullOrEmpty(settingPath))
@@ -60,7 +55,7 @@ public class SettingsController : ControllerBase
         SettingItemBase item;
         try
         {
-            item = await _settingsService.GetSettingItem(keys);
+            item = _settingsService.GetSettingItem(keys);
         }
         catch (KeyNotFoundException)
         {
@@ -86,7 +81,7 @@ public class SettingsController : ControllerBase
             return BadRequest($"Invalid value for type {valueType.Name}: {ex.Message}");
         }
 
-        var (_, setter) = GetOrCreateValueAccessors(itemType);
+        var (_, setter) = SettingItemAccessor.GetOrCreateValueAccessors(itemType);
         if (setter is null)
             return BadRequest("Cannot set value for this setting item.");
 
@@ -102,9 +97,6 @@ public class SettingsController : ControllerBase
         return Ok(BuildItemValueDto(item));
     }
 
-    /// <summary>
-    ///     强制保存所有设置到文件
-    /// </summary>
     [HttpPost("save")]
     public async Task<IActionResult> Save()
     {
@@ -112,9 +104,6 @@ public class SettingsController : ControllerBase
         return Ok();
     }
 
-    /// <summary>
-    ///     从文件重新加载设置值（不重新 Mount）
-    /// </summary>
     [HttpPost("reload")]
     public async Task<IActionResult> Reload()
     {
@@ -170,7 +159,7 @@ public class SettingsController : ControllerBase
                 var valueType = itemType.GetGenericArguments()[0];
                 dto.Type = valueType.Name;
 
-                var (getter, _) = GetOrCreateValueAccessors(itemType);
+                var (getter, _) = SettingItemAccessor.GetOrCreateValueAccessors(itemType);
                 var value = getter?.Invoke(item);
                 dto.Value = value is null ? null : JsonSerializer.SerializeToElement(value, value.GetType());
 
@@ -181,33 +170,6 @@ public class SettingsController : ControllerBase
         }
 
         return dto;
-    }
-
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type,
-        (Func<object, object?>? Getter, Action<object, object?>? Setter)> _valueAccessors = new();
-
-    private static (Func<object, object?>? Getter, Action<object, object?>? Setter) GetOrCreateValueAccessors(Type type)
-    {
-        return _valueAccessors.GetOrAdd(type, t =>
-        {
-            var prop = t.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
-            if (prop is null) return (null, null);
-
-            var instanceParam = System.Linq.Expressions.Expression.Parameter(typeof(object), "instance");
-            var instanceCast = System.Linq.Expressions.Expression.Convert(instanceParam, t);
-            var propertyAccess = System.Linq.Expressions.Expression.Property(instanceCast, prop);
-
-            var getter = System.Linq.Expressions.Expression.Lambda<Func<object, object?>>(
-                System.Linq.Expressions.Expression.Convert(propertyAccess, typeof(object)), instanceParam).Compile();
-
-            var valueParam = System.Linq.Expressions.Expression.Parameter(typeof(object), "value");
-            var setter = System.Linq.Expressions.Expression.Lambda<Action<object, object?>>(
-                System.Linq.Expressions.Expression.Assign(propertyAccess,
-                    System.Linq.Expressions.Expression.Convert(valueParam, prop.PropertyType)),
-                instanceParam, valueParam).Compile();
-
-            return (getter, setter);
-        });
     }
 
     #endregion
