@@ -1,11 +1,20 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using ImmersingLinker.Core.Abstractions.AccessControl;
 using ImmersingLinker.Core.Abstractions.Automation;
+using ImmersingLinker.Core.Abstractions.Permission;
 using ImmersingLinker.Core.Abstractions.Storage;
+using ImmersingLinker.Core.Models.AccessControl;
 using ImmersingLinker.Core.Models.Automation;
+using ImmersingLinker.Core.Models.Class;
+using ImmersingLinker.Core.Models.Permission;
+using ImmersingLinker.Core.Services.AccessControl;
 using ImmersingLinker.Core.Services.Automation;
+using ImmersingLinker.Core.Services.Permission;
 using ImmersingLinker.Core.Services.Setting;
 using ImmersingLinker.Core.Services.Storage;
 using ImmersingLinker.Core.Services.ThirdParty;
+using ImmersingLinker.Server.Middleware;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +34,10 @@ builder.Services.AddSingleton<IActionResolver, ActionResolver>();
 builder.Services.AddSingleton<ClassIslandService>();
 builder.Services.AddSingleton<ISettingsStorageService, SettingsStorageService>();
 builder.Services.AddSingleton<SettingsService>();
+builder.Services.AddSingleton<IPermissionStorageService, PermissionStorageService>();
+builder.Services.AddSingleton<IAccessControlStorageService, AccessControlStorageService>();
+builder.Services.AddSingleton<IPermissionService, PermissionService>();
+builder.Services.AddSingleton<IAccessControlService, AccessControlService>();
 
 var app = builder.Build();
 
@@ -71,11 +84,52 @@ foreach (var info in planInfos)
 
 await pipeline.LoadAllPlans(plans);
 
+var permissionService = app.Services.GetRequiredService<IPermissionService>();
+var accessControlService = app.Services.GetRequiredService<IAccessControlService>();
+
+await permissionService.LoadAsync();
+await accessControlService.LoadAsync();
+
+var adminCredPath = Path.Combine(AppContext.BaseDirectory, "Data", "admin-credential.json");
+if (!File.Exists(adminCredPath))
+{
+    var adminId = Guid.NewGuid().ToString();
+    var adminSecret = Guid.NewGuid().ToString();
+    var adminApp = new RegisteredApp(
+        new Application { UniqueId = adminId, Name = "AdminUI" },
+        adminSecret,
+        DateTime.UtcNow);
+
+    permissionService.Register(adminApp);
+    accessControlService.AddToWhitelist(new AccessControlEntry(
+        new Application { UniqueId = adminId, Name = "AdminUI" },
+        null,
+        DateTime.UtcNow));
+
+    await permissionService.SaveAsync();
+    await accessControlService.SaveAsync();
+
+    var adminDir = Path.GetDirectoryName(adminCredPath);
+    if (adminDir is not null) Directory.CreateDirectory(adminDir);
+    await File.WriteAllTextAsync(adminCredPath, JsonSerializer.Serialize(
+        new { AppId = adminId, Secret = adminSecret },
+        new JsonSerializerOptions { WriteIndented = true }));
+
+    Console.WriteLine("======================================");
+    Console.WriteLine("Admin UI Credentials generated:");
+    Console.WriteLine($"  AppId:  {adminId}");
+    Console.WriteLine($"  Secret: {adminSecret}");
+    Console.WriteLine($"  Saved to: {adminCredPath}");
+    Console.WriteLine("======================================");
+}
+
 app.Lifetime.ApplicationStopping.Register(async () => { await pipeline.DisposeAsync(); });
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware<AccessControlMiddleware>();
 
 app.MapControllers();
 

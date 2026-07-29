@@ -4,4 +4,5 @@ namespace ImmersingLinker.Core.Models.Permission;
 
 public sealed record RegisteredApp(
     Application Application,
-    string Secret);
+    string Secret,
+    DateTime RegisteredAt);
