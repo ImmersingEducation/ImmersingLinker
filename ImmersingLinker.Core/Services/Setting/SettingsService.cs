@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Setting;
 using ImmersingLinker.Core.Services.Storage;
 
@@ -70,7 +71,7 @@ public sealed class SettingsService
 
     public async Task LoadSettingsAsync()
     {
-        var data = await _storageService.LoadSettingsAsync();
+        var data = await _storageService.LoadAsync();
         if (data is null)
             return;
 
@@ -92,7 +93,7 @@ public sealed class SettingsService
             data[group.Key] = CollectGroupValues(group);
         }
 
-        await _storageService.SaveSettingsAsync(data);
+        await _storageService.SaveAsync(data);
     }
 
     private void OnAnyChanged(object? sender, EventArgs e)

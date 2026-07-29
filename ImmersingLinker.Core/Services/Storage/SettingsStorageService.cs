@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ImmersingLinker.Core.Abstractions.Storage;
 
 namespace ImmersingLinker.Core.Services.Storage;
 
@@ -21,7 +22,7 @@ public sealed class SettingsStorageService : ISettingsStorageService
             Directory.CreateDirectory(directory);
     }
 
-    public async Task<Dictionary<string, Dictionary<string, JsonElement>>?> LoadSettingsAsync()
+    public async Task<Dictionary<string, Dictionary<string, JsonElement>>?> LoadAsync()
     {
         if (!File.Exists(_filePath))
             return null;
@@ -30,7 +31,7 @@ public sealed class SettingsStorageService : ISettingsStorageService
         return JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(json);
     }
 
-    public async Task SaveSettingsAsync(Dictionary<string, Dictionary<string, JsonElement>> data)
+    public async Task SaveAsync(Dictionary<string, Dictionary<string, JsonElement>> data)
     {
         var json = JsonSerializer.Serialize(data, _options);
         await File.WriteAllTextAsync(_filePath, json);

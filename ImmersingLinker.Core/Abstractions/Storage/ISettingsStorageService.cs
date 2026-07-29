@@ -1,10 +1,6 @@
 using System.Text.Json;
+using ImmersingLinker.Core.Services.Storage;
 
-namespace ImmersingLinker.Core.Services.Storage;
+namespace ImmersingLinker.Core.Abstractions.Storage;
 
-public interface ISettingsStorageService
-{
-    Task<Dictionary<string, Dictionary<string, JsonElement>>?> LoadSettingsAsync();
-
-    Task SaveSettingsAsync(Dictionary<string, Dictionary<string, JsonElement>> data);
-}
+public interface ISettingsStorageService : IStorageService<Dictionary<string, Dictionary<string, JsonElement>>>;

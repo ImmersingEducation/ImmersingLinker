@@ -1,3 +1,4 @@
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
 using ImmersingLinker.Server.Controllers;
@@ -77,13 +78,13 @@ public class ClassControllerTest
         var mock = new Mock<IClassStorageService>();
         @class ??= CreateTestClass();
 
-        mock.Setup(s => s.GetClass(It.Is<Guid>(g => g == TestGuid)))
+        mock.Setup(s => s.GetData(It.Is<Guid>(g => g == TestGuid)))
             .ReturnsAsync(@class);
 
-        mock.Setup(s => s.GetClass(It.Is<Guid>(g => g != TestGuid)))
+        mock.Setup(s => s.GetData(It.Is<Guid>(g => g != TestGuid)))
             .ReturnsAsync((Class?)null);
 
-        mock.Setup(s => s.GetClassInfos())
+        mock.Setup(s => s.GetInfos())
             .ReturnsAsync([new ClassInfo { Guid = TestGuid, Name = TestClassName }]);
 
         return mock;
@@ -311,7 +312,7 @@ public class ClassControllerTest
         Assert.Equal(nameof(ClassController.GetClassByGuid), createdResult.ActionName);
         var @class = Assert.IsType<Class>(createdResult.Value);
         Assert.Equal("NewClass", @class.Name);
-        mock.Verify(s => s.SaveClass(It.IsAny<Class>()), Times.Once);
+        mock.Verify(s => s.SaveData(It.IsAny<Class>()), Times.Once);
     }
 
     [Fact]
@@ -329,7 +330,7 @@ public class ClassControllerTest
         var student = Assert.IsType<Student>(createdResult.Value);
         Assert.Equal("Bob", student.Name);
         Assert.Equal(2, @class.Students.Count);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -365,7 +366,7 @@ public class ClassControllerTest
         var createdResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal(nameof(ClassController.GetExtraPropertyByAppIdAndNameInClass), createdResult.ActionName);
         Assert.Equal(2, @class.ExtraProperties.Count);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -401,7 +402,7 @@ public class ClassControllerTest
         var createdResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal(nameof(ClassController.GetExtraPropertyByNameAndStudentIdInClass), createdResult.ActionName);
         Assert.Equal(2, @class.Students[0].ExtraProperties.Count);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -439,7 +440,7 @@ public class ClassControllerTest
         var updated = Assert.IsType<Class>(okResult.Value);
         Assert.Equal("Renamed", updated.Name);
         Assert.Equal("Renamed", @class.Name);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -464,7 +465,7 @@ public class ClassControllerTest
         var okResult = Assert.IsType<OkObjectResult>(result);
         var student = Assert.IsType<Student>(okResult.Value);
         Assert.Equal("AliceUpdated", student.Name);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -490,7 +491,7 @@ public class ClassControllerTest
         var okResult = Assert.IsType<OkObjectResult>(result);
         var prop = Assert.IsType<ClassExtraProperty<object>>(okResult.Value);
         Assert.Equal("room", prop.Name);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -516,7 +517,7 @@ public class ClassControllerTest
         var okResult = Assert.IsType<OkObjectResult>(result);
         var prop = Assert.IsType<StudentExtraProperty<object>>(okResult.Value);
         Assert.Equal("nickname", prop.Name);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -540,7 +541,7 @@ public class ClassControllerTest
         var result = controller.DeleteClass(TestGuid.ToString());
 
         Assert.IsType<NoContentResult>(result);
-        mock.Verify(s => s.DeleteClass(TestGuid), Times.Once);
+        mock.Verify(s => s.DeleteData(TestGuid), Times.Once);
     }
 
     [Fact]
@@ -554,7 +555,7 @@ public class ClassControllerTest
 
         Assert.IsType<NoContentResult>(result);
         Assert.Empty(@class.Students);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -577,7 +578,7 @@ public class ClassControllerTest
 
         Assert.IsType<NoContentResult>(result);
         Assert.Empty(@class.ExtraProperties);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -600,7 +601,7 @@ public class ClassControllerTest
 
         Assert.IsType<NoContentResult>(result);
         Assert.Empty(@class.Students[0].ExtraProperties);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -691,7 +692,7 @@ public class ClassControllerTest
         var rule = Assert.IsType<GroupingRuleResponse>(createdResult.Value);
         Assert.Equal("NewRule", rule.Name);
         Assert.Equal(2, @class.GroupingRules.Count);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -716,7 +717,7 @@ public class ClassControllerTest
         var createdResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal(nameof(ClassController.GetGroupingRule), createdResult.ActionName);
         Assert.Equal(2, @class.GroupingRules[0].Groups.Count);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -764,7 +765,7 @@ public class ClassControllerTest
         var rule = Assert.IsType<GroupingRuleResponse>(okResult.Value);
         Assert.Equal("Renamed", rule.Name);
         Assert.Equal("Renamed", @class.GroupingRules[0].Name);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -810,7 +811,7 @@ public class ClassControllerTest
         var okResult = Assert.IsType<OkObjectResult>(result);
         var rule = Assert.IsType<GroupingRuleResponse>(okResult.Value);
         Assert.Equal("RenamedGroup", @class.GroupingRules[0].Groups[0].Name);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -876,7 +877,7 @@ public class ClassControllerTest
 
         Assert.IsType<NoContentResult>(result);
         Assert.Empty(@class.GroupingRules);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]
@@ -918,7 +919,7 @@ public class ClassControllerTest
 
         Assert.IsType<NoContentResult>(result);
         Assert.Empty(@class.GroupingRules[0].Groups);
-        mock.Verify(s => s.SaveClass(@class), Times.Once);
+        mock.Verify(s => s.SaveData(@class), Times.Once);
     }
 
     [Fact]

@@ -12,7 +12,7 @@ public class SettingsStorageServiceTest
         return Path.Combine(dir, "Settings.json");
     }
 
-    #region LoadSettingsAsync
+    #region LoadAsync
 
     [Fact]
     public async Task LoadSettingsAsync_FileNotExists_ReturnsNull()
@@ -20,7 +20,7 @@ public class SettingsStorageServiceTest
         var path = GetTempFilePath();
         var service = new SettingsStorageService(path);
 
-        var result = await service.LoadSettingsAsync();
+        var result = await service.LoadAsync();
 
         Assert.Null(result);
     }
@@ -40,7 +40,7 @@ public class SettingsStorageServiceTest
         await File.WriteAllTextAsync(path, json);
         var service = new SettingsStorageService(path);
 
-        var result = await service.LoadSettingsAsync();
+        var result = await service.LoadAsync();
 
         Assert.NotNull(result);
         Assert.Single(result);
@@ -69,7 +69,7 @@ public class SettingsStorageServiceTest
         await File.WriteAllTextAsync(path, json);
         var service = new SettingsStorageService(path);
 
-        var result = await service.LoadSettingsAsync();
+        var result = await service.LoadAsync();
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
@@ -85,7 +85,7 @@ public class SettingsStorageServiceTest
         await File.WriteAllTextAsync(path, "{}");
         var service = new SettingsStorageService(path);
 
-        var result = await service.LoadSettingsAsync();
+        var result = await service.LoadAsync();
 
         Assert.NotNull(result);
         Assert.Empty(result);
@@ -99,7 +99,7 @@ public class SettingsStorageServiceTest
         await File.WriteAllTextAsync(path, json);
         var service = new SettingsStorageService(path);
 
-        var result = await service.LoadSettingsAsync();
+        var result = await service.LoadAsync();
 
         Assert.NotNull(result);
         Assert.Single(result);
@@ -108,7 +108,7 @@ public class SettingsStorageServiceTest
 
     #endregion
 
-    #region SaveSettingsAsync
+    #region SaveAsync
 
     [Fact]
     public async Task SaveSettingsAsync_WritesJsonFile()
@@ -123,7 +123,7 @@ public class SettingsStorageServiceTest
             }
         };
 
-        await service.SaveSettingsAsync(data);
+        await service.SaveAsync(data);
 
         Assert.True(File.Exists(path));
         var content = await File.ReadAllTextAsync(path);
@@ -147,7 +147,7 @@ public class SettingsStorageServiceTest
             }
         };
 
-        await service.SaveSettingsAsync(data);
+        await service.SaveAsync(data);
 
         var content = await File.ReadAllTextAsync(path);
         var parsed = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, JsonElement>>>(content);
@@ -164,7 +164,7 @@ public class SettingsStorageServiceTest
         var service = new SettingsStorageService(path);
         var data = new Dictionary<string, Dictionary<string, JsonElement>>();
 
-        await service.SaveSettingsAsync(data);
+        await service.SaveAsync(data);
 
         var content = await File.ReadAllTextAsync(path);
         Assert.Equal("{}", content.Trim());
@@ -193,8 +193,8 @@ public class SettingsStorageServiceTest
             }
         };
 
-        await service.SaveSettingsAsync(original);
-        var loaded = await service.LoadSettingsAsync();
+        await service.SaveAsync(original);
+        var loaded = await service.LoadAsync();
 
         Assert.NotNull(loaded);
         Assert.Equal(2, loaded.Count);
@@ -217,8 +217,8 @@ public class SettingsStorageServiceTest
             }
         };
 
-        await service.SaveSettingsAsync(original);
-        var loaded = await service.LoadSettingsAsync();
+        await service.SaveAsync(original);
+        var loaded = await service.LoadAsync();
 
         Assert.NotNull(loaded);
         Assert.Equal(JsonValueKind.Null, loaded["g"]["nullable"].ValueKind);

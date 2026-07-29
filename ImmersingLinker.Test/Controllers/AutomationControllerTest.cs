@@ -1,4 +1,5 @@
 using ImmersingLinker.Core.Abstractions.Automation;
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Enums.Automation;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Models.Automation.Triggers;
@@ -83,13 +84,13 @@ public class AutomationControllerTest
         plan ??= CreateTestPlan();
         var mock = new Mock<IAutomationStorageService>();
 
-        mock.Setup(s => s.GetPlanInfos())
+        mock.Setup(s => s.GetInfos())
             .ReturnsAsync([new AutomationPlanInfo { Guid = TestPlanGuid, Name = TestPlanName }]);
 
-        mock.Setup(s => s.GetPlan(It.Is<Guid>(g => g == TestPlanGuid)))
+        mock.Setup(s => s.GetData(It.Is<Guid>(g => g == TestPlanGuid)))
             .ReturnsAsync(plan);
 
-        mock.Setup(s => s.GetPlan(It.Is<Guid>(g => g != TestPlanGuid)))
+        mock.Setup(s => s.GetData(It.Is<Guid>(g => g != TestPlanGuid)))
             .ReturnsAsync((AutomationPlan?)null);
 
         return mock;
@@ -218,7 +219,7 @@ public class AutomationControllerTest
         var plan = Assert.IsType<AutomationPlan>(createdResult.Value);
         Assert.Equal("NewPlan", plan.Name);
         Assert.True(plan.Revertable);
-        storageMock.Verify(s => s.SavePlan(It.IsAny<AutomationPlan>()), Times.Once);
+        storageMock.Verify(s => s.SaveData(It.IsAny<AutomationPlan>()), Times.Once);
         pipelineMock.Verify(p => p.RegisterPlan(It.IsAny<AutomationPlan>()), Times.Never);
     }
 
@@ -389,7 +390,7 @@ public class AutomationControllerTest
         Assert.Equal("UpdatedPlan", plan.Name);
         Assert.False(plan.Revertable);
         pipelineMock.Verify(p => p.UnregisterPlan(TestPlanGuid), Times.Once);
-        storageMock.Verify(s => s.SavePlan(It.IsAny<AutomationPlan>()), Times.Once);
+        storageMock.Verify(s => s.SaveData(It.IsAny<AutomationPlan>()), Times.Once);
     }
 
     [Fact]
@@ -429,7 +430,7 @@ public class AutomationControllerTest
 
         Assert.IsType<NoContentResult>(result);
         pipelineMock.Verify(p => p.UnregisterPlan(TestPlanGuid), Times.Once);
-        storageMock.Verify(s => s.DeletePlan(TestPlanGuid), Times.Once);
+        storageMock.Verify(s => s.DeleteData(TestPlanGuid), Times.Once);
     }
 
     [Fact]

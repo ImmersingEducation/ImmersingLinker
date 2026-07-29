@@ -1,4 +1,5 @@
 using ImmersingLinker.Core.Abstractions.Automation;
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Models.Automation.Triggers;
 using ImmersingLinker.Core.Services.Storage;
@@ -68,7 +69,7 @@ public class AutomationController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllPlanInfos()
     {
-        return Ok(await _automationStorageService.GetPlanInfos());
+        return Ok(await _automationStorageService.GetInfos());
     }
 
     /// <summary>
@@ -80,7 +81,7 @@ public class AutomationController : ControllerBase
     {
         var guid = ParseGuidFromString(planGuid);
         if (guid is null) return BadRequest("Invalid GUID format");
-        var plan = await _automationStorageService.GetPlan(guid.Value);
+        var plan = await _automationStorageService.GetData(guid.Value);
         if (plan is not null) return Ok(plan);
         return NotFound();
     }
@@ -100,7 +101,7 @@ public class AutomationController : ControllerBase
             request.Trigger, request.RuleSet, request.Actions);
         if (error is not null) return error;
 
-        await _automationStorageService.SavePlan(plan!);
+        await _automationStorageService.SaveData(plan!);
         await plan!.Loaded(_automationPipeline);
         return CreatedAtAction(nameof(GetPlanByGuid), new { planGuid = plan.Guid }, plan);
     }
@@ -159,7 +160,7 @@ public class AutomationController : ControllerBase
         var guid = ParseGuidFromString(planGuid);
         if (guid is null) return BadRequest("Invalid GUID format");
 
-        var existing = await _automationStorageService.GetPlan(guid.Value);
+        var existing = await _automationStorageService.GetData(guid.Value);
         if (existing is null) return NotFound();
 
         _automationPipeline.UnregisterPlan(guid.Value);
@@ -169,7 +170,7 @@ public class AutomationController : ControllerBase
             request.Trigger, request.RuleSet, request.Actions);
         if (error is not null) return error;
 
-        await _automationStorageService.SavePlan(plan!);
+        await _automationStorageService.SaveData(plan!);
         await plan!.Loaded(_automationPipeline);
         return Ok(plan);
     }
@@ -188,11 +189,11 @@ public class AutomationController : ControllerBase
         var guid = ParseGuidFromString(planGuid);
         if (guid is null) return BadRequest("Invalid GUID format");
 
-        var existing = await _automationStorageService.GetPlan(guid.Value);
+        var existing = await _automationStorageService.GetData(guid.Value);
         if (existing is null) return NotFound();
 
         _automationPipeline.UnregisterPlan(guid.Value);
-        _automationStorageService.DeletePlan(guid.Value);
+        _automationStorageService.DeleteData(guid.Value);
         return NoContent();
     }
 

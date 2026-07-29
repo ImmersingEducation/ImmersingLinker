@@ -1,11 +1,6 @@
 using ImmersingLinker.Core.Models.Class;
+using ImmersingLinker.Core.Services.Storage;
 
-namespace ImmersingLinker.Core.Services.Storage;
+namespace ImmersingLinker.Core.Abstractions.Storage;
 
-public interface IClassStorageService
-{
-    Task<List<ClassInfo>> GetClassInfos();
-    Task<Class?> GetClass(Guid guid);
-    Task SaveClass(Class @class);
-    void DeleteClass(Guid guid);
-}
+public interface IClassStorageService : ISeveralStorageService<Guid, ClassInfo, Class>;

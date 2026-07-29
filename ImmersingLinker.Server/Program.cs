@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json.Nodes;
 using ImmersingLinker.Core.Abstractions.Automation;
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Automation;
 using ImmersingLinker.Core.Services.Automation;
 using ImmersingLinker.Core.Services.Setting;
@@ -62,11 +63,11 @@ if (app.Environment.IsDevelopment())
 
 var pipeline = app.Services.GetRequiredService<IAutomationPipeline>();
 var storage = app.Services.GetRequiredService<IAutomationStorageService>();
-var planInfos = await storage.GetPlanInfos();
+var planInfos = await storage.GetInfos();
 var plans = new List<ImmersingLinker.Core.Models.Automation.AutomationPlan>();
 foreach (var info in planInfos)
 {
-    var plan = await storage.GetPlan(info.Guid);
+    var plan = await storage.GetData(info.Guid);
     if (plan is not null) plans.Add(plan);
 }
 await pipeline.LoadAllPlans(plans);

@@ -1,3 +1,4 @@
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models;
 using ImmersingLinker.Core.Models.Class;
 using ImmersingLinker.Core.Services.Storage;
@@ -24,7 +25,7 @@ public class ClassController : ControllerBase
     {
         var guid = ParseGuidFromString(guidString);
         if (guid is null) return null;
-        return await _classStorageService.GetClass(guid.Value);
+        return await _classStorageService.GetData(guid.Value);
     }
 
     private GroupingRuleResponse BuildGroupingRuleResponse(Class @class, GroupingRule rule)
@@ -54,9 +55,9 @@ public class ClassController : ControllerBase
     public async Task<IActionResult> GetAllClasses()
     {
         List<Class> classes = [];
-        foreach (var classInfo in await _classStorageService.GetClassInfos())
+        foreach (var classInfo in await _classStorageService.GetInfos())
         {
-            var @class = await _classStorageService.GetClass(classInfo.Guid);
+            var @class = await _classStorageService.GetData(classInfo.Guid);
             if (@class is not null) classes.Add(@class);
         }
 
@@ -69,7 +70,7 @@ public class ClassController : ControllerBase
     [HttpGet("infos")]
     public async Task<IActionResult> GetAllClassInfos()
     {
-        return Ok(await _classStorageService.GetClassInfos());
+        return Ok(await _classStorageService.GetInfos());
     }
 
     /// <summary>
@@ -246,7 +247,7 @@ public class ClassController : ControllerBase
             ExtraProperties = [],
             GroupingRules = []
         };
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return CreatedAtAction(nameof(GetClassByGuid), new { classGuid = @class.Guid }, @class);
     }
 
@@ -271,7 +272,7 @@ public class ClassController : ControllerBase
             ExtraProperties = []
         };
         @class.Students.Add(student);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return CreatedAtAction(nameof(GetStudentByStudentIdInClass),
             new { classGuid, studentId = student.StudentIdInClass }, student);
     }
@@ -295,7 +296,7 @@ public class ClassController : ControllerBase
             Name = request.Name
         };
         @class.ExtraProperties.Add(prop);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return CreatedAtAction(nameof(GetExtraPropertyByAppIdAndNameInClass),
             new { classGuid, appId = request.AppId, propName = request.Name }, prop);
     }
@@ -320,7 +321,7 @@ public class ClassController : ControllerBase
             Name = request.Name
         };
         student.ExtraProperties.Add(prop);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return CreatedAtAction(nameof(GetExtraPropertyByNameAndStudentIdInClass),
             new { classGuid, studentId, appId = request.AppId, propName = request.Name }, prop);
     }
@@ -340,7 +341,7 @@ public class ClassController : ControllerBase
             Name = request.Name
         };
         @class.GroupingRules.Add(rule);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() },
             BuildGroupingRuleResponse(@class, rule));
     }
@@ -363,7 +364,7 @@ public class ClassController : ControllerBase
             Name = request.Name
         };
         rule.Groups.Add(group);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return CreatedAtAction(nameof(GetGroupingRule), new { classGuid, ruleGuid = rule.Guid.ToString() },
             BuildGroupingRuleResponse(@class, rule));
     }
@@ -381,7 +382,7 @@ public class ClassController : ControllerBase
         var @class = await GetClassByGuidLogicAsync(classGuid);
         if (@class is null) return NotFound();
         @class.Name = request.Name;
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return Ok(@class);
     }
 
@@ -397,7 +398,7 @@ public class ClassController : ControllerBase
         if (student is null) return NotFound();
         student.Name = request.Name;
         student.Gender = request.Gender;
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return Ok(student);
     }
 
@@ -412,7 +413,7 @@ public class ClassController : ControllerBase
         var prop = @class?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
         prop.Value = request.Value;
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return Ok(prop);
     }
 
@@ -428,7 +429,7 @@ public class ClassController : ControllerBase
         var prop = student?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
         prop.Value = request.Value;
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return Ok(prop);
     }
 
@@ -446,7 +447,7 @@ public class ClassController : ControllerBase
         var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == parsed.Value);
         if (rule is null) return NotFound();
         rule.Name = request.Name;
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return Ok(BuildGroupingRuleResponse(@class, rule));
     }
 
@@ -468,7 +469,7 @@ public class ClassController : ControllerBase
         var group = rule.Groups.FirstOrDefault(g => g.Guid == groupParsed.Value);
         if (group is null) return NotFound();
         group.Name = request.Name;
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return Ok(BuildGroupingRuleResponse(@class, rule));
     }
 
@@ -484,7 +485,7 @@ public class ClassController : ControllerBase
     {
         var guid = ParseGuidFromString(classGuid);
         if (guid is null) return BadRequest("Invalid GUID format");
-        _classStorageService.DeleteClass(guid.Value);
+        _classStorageService.DeleteData(guid.Value);
         return NoContent();
     }
 
@@ -498,7 +499,7 @@ public class ClassController : ControllerBase
         var student = @class?.Students.FirstOrDefault(s => s.StudentIdInClass == studentId);
         if (student is null) return NotFound();
         @class.Students.Remove(student);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return NoContent();
     }
 
@@ -512,7 +513,7 @@ public class ClassController : ControllerBase
         var prop = @class?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
         @class.ExtraProperties.Remove(prop);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return NoContent();
     }
 
@@ -528,7 +529,7 @@ public class ClassController : ControllerBase
         var prop = student?.ExtraProperties.FirstOrDefault(p => p.Application.UniqueId == appId && p.Name == propName);
         if (prop is null) return NotFound();
         student.ExtraProperties.Remove(prop);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return NoContent();
     }
 
@@ -545,7 +546,7 @@ public class ClassController : ControllerBase
         var rule = (@class.GroupingRules ?? []).FirstOrDefault(r => r.Guid == parsed.Value);
         if (rule is null) return NotFound();
         @class.GroupingRules.Remove(rule);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return NoContent();
     }
 
@@ -566,7 +567,7 @@ public class ClassController : ControllerBase
         var group = rule.Groups.FirstOrDefault(g => g.Guid == groupParsed.Value);
         if (group is null) return NotFound();
         rule.Groups.Remove(group);
-        await _classStorageService.SaveClass(@class);
+        await _classStorageService.SaveData(@class);
         return NoContent();
     }
 

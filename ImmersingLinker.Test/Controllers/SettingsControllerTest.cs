@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Setting;
 using ImmersingLinker.Core.Services.Setting;
 using ImmersingLinker.Core.Services.Storage;
@@ -77,9 +78,9 @@ public class SettingsControllerTest
         Dictionary<string, Dictionary<string, JsonElement>>? savedData = null)
     {
         var mockStorage = new Mock<ISettingsStorageService>();
-        mockStorage.Setup(s => s.LoadSettingsAsync())
+        mockStorage.Setup(s => s.LoadAsync())
             .ReturnsAsync(savedData);
-        mockStorage.Setup(s => s.SaveSettingsAsync(It.IsAny<Dictionary<string, Dictionary<string, JsonElement>>>()))
+        mockStorage.Setup(s => s.SaveAsync(It.IsAny<Dictionary<string, Dictionary<string, JsonElement>>>()))
             .Returns(Task.CompletedTask);
 
         var service = new SettingsService(mockStorage.Object);

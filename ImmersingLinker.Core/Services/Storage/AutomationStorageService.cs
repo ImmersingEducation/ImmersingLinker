@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ImmersingLinker.Core.Abstractions.Automation;
+using ImmersingLinker.Core.Abstractions.Storage;
 using ImmersingLinker.Core.Models.Automation;
 
 namespace ImmersingLinker.Core.Services.Storage;
@@ -25,7 +26,7 @@ public sealed class AutomationStorageService : IAutomationStorageService
         Directory.CreateDirectory(_dataDirectory);
     }
 
-    public async Task<List<AutomationPlanInfo>> GetPlanInfos()
+    public async Task<List<AutomationPlanInfo>> GetInfos()
     {
         List<AutomationPlanInfo> infos = [];
         var dataDir = new DirectoryInfo(_dataDirectory);
@@ -34,7 +35,7 @@ public sealed class AutomationStorageService : IAutomationStorageService
         foreach (var file in dataDir.GetFiles("*.json"))
         {
             var guid = Guid.Parse(Path.GetFileNameWithoutExtension(file.Name));
-            var plan = await GetPlan(guid);
+            var plan = await GetData(guid);
             if (plan is not null)
             {
                 infos.Add(new AutomationPlanInfo
@@ -48,7 +49,7 @@ public sealed class AutomationStorageService : IAutomationStorageService
         return infos;
     }
 
-    public async Task<AutomationPlan?> GetPlan(Guid guid)
+    public async Task<AutomationPlan?> GetData(Guid guid)
     {
         var path = Path.Combine(_dataDirectory, $"{guid}.json");
         if (!File.Exists(path)) return null;
@@ -56,14 +57,14 @@ public sealed class AutomationStorageService : IAutomationStorageService
         return JsonSerializer.Deserialize<AutomationPlan>(json, _options);
     }
 
-    public async Task SavePlan(AutomationPlan plan)
+    public async Task SaveData(AutomationPlan plan)
     {
         var path = Path.Combine(_dataDirectory, $"{plan.Guid}.json");
         var json = JsonSerializer.Serialize(plan, _options);
         await File.WriteAllTextAsync(path, json);
     }
 
-    public void DeletePlan(Guid guid)
+    public void DeleteData(Guid guid)
     {
         var path = Path.Combine(_dataDirectory, $"{guid}.json");
         if (File.Exists(path)) File.Delete(path);
